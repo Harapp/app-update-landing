@@ -8,6 +8,16 @@ use DateTimeImmutable;
 
 final readonly class UpdatePageViewModel
 {
+    /** @var array{primaryColor: string, accentColor: string, backgroundColor: string, textColor: string, logoUrl: ?string, maxContentWidth: int} */
+    public const DEFAULT_THEME = [
+        'primaryColor' => '#14532d',
+        'accentColor' => '#2563eb',
+        'backgroundColor' => '#f4f5f7',
+        'textColor' => '#202124',
+        'logoUrl' => null,
+        'maxContentWidth' => 576,
+    ];
+
     public function __construct(
         public string $state,
         public string $locale,
@@ -25,6 +35,8 @@ final readonly class UpdatePageViewModel
         public bool $showUpdate,
         public bool $showStoreNotice,
         public string $template,
+        /** @var array{primaryColor: string, accentColor: string, backgroundColor: string, textColor: string, logoUrl: ?string, maxContentWidth: int} */
+        public array $theme = self::DEFAULT_THEME,
     ) {
     }
 
@@ -33,7 +45,7 @@ final readonly class UpdatePageViewModel
         return new self(
             'unavailable', 'en', null, null, '',
             'This update page is currently unavailable.',
-            null, null, null, null, null, null, null, false, false, 'event-update'
+            null, null, null, null, null, null, null, false, false, 'event-update', self::DEFAULT_THEME
         );
     }
 }

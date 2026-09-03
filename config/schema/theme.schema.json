@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["primaryColor", "accentColor", "backgroundColor", "textColor", "logoUrl", "maxContentWidth"],
+  "additionalProperties": false,
+  "properties": {
+    "primaryColor": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
+    "accentColor": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
+    "backgroundColor": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
+    "textColor": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
+    "logoUrl": {"type": ["string", "null"], "pattern": "^https://[^\\s]+$", "maxLength": 2048},
+    "maxContentWidth": {"type": "integer", "minimum": 320, "maximum": 1200}
+  }
+}

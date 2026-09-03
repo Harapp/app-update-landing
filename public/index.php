@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Config\ThemeRepository;
 use App\Config\UpdatePageRepository;
 use App\Domain\LocaleResolver;
 use App\Domain\UpdatePageEvaluator;
@@ -27,7 +28,11 @@ try {
         dirname(__DIR__) . '/games/default/update-pages.json',
         ['cdn.example.com', 'apps.apple.com', 'play.google.com', 'example.com']
     );
-    $viewModel = (new UpdatePageEvaluator($repository, new App\SystemClock(), new LocaleResolver()))->evaluate($request);
+    $theme = (new ThemeRepository(
+        dirname(__DIR__) . '/games/default/theme.json',
+        ['cdn.example.com', 'apps.apple.com', 'play.google.com', 'example.com']
+    ))->load();
+    $viewModel = (new UpdatePageEvaluator($repository, new App\SystemClock(), new LocaleResolver(), $theme))->evaluate($request);
     $statusCode = $viewModel->state === 'unavailable' ? 404 : 200;
 } catch (InvalidArgumentException $exception) {
     $statusCode = 400;

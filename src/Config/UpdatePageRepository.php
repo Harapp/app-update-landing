@@ -15,10 +15,17 @@ final class UpdatePageRepository
     private array $allowedHosts;
 
     /** @param list<string> $allowedHosts */
-    public function __construct(private readonly string $path, array $allowedHosts)
+    public function __construct(
+        private readonly string $path,
+        array $allowedHosts,
+        ?string $schemaPath = null,
+    )
     {
         $this->allowedHosts = array_fill_keys(array_map('strtolower', $allowedHosts), true);
+        $this->schemaPath = $schemaPath ?? dirname(__DIR__, 2) . '/config/schema/update-pages.schema.json';
     }
+
+    private readonly string $schemaPath;
 
     /** @return array<string, mixed>|null */
     public function findByTargetVersion(string $targetVersion): ?array
@@ -39,6 +46,8 @@ final class UpdatePageRepository
         } catch (JsonException $exception) {
             throw new ConfigException('Configuration is invalid.', 0, $exception);
         }
+
+        (new JsonSchemaValidator($this->schemaPath))->validate($document);
 
         if (!is_array($document) || array_diff(array_keys($document), ['pages']) !== [] || !isset($document['pages']) || !is_array($document['pages']) || !array_is_list($document['pages'])) {
             throw new ConfigException('Configuration is invalid.');

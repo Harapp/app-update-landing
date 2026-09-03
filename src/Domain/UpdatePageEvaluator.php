@@ -15,6 +15,8 @@ final class UpdatePageEvaluator
         private readonly UpdatePageRepository $repository,
         private readonly Clock $clock,
         private readonly LocaleResolver $localeResolver = new LocaleResolver(),
+        /** @var array{primaryColor: string, accentColor: string, backgroundColor: string, textColor: string, logoUrl: ?string, maxContentWidth: int}|null */
+        private readonly ?array $theme = null,
     ) {
     }
 
@@ -87,6 +89,7 @@ final class UpdatePageEvaluator
             $state === 'available',
             $showStoreNotice && $state === 'available',
             $common['template'],
+            $this->theme ?? UpdatePageViewModel::DEFAULT_THEME,
         );
     }
 }
