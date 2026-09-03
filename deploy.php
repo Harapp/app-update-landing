@@ -10,6 +10,8 @@ require 'recipe/composer.php';
 // Keep the alias as `coreserver` so Deployer uses `ssh coreserver`.
 host('coreserver')
     ->set('ssh_multiplexing', false)
+    // Override the local SSH config's ControlPath; this environment cannot create its socket.
+    ->set('ssh_arguments', ['-o ControlMaster=no', '-o ControlPath=none'])
     ->set('deploy_path', '/home/harapeco/domains/neko.harapeco.okinawa/.deploy/event-update')
     ->set('public_path', '/home/harapeco/domains/neko.harapeco.okinawa/public_html/event-update')
     ->set('bin/composer', '/home/harapeco/bin/composer')
