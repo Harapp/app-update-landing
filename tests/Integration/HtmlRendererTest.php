@@ -23,6 +23,10 @@ final class HtmlRendererTest extends TestCase
         self::assertStringContainsString('&lt;script&gt;alert(1)&lt;/script&gt;', $html);
         self::assertStringContainsString('a=1&amp;b=2', $html);
         self::assertStringNotContainsString('<script>alert(1)</script>', $html);
+        self::assertStringContainsString('<meta property="og:image" content="https://cdn.example.com/banner.webp">', $html);
+        self::assertStringContainsString('<meta name="twitter:image" content="https://cdn.example.com/banner.webp">', $html);
+        self::assertStringContainsString('<meta name="twitter:card" content="summary_large_image">', $html);
+        self::assertStringContainsString('<meta property="og:image:alt" content="&lt;alt&gt;">', $html);
     }
 
     public function testAvailablePageOmitsSupportingLinesAndUsesLocalizedCallToAction(): void
@@ -43,5 +47,7 @@ final class HtmlRendererTest extends TestCase
         self::assertStringContainsString('<span>V2.0.0</span>', $html);
         self::assertStringContainsString('<small>更新してイベントを遊ぶ</small>', $html);
         self::assertStringContainsString('aria-label="バージョン2.0.0に更新してイベントを遊ぶ"', $html);
+        self::assertStringContainsString('<title>Event description</title>', $html);
+        self::assertStringNotContainsString('<meta property="og:image"', $html);
     }
 }

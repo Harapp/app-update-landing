@@ -284,6 +284,12 @@ Updates may take some time to appear on the App Store or Google Play. If the upd
 - 状態を色だけで表現しない
 - 読み込み中、画像失敗、設定取得失敗でもレイアウトが大きく崩れない
 
+## SNSカード
+
+- Open GraphとX（Twitter）のLarge Image Cardに対応する
+- カード画像にはページ内のバナー画像と同じ絶対HTTPS URLを使う
+- カードのタイトルと説明、画像altは、ページで解決された言語の文言を使う
+
 ## テスト要件
 
 - 更新可能、更新済み、期間前、期間終了、OS非対応、platform非対応をそれぞれ確認する
