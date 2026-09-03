@@ -31,6 +31,7 @@ final class UpdatePageEvaluatorTest extends TestCase
                     'imageUrl' => 'https://cdn.example.com/banner.webp',
                     'startAt' => '2026-09-03T10:00:00Z',
                     'endAt' => '2026-09-04T10:00:00Z',
+                    'released' => ['ios' => true, 'android' => true],
                     'minimumOsVersions' => ['ios' => '18.0'],
                     'destinationUrls' => ['ios' => 'https://apps.apple.com/app/id1'],
                     'descriptions' => ['en' => 'English', 'ja' => '日本語'],
@@ -131,8 +132,9 @@ final class UpdatePageEvaluatorTest extends TestCase
         self::assertFalse($view->showUpdate);
     }
 
-    public function testUpdateIsNotShownBeforeStartAndEndsAfterTheEndBoundary(): void
+    public function testReleaseFlagControlsUpdateBeforeEventStarts(): void
     {
+        $this->replacePage(['released' => ['ios' => false, 'android' => true]]);
         $repository = new UpdatePageRepository($this->configPath, ['cdn.example.com', 'apps.apple.com']);
         $request = (new RequestValidator())->validate([
             'appVersion' => '1.0.0',
@@ -142,12 +144,27 @@ final class UpdatePageEvaluatorTest extends TestCase
             'osVersion' => '18.0',
         ]);
 
-        $before = (new UpdatePageEvaluator($repository, new FixedClock('2026-09-03T09:59:59Z')))->evaluate($request);
+        $unreleased = (new UpdatePageEvaluator($repository, new FixedClock('2026-09-03T09:59:59Z')))->evaluate($request);
+
+        self::assertSame('unreleased', $unreleased->state);
+        self::assertTrue($unreleased->showUpdate);
+        self::assertFalse($unreleased->showStoreNotice);
+        self::assertSame('https://apps.apple.com/app/id1', $unreleased->destinationUrl);
+    }
+
+    public function testUpdateEndsAfterTheEndBoundary(): void
+    {
+        $repository = new UpdatePageRepository($this->configPath, ['cdn.example.com', 'apps.apple.com']);
+        $request = (new RequestValidator())->validate([
+            'appVersion' => '1.0.0',
+            'targetVersion' => '2.0.0',
+            'locale' => 'en',
+            'platform' => 'ios',
+            'osVersion' => '18.0',
+        ]);
         $atEnd = (new UpdatePageEvaluator($repository, new FixedClock('2026-09-04T10:00:00Z')))->evaluate($request);
         $afterEnd = (new UpdatePageEvaluator($repository, new FixedClock('2026-09-04T10:00:01Z')))->evaluate($request);
 
-        self::assertSame('not-started', $before->state);
-        self::assertFalse($before->showUpdate);
         self::assertSame('available', $atEnd->state);
         self::assertSame('ended', $afterEnd->state);
     }
@@ -157,6 +174,7 @@ final class UpdatePageEvaluatorTest extends TestCase
         $this->replacePage([
             'startAt' => '2026-09-10T00:00:00+09:00',
             'endAt' => '2026-09-30T23:59:59+09:00',
+            'released' => ['ios' => false, 'android' => true],
         ]);
         $repository = new UpdatePageRepository($this->configPath, ['cdn.example.com', 'apps.apple.com']);
         $texts = (new UiTextRepository(dirname(__DIR__, 2) . '/templates/event-update/ui-texts.json'))->load();
@@ -173,6 +191,7 @@ final class UpdatePageEvaluatorTest extends TestCase
         $ended = (new UpdatePageEvaluator($repository, new FixedClock('2026-10-01T00:00:00+09:00'), uiTexts: $texts))->evaluate($request);
 
         self::assertSame('9月10日〜30日（7日後に開始）', $before->eventPeriod);
+        self::assertSame('近日開始', $before->comingSoonButtonLabel);
         self::assertSame('9月10日〜30日（残り11日）', $active->eventPeriod);
         self::assertSame('終了しました。', $ended->eventPeriod);
     }

@@ -11,9 +11,9 @@
         "en": "You're using the latest version.",
         "ja": "最新バージョンをご利用中です。"
     },
-    "status.notStarted": {
-        "en": "This update is not available yet.",
-        "ja": "このアップデートはまだ利用できません。"
+    "status.unreleased": {
+        "en": "This update has not been released yet.",
+        "ja": "このアップデートはまだ配信されていません。"
     },
     "status.ended": {
         "en": "This update period has ended.",
@@ -38,6 +38,10 @@
     "button.updateAriaLabel": {
         "en": "Update to version {version} and play the event",
         "ja": "バージョン{version}に更新してイベントを遊ぶ"
+    },
+    "button.comingSoon": {
+        "en": "Coming Soon",
+        "ja": "近日開始"
     },
     "notice.storeDelay": {
         "en": "Updates may take some time to appear on the App Store or Google Play. If the update is not available yet, please try again later.",

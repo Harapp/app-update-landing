@@ -17,13 +17,14 @@ final class UpdatePageEvaluator
         'status.available' => ['en' => 'A new version is available.'],
         'status.disabled' => ['en' => 'This update is currently unavailable.'],
         'status.upToDate' => ['en' => "You're using the latest version."],
-        'status.notStarted' => ['en' => 'This update is not available yet.'],
+        'status.unreleased' => ['en' => 'This update has not been released yet.'],
         'status.ended' => ['en' => 'This update period has ended.'],
         'status.unsupportedOs' => ['en' => 'This update requires a newer OS version.'],
         'status.missingDestination' => ['en' => 'This update is temporarily unavailable.'],
         'status.unavailable' => ['en' => 'This update page is currently unavailable.'],
         'button.update' => ['en' => 'Update and play the event'],
         'button.updateAriaLabel' => ['en' => 'Update to version {version} and play the event'],
+        'button.comingSoon' => ['en' => 'Coming Soon'],
         'notice.storeDelay' => ['en' => 'Updates may take some time to appear on the App Store or Google Play. If the update is not available yet, please try again later.'],
         'period.range' => ['en' => '{start}–{end}'],
         'period.remaining.one' => ['en' => '{range} (1 day remaining)'],
@@ -73,6 +74,7 @@ final class UpdatePageEvaluator
                 $request->locale,
                 ['{version}' => $page['targetVersion']],
             ),
+            'comingSoonButtonLabel' => $this->text('button.comingSoon', $request->locale),
             'storeNotice' => $this->text('notice.storeDelay', $request->locale),
         ];
 
@@ -84,9 +86,6 @@ final class UpdatePageEvaluator
         }
         if ($appVersion->compare($targetVersion) >= 0) {
             return $this->view($common, 'up-to-date', 'status.upToDate');
-        }
-        if ($page['startAt'] !== null && $now < $page['startAt']) {
-            return $this->view($common, 'not-started', 'status.notStarted');
         }
         if ($page['endAt'] !== null && $now > $page['endAt']) {
             return $this->view($common, 'ended', 'status.ended');
@@ -100,6 +99,9 @@ final class UpdatePageEvaluator
         $destinationUrl = $page['destinationUrls'][$request->platform] ?? null;
         if ($destinationUrl === null) {
             return $this->view($common, 'missing-destination', 'status.missingDestination');
+        }
+        if ($request->platform !== 'pc' && !$page['released'][$request->platform]) {
+            return $this->view($common, 'unreleased', 'status.unreleased', null, null, $destinationUrl);
         }
 
         return $this->view($common, 'available', 'status.available', null, null, $destinationUrl, $request->platform !== 'pc');
@@ -129,7 +131,7 @@ final class UpdatePageEvaluator
             $common['startAt'],
             $common['endAt'],
             $destinationUrl,
-            $state === 'available',
+            in_array($state, ['available', 'unreleased'], true),
             $showStoreNotice && $state === 'available',
             $common['template'],
             $this->theme ?? UpdatePageViewModel::DEFAULT_THEME,
@@ -143,6 +145,7 @@ final class UpdatePageEvaluator
             $common['updateButtonAriaLabel'],
             $common['storeNotice'],
             $osRequirementMessage,
+            $common['comingSoonButtonLabel'],
         );
     }
 

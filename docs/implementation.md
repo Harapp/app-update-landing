@@ -48,10 +48,11 @@ Escaped HTML response
 | `appVersion` | インストール済みアプリバージョン |
 | `targetVersion` | 案内対象アプリバージョン |
 | `locale` | 端末のロケール |
-| `platform` | `ios`、`android`、`pc` |
+| `platform` | 任意。`ios`、`android`、`pc`。内部判定不能時のフォールバック |
 | `osVersion` | 端末のOSバージョン |
 
 入力値は長さ、形式、許容値を検証します。端末ID、通知トークン、認証情報は受け取りません。
+User-AgentからiOSまたはAndroidを判定できた場合は内部判定を優先し、それ以外では有効な`platform`、未指定時は`pc`を使用します。
 
 ### 2. 設定取得
 
@@ -66,7 +67,7 @@ Escaped HTML response
 - `unavailable`
 - `disabled`
 - `up-to-date`
-- `not-started`
+- `unreleased`
 - `ended`
 - `unsupported-platform`
 - `unsupported-os`
@@ -74,6 +75,7 @@ Escaped HTML response
 - `available`
 
 判定結果は文字列だけでなく、画面表示に必要な値を持つView Modelへ変換します。
+解決済みplatformの`released`がfalseなら`unreleased`とし、通常CTAと同じ位置・サイズにローカライズ済みの無効ボタンを表示します。イベント開始前でも`released=true`なら更新リンクを有効にします。
 
 ### 4. 言語解決
 
@@ -149,6 +151,10 @@ templates/
       "imageUrl": "assets/banner.webp",
       "startAt": "2026-09-10T00:00:00+09:00",
       "endAt": "2026-10-10T23:59:59+09:00",
+      "released": {
+        "ios": true,
+        "android": false
+      },
       "minimumOsVersions": {
         "ios": "18.0",
         "android": "14"
@@ -192,6 +198,7 @@ JSON Schemaでは少なくとも次を検証します。
 - `template`が許可された識別子であること
 - `enabled`がbooleanであること
 - `startAt`と`endAt`がタイムゾーン付きISO 8601形式であること
+- `released`にiOS・Android両方のbooleanがあること
 - `en`の説明と画像altが存在すること
 - platformが`ios`、`android`、`pc`のいずれかであること
 - 画像が安全な相対WebPパス、または許可された絶対HTTPS URLであること
@@ -307,7 +314,7 @@ $templates = [
 
 ## キャッシュ
 
-初期実装では、正しさを優先して過度なページキャッシュを行いません。レスポンスは`appVersion`、`targetVersion`、`locale`、`platform`、`osVersion`、現在時刻に依存するためです。
+初期実装では、正しさを優先して過度なページキャッシュを行いません。レスポンスは`appVersion`、`targetVersion`、`locale`、解決済みplatform、`osVersion`、User-Agent、現在時刻に依存するためです。
 
 性能上必要になった場合は、生成HTMLではなく解析済みJSON設定を短時間キャッシュします。キャッシュを導入しても期間境界の判定はリクエストごとに行います。
 

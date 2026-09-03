@@ -8,6 +8,9 @@ use PHPUnit\Framework\TestCase;
 
 final class PublicIndexTest extends TestCase
 {
+    private const IOS_USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.6 Mobile/15E148 Safari/604.1';
+    private const ANDROID_USER_AGENT = 'Mozilla/5.0 (Linux; Android 14; Pixel 8 Build/AP1A.240505.005) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Mobile Safari/537.36';
+
     public function testPublicResponseUsesPurrfectSpiritsConfigurationForEveryPlatform(): void
     {
         $port = $this->freePort();
@@ -46,6 +49,8 @@ final class PublicIndexTest extends TestCase
                         'href="' . htmlspecialchars($destination, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '"',
                         $body
                     );
+                } else {
+                    self::assertStringContainsString('<small>Coming Soon</small>', $body);
                 }
             }
 
@@ -59,6 +64,8 @@ final class PublicIndexTest extends TestCase
                 self::assertStringContainsString('<small>更新してイベントを遊ぶ</small>', $japaneseBody);
                 self::assertStringContainsString('バージョン2.9.0に更新してイベントを遊ぶ', $japaneseBody);
                 self::assertStringContainsString('アップデートが反映されるまで、時間がかかる場合があります。', $japaneseBody);
+            } else {
+                self::assertStringContainsString('<small>近日開始</small>', $japaneseBody);
             }
             self::assertStringNotContainsString('A new version is available.', $japaneseBody);
             self::assertStringNotContainsString('Event period:', $japaneseBody);
@@ -72,14 +79,48 @@ final class PublicIndexTest extends TestCase
             if (str_contains($fallbackBody, '<a class="update-link"')) {
                 self::assertStringContainsString('<small>Update and play the event</small>', $fallbackBody);
                 self::assertStringContainsString('Updates may take some time to appear', $fallbackBody);
+            } else {
+                self::assertStringContainsString('<small>Coming Soon</small>', $fallbackBody);
             }
             self::assertContainsHeader('Content-Security-Policy:', $http_response_header ?? []);
             self::assertContainsHeader('X-Content-Type-Options: nosniff', $http_response_header ?? []);
             self::assertContainsHeader('Referrer-Policy: no-referrer', $http_response_header ?? []);
+
+            $iosBodyFromSharedAndroidUrl = file_get_contents(
+                "http://127.0.0.1:$port/?appVersion=0.0.0&targetVersion=2.9.0&locale=en-US&platform=android&osVersion=1",
+                false,
+                $this->userAgentContext(self::IOS_USER_AGENT),
+            );
+            self::assertIsString($iosBodyFromSharedAndroidUrl);
+            self::assertStringContainsString('href="https://itunes.apple.com/jp/app/id1269423920"', $iosBodyFromSharedAndroidUrl);
+            self::assertStringNotContainsString('play.google.com', $iosBodyFromSharedAndroidUrl);
+
+            $androidBodyFromSharedIosUrl = file_get_contents(
+                "http://127.0.0.1:$port/?appVersion=0.0.0&targetVersion=2.9.0&locale=en-US&platform=ios&osVersion=1",
+                false,
+                $this->userAgentContext(self::ANDROID_USER_AGENT),
+            );
+            self::assertIsString($androidBodyFromSharedIosUrl);
+            self::assertStringContainsString('<small>Coming Soon</small>', $androidBodyFromSharedIosUrl);
+            self::assertStringNotContainsString('<a class="update-link"', $androidBodyFromSharedIosUrl);
+
+            $androidBodyWithoutPlatform = file_get_contents(
+                "http://127.0.0.1:$port/?appVersion=0.0.0&targetVersion=2.9.0&locale=en-US&osVersion=1",
+                false,
+                $this->userAgentContext(self::ANDROID_USER_AGENT),
+            );
+            self::assertIsString($androidBodyWithoutPlatform);
+            self::assertStringContainsString('<small>Coming Soon</small>', $androidBodyWithoutPlatform);
         } finally {
             proc_terminate($process);
             proc_close($process);
         }
+    }
+
+    /** @return resource */
+    private function userAgentContext(string $userAgent)
+    {
+        return stream_context_create(['http' => ['header' => "User-Agent: $userAgent\r\n"]]);
     }
 
     /** @param list<string> $headers */

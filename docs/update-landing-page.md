@@ -55,11 +55,13 @@ https://updates.example.com/update
 | `appVersion` | 必須 | タップ時点でインストールされているアプリバージョン |
 | `targetVersion` | 必須 | 通知が案内する対象アプリバージョン |
 | `locale` | 必須 | タップ時点の言語・ロケール |
-| `platform` | 必須 | `ios`、`android`、または`pc` |
+| `platform` | 任意 | `ios`、`android`、または`pc`。端末判定不能時のフォールバック |
 | `osVersion` | 必須 | タップ時点のOSバージョン |
 
 query parameterは表示判定の入力であり、認証・認可や秘密情報の受け渡しには使用しません。
 端末ID、通知トークン、認証情報はURLへ含めません。
+
+platformはUser-Agentによる内部判定を優先します。iOSまたはAndroidを判定できた場合はquery parameterより内部判定を使用し、判定できない場合だけ有効な`platform`を使用します。どちらもない場合は`pc`とします。
 
 ゲームはドメインまたはデプロイ先で固定し、ゲーム識別子をquery parameterとして受け取りません。
 
@@ -102,6 +104,10 @@ query parameterは表示判定の入力であり、認証・認可や秘密情�
       "imageUrl": "assets/banner.webp",
       "startAt": "2026-09-10T00:00:00+09:00",
       "endAt": "2026-09-30T23:59:59+09:00",
+      "released": {
+        "ios": true,
+        "android": false
+      },
       "minimumOsVersions": {
         "ios": "18.0",
         "android": "14"
@@ -128,6 +134,7 @@ query parameterは表示判定の入力であり、認証・認可や秘密情�
 通常のアプリ更新では終了期限がない場合があるためです。
 
 `minimumOsVersions`もplatformごとに任意とし、PCを含め、値がないplatformには最低OS制限を適用しません。
+`released`はiOS・Androidそれぞれのストア配信状態を必須booleanで保持します。PCは配信フラグの対象外とし、遷移先URLがあれば利用可能とします。
 
 ## テンプレート
 
@@ -162,11 +169,11 @@ startAt <= now <= endAt
 | 1 | parameter不正、または`targetVersion`に対応する設定がない | ページを表示できない | 非表示 |
 | 2 | `enabled=false` | 現在利用できない | 非表示 |
 | 3 | `appVersion >= targetVersion` | 更新済み | 非表示 |
-| 4 | `now < startAt` | 期間前 | 非表示 |
-| 5 | `endAt < now` | 期間終了 | 非表示 |
-| 6 | 未対応の`platform` | 更新不可 | 非表示 |
-| 7 | `osVersion`が最低対応バージョン未満 | OS非対応 | 非表示 |
-| 8 | 対応する更新先URLがない | 一時的に更新不可 | 非表示 |
+| 4 | `endAt < now` | 期間終了 | 非表示 |
+| 5 | 未対応の`platform` | 更新不可 | 非表示 |
+| 6 | `osVersion`が最低対応バージョン未満 | OS非対応 | 非表示 |
+| 7 | 対応する更新先URLがない | 一時的に更新不可 | 非表示 |
+| 8 | iOS / Androidで`released[platform]=false` | 未配信 | 「Coming Soon」を無効表示 |
 | 9 | 上記以外 | アップデート可能 | 表示 |
 
 更新済み判定を期間判定より先に行います。更新後に古い通知をタップした利用者には、期間終了ではなく最新版を利用中であることを伝えます。
@@ -194,12 +201,13 @@ startAt <= now <= endAt
 - `You're using the latest version.`
 - 更新ボタンは表示しない
 
-### 期間前
+### 未配信
 
 - バナー画像
 - イベント説明
-- `Sep 10–30 (starts in 7 days)` / `9月10日〜30日（7日後に開始）`形式の期間と開始までの日数
-- 更新ボタンは表示しない
+- 開始前は`Sep 10–30 (starts in 7 days)` / `9月10日〜30日（7日後に開始）`形式の期間と開始までの日数
+- 通常ボタンと同じ位置・サイズで、`Coming Soon` / `近日開始`の無効ボタンを表示する
+- 無効ボタンから更新先へは遷移せず、ストア反映の注意書きも表示しない
 
 ### 期間終了
 
@@ -242,8 +250,8 @@ startAt <= now <= endAt
 - 英語初期値は`Update and play the event`、日本語初期値は`更新してイベントを遊ぶ`とする
 - ボタンのアクセシブルな名前には対象バージョンを含める。英語初期値は`Update to version 2.9.0 and play the event`とする
 - ボタンはコンテンツ内で中央寄せとし、モバイルでも押しやすい幅と高さを確保する
-- `platform=ios` はiOS用URL、`platform=android`はAndroid用URLを使用する
-- `platform=pc` はPC用の案内、ストア、またはダウンロードURLを使用する
+- 内部判定で解決したplatformが`ios`ならiOS用URL、`android`ならAndroid用URLを使用する
+- 解決したplatformが`pc`ならPC用の案内、ストア、またはダウンロードURLを使用する
 - PC用URLは特定ストアへ固定せず、Updateページ設定で任意のHTTPS URLを指定できるようにする
 - 遷移先は事前設定されたHTTPS URLに限定し、query parameterから任意の遷移先を受け取らない
 - ボタンの連打による多重遷移を防ぐ
@@ -262,7 +270,7 @@ Updates may take some time to appear on the App Store or Google Play. If the upd
 - 文字色は十分なコントラストを保った薄めのグレーとする
 - 読めないほど薄い色や小さい文字にはせず、本文より小さくても十分なコントラストを確保する
 - PCでは表示しない
-- 更新済み、期間前、期間終了、OS非対応など、更新ボタンがない状態では表示しない
+- 更新済み、期間終了、OS非対応など、更新ボタンがない状態では表示しない
 
 ## バージョン比較
 
@@ -300,7 +308,8 @@ Updates may take some time to appear on the App Store or Google Play. If the upd
 
 ## テスト要件
 
-- 更新可能、更新済み、期間前、期間終了、OS非対応、platform非対応をそれぞれ確認する
+- 更新可能、更新済み、未配信、期間終了、OS非対応、platform非対応をそれぞれ確認する
+- iOS / Androidの内部判定が共有URL上の異なるplatformを上書きし、platform未指定時にも機能することを確認する
 - `startAt`と`endAt`の境界時刻を確認する
 - 期間設定がない場合、開始日時だけの場合、終了日時だけの場合を確認する
 - `1.2`、`1.2.0`、`1.10.0`など、文字列比較で誤りやすいバージョンを確認する
@@ -309,7 +318,7 @@ Updates may take some time to appear on the App Store or Google Play. If the upd
 - iOS、Android、PCで正しい更新先が選択されることを確認する
 - ボタンに`V{targetVersion}`とローカライズされた行動文言が2段で表示されることを確認する
 - 更新可能状態で状態文と現在・対象バージョンの補助行が表示されず、期間と残り日数が表示されることを確認する
-- 期間前は開始までの日数、期間終了後は終了文言が表示されることを確認する
+- 期間前は開始までの日数、未配信platformは無効な`Coming Soon`ボタン、期間終了後は終了文言が表示されることを確認する
 - `ja`と`ja-*`で日本語、未対応localeで`en`へフォールバックすることを確認する
 - iOS / Androidの更新可能状態だけで、ページ最下部にストア反映の注意書きが表示されることを確認する
 - 不正なquery parameter、存在しない`targetVersion`、無効な外部URLを安全に拒否する

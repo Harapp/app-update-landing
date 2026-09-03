@@ -90,13 +90,13 @@ final class UpdatePageRepository
     {
         $allowedFields = [
             'targetVersion', 'template', 'enabled', 'imageUrl', 'startAt', 'endAt',
-            'minimumOsVersions', 'destinationUrls', 'descriptions', 'imageAltTexts',
+            'released', 'minimumOsVersions', 'destinationUrls', 'descriptions', 'imageAltTexts',
         ];
         if (array_diff(array_keys($page), $allowedFields) !== []) {
             throw new ConfigException('Configuration is invalid.');
         }
 
-        foreach (['targetVersion', 'enabled', 'imageUrl', 'descriptions', 'imageAltTexts'] as $required) {
+        foreach (['targetVersion', 'enabled', 'imageUrl', 'released', 'descriptions', 'imageAltTexts'] as $required) {
             if (!array_key_exists($required, $page)) {
                 throw new ConfigException('Configuration is invalid.');
             }
@@ -143,6 +143,7 @@ final class UpdatePageRepository
 
         $minimumOsVersions = $this->validateVersionsByPlatform($page['minimumOsVersions'] ?? []);
         $destinationUrls = $this->validateUrlsByPlatform($page['destinationUrls'] ?? []);
+        $released = $this->validateReleasedPlatforms($page['released']);
 
         return [
             'targetVersion' => $page['targetVersion'],
@@ -151,6 +152,7 @@ final class UpdatePageRepository
             'imageUrl' => $imageUrl,
             'startAt' => $startAt,
             'endAt' => $endAt,
+            'released' => $released,
             'minimumOsVersions' => $minimumOsVersions,
             'destinationUrls' => $destinationUrls,
             'descriptions' => $descriptions,
@@ -303,5 +305,24 @@ final class UpdatePageRepository
             $result[$platform] = $url;
         }
         return $result;
+    }
+
+    /** @param mixed $released @return array{ios: bool, android: bool} */
+    private function validateReleasedPlatforms(mixed $released): array
+    {
+        if (
+            !is_array($released)
+            || array_is_list($released)
+            || count($released) !== 2
+            || !array_key_exists('ios', $released)
+            || !array_key_exists('android', $released)
+        ) {
+            throw new ConfigException('Configuration is invalid.');
+        }
+        if (!is_bool($released['ios']) || !is_bool($released['android'])) {
+            throw new ConfigException('Configuration is invalid.');
+        }
+
+        return ['ios' => $released['ios'], 'android' => $released['android']];
     }
 }

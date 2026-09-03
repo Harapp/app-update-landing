@@ -9,6 +9,10 @@
             "imageUrl": "assets/banner.webp",
             "startAt": "2026-09-10T00:00:00+09:00",
             "endAt": "2026-09-30T23:59:59+09:00",
+            "released": {
+                "ios": true,
+                "android": false
+            },
             "minimumOsVersions": {},
             "destinationUrls": {
                 "ios": "https://itunes.apple.com/jp/app/id1269423920",

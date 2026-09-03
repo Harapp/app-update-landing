@@ -7,6 +7,7 @@ use App\Config\UiTextRepository;
 use App\Config\UpdatePageRepository;
 use App\Domain\LocaleResolver;
 use App\Domain\UpdatePageEvaluator;
+use App\Http\PlatformResolver;
 use App\Http\RequestValidator;
 use App\Presentation\HtmlRenderer;
 use App\Presentation\TemplateRegistry;
@@ -24,7 +25,12 @@ $viewModel = UpdatePageViewModel::unavailable();
 $statusCode = 503;
 
 try {
-    $request = (new RequestValidator())->validate($_GET);
+    $query = $_GET;
+    $query['platform'] = (new PlatformResolver())->resolve(
+        $query['platform'] ?? null,
+        $_SERVER['HTTP_USER_AGENT'] ?? null,
+    );
+    $request = (new RequestValidator())->validate($query);
     /** @var array{key: string, updatePagesPath: string, themePath: string, uiTextsPath: string, allowedHosts: list<string>} $gameConfig */
     $gameConfig = require dirname(__DIR__) . '/config/game.php';
     $repository = new UpdatePageRepository(

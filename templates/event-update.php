@@ -35,7 +35,8 @@ $pageTitle = $viewModel->description !== '' ? $viewModel->description : 'App upd
         .period { margin: 0; color: #4b5563; font-weight: 600; text-align: center; }
         .os-version { margin: .5rem 0; color: #4b5563; }
         .update-action { display: flex; justify-content: center; margin-top: 1.25rem; }
-        .update-link { box-sizing: border-box; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; min-width: 12rem; padding: .8rem 1.25rem; border-radius: .6rem; background: <?= $escape($viewModel->theme['primaryColor']) ?>; color: #fff; font-weight: 700; line-height: 1.25; text-align: center; text-decoration: none; }
+        .update-link { box-sizing: border-box; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; min-width: 12rem; padding: .8rem 1.25rem; border: 0; border-radius: .6rem; background: <?= $escape($viewModel->theme['primaryColor']) ?>; color: #fff; font: inherit; font-weight: 700; line-height: 1.25; text-align: center; text-decoration: none; }
+        .update-link--disabled { background: #6b7280; cursor: not-allowed; }
         .update-link small { margin-top: .2rem; font-size: .9rem; }
         .notice { margin: 1.75rem 0 0; color: #6b7280; font-size: .85rem; line-height: 1.5; }
     </style>
@@ -52,7 +53,7 @@ $pageTitle = $viewModel->description !== '' ? $viewModel->description : 'App upd
         <?php if ($viewModel->description !== ''): ?>
             <h1><?= $escape($viewModel->description) ?></h1>
         <?php endif; ?>
-        <?php if (!in_array($viewModel->state, ['available', 'not-started', 'ended'], true)): ?>
+        <?php if (!in_array($viewModel->state, ['available', 'unreleased', 'ended'], true)): ?>
             <p class="status"><?= $escape($viewModel->statusMessage) ?></p>
         <?php endif; ?>
         <?php if ($viewModel->eventPeriod !== null && $viewModel->eventPeriod !== ''): ?>
@@ -63,10 +64,17 @@ $pageTitle = $viewModel->description !== '' ? $viewModel->description : 'App upd
         <?php endif; ?>
         <?php if ($viewModel->showUpdate && $viewModel->destinationUrl !== null && $viewModel->targetVersion !== null): ?>
             <div class="update-action">
-                <a class="update-link" href="<?= $escape($viewModel->destinationUrl) ?>" aria-label="<?= $escape($viewModel->updateButtonAriaLabel) ?>">
-                    <span>V<?= $escape($viewModel->targetVersion) ?></span>
-                    <small><?= $escape($viewModel->updateButtonLabel) ?></small>
-                </a>
+                <?php if ($viewModel->state === 'unreleased'): ?>
+                    <button class="update-link update-link--disabled" type="button" disabled>
+                        <span>V<?= $escape($viewModel->targetVersion) ?></span>
+                        <small><?= $escape($viewModel->comingSoonButtonLabel) ?></small>
+                    </button>
+                <?php else: ?>
+                    <a class="update-link" href="<?= $escape($viewModel->destinationUrl) ?>" aria-label="<?= $escape($viewModel->updateButtonAriaLabel) ?>">
+                        <span>V<?= $escape($viewModel->targetVersion) ?></span>
+                        <small><?= $escape($viewModel->updateButtonLabel) ?></small>
+                    </a>
+                <?php endif; ?>
             </div>
         <?php endif; ?>
         <?php if ($viewModel->showStoreNotice): ?>
