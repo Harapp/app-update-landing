@@ -75,7 +75,7 @@ User-AgentからiOSまたはAndroidを判定できた場合は内部判定を優
 - `available`
 
 判定結果は文字列だけでなく、画面表示に必要な値を持つView Modelへ変換します。
-解決済みplatformの`released`がfalseなら`unreleased`とし、通常CTAと同じ位置・サイズにローカライズ済みの無効ボタンを表示します。イベント開始前でも`released=true`なら更新リンクを有効にします。
+解決済みplatformの`released`がfalseなら`unreleased`とし、通常CTAと同じ位置・サイズにローカライズ済みの無効ボタンとストア反映の注意書きを表示します。イベント開始前でも`released=true`なら更新リンクを有効にします。
 
 ### 4. 言語解決
 
@@ -153,7 +153,8 @@ templates/
       "endAt": "2026-10-10T23:59:59+09:00",
       "released": {
         "ios": true,
-        "android": false
+        "android": false,
+        "pc": true
       },
       "minimumOsVersions": {
         "ios": "18.0",
@@ -198,7 +199,7 @@ JSON Schemaでは少なくとも次を検証します。
 - `template`が許可された識別子であること
 - `enabled`がbooleanであること
 - `startAt`と`endAt`がタイムゾーン付きISO 8601形式であること
-- `released`にiOS・Android両方のbooleanがあること
+- `released`にiOS・Android・PCすべてのbooleanがあること
 - `en`の説明と画像altが存在すること
 - platformが`ios`、`android`、`pc`のいずれかであること
 - 画像が安全な相対WebPパス、または許可された絶対HTTPS URLであること

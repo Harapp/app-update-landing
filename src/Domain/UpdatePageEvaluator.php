@@ -100,8 +100,16 @@ final class UpdatePageEvaluator
         if ($destinationUrl === null) {
             return $this->view($common, 'missing-destination', 'status.missingDestination');
         }
-        if ($request->platform !== 'pc' && !$page['released'][$request->platform]) {
-            return $this->view($common, 'unreleased', 'status.unreleased', null, null, $destinationUrl);
+        if (!$page['released'][$request->platform]) {
+            return $this->view(
+                $common,
+                'unreleased',
+                'status.unreleased',
+                null,
+                null,
+                $destinationUrl,
+                $request->platform !== 'pc',
+            );
         }
 
         return $this->view($common, 'available', 'status.available', null, null, $destinationUrl, $request->platform !== 'pc');
@@ -132,7 +140,7 @@ final class UpdatePageEvaluator
             $common['endAt'],
             $destinationUrl,
             in_array($state, ['available', 'unreleased'], true),
-            $showStoreNotice && $state === 'available',
+            $showStoreNotice && in_array($state, ['available', 'unreleased'], true),
             $common['template'],
             $this->theme ?? UpdatePageViewModel::DEFAULT_THEME,
             $this->formatEventPeriod(

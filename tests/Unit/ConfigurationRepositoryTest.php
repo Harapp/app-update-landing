@@ -149,7 +149,7 @@ final class ConfigurationRepositoryTest extends TestCase
         (new UpdatePageRepository($this->writeJson($this->document([$page])), ['cdn.example.com']))->findByTargetVersion('2.0.0');
     }
 
-    public function testReleasedRequiresBooleanFlagsForIosAndAndroid(): void
+    public function testReleasedRequiresBooleanFlagsForEveryPlatform(): void
     {
         $page = $this->basePage();
         $page['released'] = ['ios' => true];
@@ -365,6 +365,7 @@ final class ConfigurationRepositoryTest extends TestCase
         self::assertSame('2026-09-30T23:59:59+09:00', $page['endAt']?->format('Y-m-d\\TH:i:sP'));
         self::assertTrue($page['released']['ios']);
         self::assertFalse($page['released']['android']);
+        self::assertTrue($page['released']['pc']);
         self::assertSame('https://itunes.apple.com/jp/app/id1269423920', $page['destinationUrls']['ios']);
         self::assertSame('https://play.google.com/store/apps/details?id=okinawa.harapeco.catRestaurant', $page['destinationUrls']['android']);
         self::assertSame('https://www.harapeco.okinawa/info/app/neko_boku.html', $page['destinationUrls']['pc']);
@@ -387,7 +388,7 @@ final class ConfigurationRepositoryTest extends TestCase
             'imageUrl' => 'https://cdn.example.com/banner.webp',
             'startAt' => null,
             'endAt' => null,
-            'released' => ['ios' => true, 'android' => true],
+            'released' => ['ios' => true, 'android' => true, 'pc' => true],
             'minimumOsVersions' => ['ios' => '18.0'],
             'destinationUrls' => ['ios' => 'https://apps.apple.com/app/id1'],
             'descriptions' => ['en' => 'English'],

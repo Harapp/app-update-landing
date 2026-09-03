@@ -29,11 +29,12 @@
           "endAt": {"type": ["string", "null"], "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:Z|[+-]\\d{2}:\\d{2})$"},
           "released": {
             "type": "object",
-            "required": ["ios", "android"],
+            "required": ["ios", "android", "pc"],
             "additionalProperties": false,
             "properties": {
               "ios": {"type": "boolean"},
-              "android": {"type": "boolean"}
+              "android": {"type": "boolean"},
+              "pc": {"type": "boolean"}
             }
           },
           "minimumOsVersions": {

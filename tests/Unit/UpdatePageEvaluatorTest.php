@@ -31,7 +31,7 @@ final class UpdatePageEvaluatorTest extends TestCase
                     'imageUrl' => 'https://cdn.example.com/banner.webp',
                     'startAt' => '2026-09-03T10:00:00Z',
                     'endAt' => '2026-09-04T10:00:00Z',
-                    'released' => ['ios' => true, 'android' => true],
+                    'released' => ['ios' => true, 'android' => true, 'pc' => true],
                     'minimumOsVersions' => ['ios' => '18.0'],
                     'destinationUrls' => ['ios' => 'https://apps.apple.com/app/id1'],
                     'descriptions' => ['en' => 'English', 'ja' => '日本語'],
@@ -134,7 +134,7 @@ final class UpdatePageEvaluatorTest extends TestCase
 
     public function testReleaseFlagControlsUpdateBeforeEventStarts(): void
     {
-        $this->replacePage(['released' => ['ios' => false, 'android' => true]]);
+        $this->replacePage(['released' => ['ios' => false, 'android' => true, 'pc' => true]]);
         $repository = new UpdatePageRepository($this->configPath, ['cdn.example.com', 'apps.apple.com']);
         $request = (new RequestValidator())->validate([
             'appVersion' => '1.0.0',
@@ -148,7 +148,7 @@ final class UpdatePageEvaluatorTest extends TestCase
 
         self::assertSame('unreleased', $unreleased->state);
         self::assertTrue($unreleased->showUpdate);
-        self::assertFalse($unreleased->showStoreNotice);
+        self::assertTrue($unreleased->showStoreNotice);
         self::assertSame('https://apps.apple.com/app/id1', $unreleased->destinationUrl);
     }
 
@@ -169,12 +169,37 @@ final class UpdatePageEvaluatorTest extends TestCase
         self::assertSame('ended', $afterEnd->state);
     }
 
+    public function testUnreleasedPcShowsDisabledActionWithoutStoreNotice(): void
+    {
+        $this->replacePage([
+            'released' => ['ios' => true, 'android' => true, 'pc' => false],
+            'destinationUrls' => [
+                'ios' => 'https://apps.apple.com/app/id1',
+                'pc' => 'https://cdn.example.com/download',
+            ],
+        ]);
+        $repository = new UpdatePageRepository($this->configPath, ['cdn.example.com', 'apps.apple.com']);
+        $request = (new RequestValidator())->validate([
+            'appVersion' => '1.0.0',
+            'targetVersion' => '2.0.0',
+            'locale' => 'en',
+            'platform' => 'pc',
+            'osVersion' => '1',
+        ]);
+
+        $view = (new UpdatePageEvaluator($repository, new FixedClock('2026-09-03T12:00:00Z')))->evaluate($request);
+
+        self::assertSame('unreleased', $view->state);
+        self::assertTrue($view->showUpdate);
+        self::assertFalse($view->showStoreNotice);
+    }
+
     public function testJapaneseEventPeriodShowsCountdownRemainingDaysAndEndedState(): void
     {
         $this->replacePage([
             'startAt' => '2026-09-10T00:00:00+09:00',
             'endAt' => '2026-09-30T23:59:59+09:00',
-            'released' => ['ios' => false, 'android' => true],
+            'released' => ['ios' => false, 'android' => true, 'pc' => true],
         ]);
         $repository = new UpdatePageRepository($this->configPath, ['cdn.example.com', 'apps.apple.com']);
         $texts = (new UiTextRepository(dirname(__DIR__, 2) . '/templates/event-update/ui-texts.json'))->load();

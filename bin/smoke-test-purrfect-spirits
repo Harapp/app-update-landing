@@ -62,7 +62,7 @@ foreach ($destinations as $platform => $destination) {
     ]);
     $viewModel = $evaluator->evaluate($request);
     $html = $renderer->render($viewModel);
-    $isReleased = $platform === 'pc' || $releasePage['released'][$platform];
+    $isReleased = $releasePage['released'][$platform];
     $expectedState = $isReleased ? 'available' : 'unreleased';
 
     if ($viewModel->state !== $expectedState
@@ -76,6 +76,8 @@ foreach ($destinations as $platform => $destination) {
         || ($isReleased && !str_contains($html, htmlspecialchars($destination, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')))
         || (!$isReleased && !str_contains($html, 'Coming Soon'))
         || (!$isReleased && str_contains($html, '<a class="update-link"'))
+        || ($platform !== 'pc' && !$viewModel->showStoreNotice)
+        || ($platform === 'pc' && $viewModel->showStoreNotice)
     ) {
         fwrite(STDERR, "PurrfectSpirits release smoke test failed.\n");
         exit(1);

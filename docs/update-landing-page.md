@@ -106,7 +106,8 @@ platformはUser-Agentによる内部判定を優先します。iOSまたはAndro
       "endAt": "2026-09-30T23:59:59+09:00",
       "released": {
         "ios": true,
-        "android": false
+        "android": false,
+        "pc": true
       },
       "minimumOsVersions": {
         "ios": "18.0",
@@ -134,7 +135,7 @@ platformはUser-Agentによる内部判定を優先します。iOSまたはAndro
 通常のアプリ更新では終了期限がない場合があるためです。
 
 `minimumOsVersions`もplatformごとに任意とし、PCを含め、値がないplatformには最低OS制限を適用しません。
-`released`はiOS・Androidそれぞれのストア配信状態を必須booleanで保持します。PCは配信フラグの対象外とし、遷移先URLがあれば利用可能とします。
+`released`はiOS・Android・PCそれぞれの配信状態を必須booleanで保持します。PCはサイトなどの遷移先が利用可能になった時点でtrueにします。
 
 ## テンプレート
 
@@ -173,7 +174,7 @@ startAt <= now <= endAt
 | 5 | 未対応の`platform` | 更新不可 | 非表示 |
 | 6 | `osVersion`が最低対応バージョン未満 | OS非対応 | 非表示 |
 | 7 | 対応する更新先URLがない | 一時的に更新不可 | 非表示 |
-| 8 | iOS / Androidで`released[platform]=false` | 未配信 | 「Coming Soon」を無効表示 |
+| 8 | `released[platform]=false` | 未配信 | 「Coming Soon」を無効表示 |
 | 9 | 上記以外 | アップデート可能 | 表示 |
 
 更新済み判定を期間判定より先に行います。更新後に古い通知をタップした利用者には、期間終了ではなく最新版を利用中であることを伝えます。
@@ -207,7 +208,7 @@ startAt <= now <= endAt
 - イベント説明
 - 開始前は`Sep 10–30 (starts in 7 days)` / `9月10日〜30日（7日後に開始）`形式の期間と開始までの日数
 - 通常ボタンと同じ位置・サイズで、`Coming Soon` / `近日開始`の無効ボタンを表示する
-- 無効ボタンから更新先へは遷移せず、ストア反映の注意書きも表示しない
+- 無効ボタンから更新先へは遷移せず、その下にストア反映の注意書きを表示する
 
 ### 期間終了
 
@@ -259,7 +260,7 @@ startAt <= now <= endAt
 
 ## ストア反映に関する注意書き
 
-`platform`が`ios`または`android`で、アップデート可能と判定された場合は、ページの一番下に次の注意書きを表示します。
+`platform`が`ios`または`android`の場合は、配信済み・未配信のどちらでもページの一番下に次の注意書きを表示します。
 
 ```text
 Updates may take some time to appear on the App Store or Google Play. If the update is not available yet, please try again later.
@@ -270,7 +271,7 @@ Updates may take some time to appear on the App Store or Google Play. If the upd
 - 文字色は十分なコントラストを保った薄めのグレーとする
 - 読めないほど薄い色や小さい文字にはせず、本文より小さくても十分なコントラストを確保する
 - PCでは表示しない
-- 更新済み、期間終了、OS非対応など、更新ボタンがない状態では表示しない
+- 更新済み、期間終了、OS非対応など、更新CTA自体がない状態では表示しない
 
 ## バージョン比較
 
@@ -320,7 +321,7 @@ Updates may take some time to appear on the App Store or Google Play. If the upd
 - 更新可能状態で状態文と現在・対象バージョンの補助行が表示されず、期間と残り日数が表示されることを確認する
 - 期間前は開始までの日数、未配信platformは無効な`Coming Soon`ボタン、期間終了後は終了文言が表示されることを確認する
 - `ja`と`ja-*`で日本語、未対応localeで`en`へフォールバックすることを確認する
-- iOS / Androidの更新可能状態だけで、ページ最下部にストア反映の注意書きが表示されることを確認する
+- iOS / Androidの配信済み・未配信状態で、ページ最下部にストア反映の注意書きが表示されることを確認する
 - 不正なquery parameter、存在しない`targetVersion`、無効な外部URLを安全に拒否する
 - 未指定のテンプレートが`event-update`へ解決され、未知のテンプレートが安全に拒否されることを確認する
 - Consoleから表示するテストリンクで、固定URLと指定`targetVersion`のページを確認できる

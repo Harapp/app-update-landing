@@ -103,6 +103,7 @@ final class PublicIndexTest extends TestCase
             self::assertIsString($androidBodyFromSharedIosUrl);
             self::assertStringContainsString('<small>Coming Soon</small>', $androidBodyFromSharedIosUrl);
             self::assertStringNotContainsString('<a class="update-link"', $androidBodyFromSharedIosUrl);
+            self::assertStringContainsString('Updates may take some time to appear', $androidBodyFromSharedIosUrl);
 
             $androidBodyWithoutPlatform = file_get_contents(
                 "http://127.0.0.1:$port/?appVersion=0.0.0&targetVersion=2.9.0&locale=en-US&osVersion=1",
@@ -111,6 +112,7 @@ final class PublicIndexTest extends TestCase
             );
             self::assertIsString($androidBodyWithoutPlatform);
             self::assertStringContainsString('<small>Coming Soon</small>', $androidBodyWithoutPlatform);
+            self::assertStringContainsString('Updates may take some time to appear', $androidBodyWithoutPlatform);
         } finally {
             proc_terminate($process);
             proc_close($process);

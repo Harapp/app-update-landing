@@ -44,8 +44,8 @@
         "ja": "近日開始"
     },
     "notice.storeDelay": {
-        "en": "Updates may take some time to appear on the App Store or Google Play. If the update is not available yet, please try again later.",
-        "ja": "App StoreまたはGoogle Playにアップデートが反映されるまで、時間がかかる場合があります。まだ更新できない場合は、しばらくしてからもう一度お試しください。"
+        "en": "Updates may take some time to appear on the App Store or Google Play.",
+        "ja": "App StoreまたはGoogle Playにアップデートが反映されるまで、時間がかかる場合があります。"
     },
     "period.range": {
         "en": "{start}–{end}",

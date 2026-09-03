@@ -307,22 +307,23 @@ final class UpdatePageRepository
         return $result;
     }
 
-    /** @param mixed $released @return array{ios: bool, android: bool} */
+    /** @param mixed $released @return array{ios: bool, android: bool, pc: bool} */
     private function validateReleasedPlatforms(mixed $released): array
     {
         if (
             !is_array($released)
             || array_is_list($released)
-            || count($released) !== 2
+            || count($released) !== 3
             || !array_key_exists('ios', $released)
             || !array_key_exists('android', $released)
+            || !array_key_exists('pc', $released)
         ) {
             throw new ConfigException('Configuration is invalid.');
         }
-        if (!is_bool($released['ios']) || !is_bool($released['android'])) {
+        if (!is_bool($released['ios']) || !is_bool($released['android']) || !is_bool($released['pc'])) {
             throw new ConfigException('Configuration is invalid.');
         }
 
-        return ['ios' => $released['ios'], 'android' => $released['android']];
+        return ['ios' => $released['ios'], 'android' => $released['android'], 'pc' => $released['pc']];
     }
 }
