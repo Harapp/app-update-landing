@@ -234,6 +234,23 @@ $templates = [
 
 テーマ値も許容形式と範囲を検証し、CSSへ出力する値を限定します。任意のCSS文字列を設定から挿入できる構造にはしません。
 
+配色は`colorPreset`で次のプリセットから選択できます。
+
+- `purple`: 紫を基調とした配色
+- `red`: 赤を基調とした配色
+- `blue`: 青を基調とした配色
+- `green`: 緑を基調とした配色
+
+```json
+{
+  "colorPreset": "purple",
+  "logoUrl": null,
+  "maxContentWidth": 640
+}
+```
+
+独自配色が必要な場合は、従来どおり`primaryColor`、`accentColor`、`backgroundColor`、`textColor`の4項目をすべて指定します。プリセットと独自配色は同時に指定できません。
+
 ## HTTPとセキュリティ
 
 - HTTPSを必須とする

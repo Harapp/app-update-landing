@@ -8,6 +8,34 @@ use JsonException;
 
 final class ThemeRepository
 {
+    /** @var array<string, array{primaryColor: string, accentColor: string, backgroundColor: string, textColor: string}> */
+    private const COLOR_PRESETS = [
+        'purple' => [
+            'primaryColor' => '#6D4C8D',
+            'accentColor' => '#A63D72',
+            'backgroundColor' => '#F7F1FA',
+            'textColor' => '#2F2440',
+        ],
+        'red' => [
+            'primaryColor' => '#A84448',
+            'accentColor' => '#B24A50',
+            'backgroundColor' => '#FFF3F3',
+            'textColor' => '#3F2426',
+        ],
+        'blue' => [
+            'primaryColor' => '#3F6FA5',
+            'accentColor' => '#3F6FA5',
+            'backgroundColor' => '#F1F6FB',
+            'textColor' => '#203044',
+        ],
+        'green' => [
+            'primaryColor' => '#3F7D5A',
+            'accentColor' => '#3F7D5A',
+            'backgroundColor' => '#F1F8F3',
+            'textColor' => '#20352A',
+        ],
+    ];
+
     /** @var array<string, true> */
     private array $allowedHosts;
 
@@ -42,11 +70,35 @@ final class ThemeRepository
             throw new ConfigException('Theme is invalid.');
         }
 
+        $colorKeys = ['primaryColor', 'accentColor', 'backgroundColor', 'textColor'];
+        if (array_key_exists('colorPreset', $theme)) {
+            foreach ($colorKeys as $colorKey) {
+                if (array_key_exists($colorKey, $theme)) {
+                    throw new ConfigException('Theme is invalid.');
+                }
+            }
+
+            $colors = self::COLOR_PRESETS[$theme['colorPreset']] ?? null;
+            if ($colors === null) {
+                throw new ConfigException('Theme is invalid.');
+            }
+        } else {
+            foreach ($colorKeys as $colorKey) {
+                if (!array_key_exists($colorKey, $theme)) {
+                    throw new ConfigException('Theme is invalid.');
+                }
+            }
+
+            $colors = [
+                'primaryColor' => $theme['primaryColor'],
+                'accentColor' => $theme['accentColor'],
+                'backgroundColor' => $theme['backgroundColor'],
+                'textColor' => $theme['textColor'],
+            ];
+        }
+
         return [
-            'primaryColor' => $theme['primaryColor'],
-            'accentColor' => $theme['accentColor'],
-            'backgroundColor' => $theme['backgroundColor'],
-            'textColor' => $theme['textColor'],
+            ...$colors,
             'logoUrl' => $theme['logoUrl'],
             'maxContentWidth' => $theme['maxContentWidth'],
         ];

@@ -12,10 +12,14 @@ Issue #8では、coreserverのSSH configに登録された`coreserver` aliasだ�
 
 ```bash
 composer install
-vendor/bin/dep deploy coreserver
+scripts/release-purrfect-spirits
 ```
 
-デプロイ前にローカルで`composer test`と`composer validate:config`を実行します。配布元は実行時のGitアーカイブで、リリースには`games/purrfect-spirits`だけを残します。`games/default`、テスト、ドキュメントは本番リリースへ転送後に除外します。
+リリーススクリプトは未コミット差分がないことを確認し、ローカル検証の成功後に対象commitと本番環境を表示してデプロイ確認を求めます。実行計画だけを見る場合は`scripts/release-purrfect-spirits --plan`を使用します。
+
+デプロイ前にローカルで`composer test`、`composer validate:config`、`composer smoke`を実行します。配布元は実行時のGitアーカイブで、`bin`、Composer定義、固定ゲーム設定、公開コード、アプリケーションコード、テンプレートだけを許可リストで選択します。`.claude`、ドキュメント、テスト、既定ゲーム設定など、本番実行に不要なファイルはアーカイブへ含めず、サーバーへ転送しません。
+
+転送後はまだ`current`を切り替えず、候補release上でComposerのplatform要件、PHP構文、JSON Schemaと固定ゲーム設定、iOS・Android・PCの更新先とHTML生成を検証します。すべて成功した場合だけ`current`と公開リンクを切り替え、その後に公開URLのHTTPS health checkを実行します。
 
 Deployerのリリース領域は公開ディレクトリ外に置きます。
 
@@ -34,7 +38,7 @@ Deployerのリリース領域は公開ディレクトリ外に置きます。
 
 事前確認では、coreserverのPHP 8.3.20、Composer、Git、rsync、配置先の書込み権限、シンボリックリンク利用可を確認済みです。既存の公開パスが空の通常ディレクトリであれば初回デプロイ時にリンクへ置換します。内容のある通常ディレクトリは削除せず、デプロイを失敗させて公開中の状態を維持します。
 
-公開リンク切替後にHTTPS health checkを行い、失敗時は直前リリースへ`rollback`して公開リンクを同期します。手動ロールバックは次のコマンドです。
+公開リンク切替後にHTTPS health checkを行い、失敗時は直前リリースへ`rollback`して公開リンクを同期します。候補release上の検証に失敗した場合は`current`を切り替えません。手動ロールバックは次のコマンドです。
 
 ```bash
 vendor/bin/dep rollback coreserver
@@ -129,7 +133,7 @@ game-b.update.example.com
 coreserver本番だけを対象にし、selectorを省略せず明示します。
 
 ```bash
-vendor/bin/dep deploy coreserver
+scripts/release-purrfect-spirits
 vendor/bin/dep rollback coreserver
 ```
 

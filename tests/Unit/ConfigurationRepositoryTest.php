@@ -7,6 +7,7 @@ namespace Tests\Unit;
 use App\Config\ConfigException;
 use App\Config\ThemeRepository;
 use App\Config\UpdatePageRepository;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 final class ConfigurationRepositoryTest extends TestCase
@@ -118,6 +119,98 @@ final class ConfigurationRepositoryTest extends TestCase
         self::assertSame($theme, $repository->load());
     }
 
+    #[DataProvider('colorPresetProvider')]
+    public function testThemeColorPresetResolvesToACompletePalette(string $preset, array $expectedColors): void
+    {
+        $theme = [
+            'colorPreset' => $preset,
+            'logoUrl' => null,
+            'maxContentWidth' => 640,
+        ];
+
+        self::assertSame(
+            [...$expectedColors, 'logoUrl' => null, 'maxContentWidth' => 640],
+            (new ThemeRepository($this->writeJson($theme), ['cdn.example.com']))->load(),
+        );
+    }
+
+    /** @return iterable<string, array{string, array<string, string>}> */
+    public static function colorPresetProvider(): iterable
+    {
+        yield 'purple' => ['purple', [
+            'primaryColor' => '#6D4C8D',
+            'accentColor' => '#A63D72',
+            'backgroundColor' => '#F7F1FA',
+            'textColor' => '#2F2440',
+        ]];
+        yield 'red' => ['red', [
+            'primaryColor' => '#A84448',
+            'accentColor' => '#B24A50',
+            'backgroundColor' => '#FFF3F3',
+            'textColor' => '#3F2426',
+        ]];
+        yield 'blue' => ['blue', [
+            'primaryColor' => '#3F6FA5',
+            'accentColor' => '#3F6FA5',
+            'backgroundColor' => '#F1F6FB',
+            'textColor' => '#203044',
+        ]];
+        yield 'green' => ['green', [
+            'primaryColor' => '#3F7D5A',
+            'accentColor' => '#3F7D5A',
+            'backgroundColor' => '#F1F8F3',
+            'textColor' => '#20352A',
+        ]];
+    }
+
+    public function testThemeRejectsUnknownPresetOrMixedPresetAndCustomColors(): void
+    {
+        $unknown = [
+            'colorPreset' => 'orange',
+            'logoUrl' => null,
+            'maxContentWidth' => 640,
+        ];
+
+        try {
+            (new ThemeRepository($this->writeJson($unknown), ['cdn.example.com']))->load();
+            self::fail('Unknown preset should be rejected.');
+        } catch (ConfigException) {
+        }
+
+        $mixed = [
+            'colorPreset' => 'purple',
+            'primaryColor' => '#123456',
+            'accentColor' => '#abcdef',
+            'backgroundColor' => '#f4f5f7',
+            'textColor' => '#202124',
+            'logoUrl' => null,
+            'maxContentWidth' => 640,
+        ];
+
+        $this->expectException(ConfigException::class);
+        (new ThemeRepository($this->writeJson($mixed), ['cdn.example.com']))->load();
+    }
+
+    #[DataProvider('colorPresetProvider')]
+    public function testThemeColorPresetMaintainsReadableContrast(string $preset, array $colors): void
+    {
+        self::assertGreaterThanOrEqual(4.5, $this->contrastRatio($colors['primaryColor'], '#FFFFFF'), "$preset button contrast");
+        self::assertGreaterThanOrEqual(4.5, $this->contrastRatio($colors['accentColor'], '#FFFFFF'), "$preset accent contrast");
+        self::assertGreaterThanOrEqual(4.5, $this->contrastRatio($colors['textColor'], $colors['backgroundColor']), "$preset body contrast");
+    }
+
+    public function testThemeRejectsIncompleteCustomColors(): void
+    {
+        $theme = [
+            'primaryColor' => '#123456',
+            'logoUrl' => null,
+            'maxContentWidth' => 640,
+        ];
+
+        $this->expectException(ConfigException::class);
+        (new ThemeRepository($this->writeJson($theme), ['cdn.example.com']))->load();
+    }
+
     public function testThemeRejectsInvalidColorAndUnknownField(): void
     {
         $theme = [
@@ -162,6 +255,10 @@ final class ConfigurationRepositoryTest extends TestCase
         self::assertSame('https://itunes.apple.com/jp/app/id1269423920', $page['destinationUrls']['ios']);
         self::assertSame('https://play.google.com/store/apps/details?id=okinawa.harapeco.catRestaurant', $page['destinationUrls']['android']);
         self::assertSame('https://www.harapeco.okinawa/info/app/neko_boku.html', $page['destinationUrls']['pc']);
+        self::assertSame('#A84448', $theme['primaryColor']);
+        self::assertSame('#B24A50', $theme['accentColor']);
+        self::assertSame('#FFF3F3', $theme['backgroundColor']);
+        self::assertSame('#3F2426', $theme['textColor']);
         self::assertSame('https://neko.harapeco.okinawa/event-update/assets/purrfect-spirits-logo.webp', $theme['logoUrl']);
     }
 
@@ -189,5 +286,26 @@ final class ConfigurationRepositoryTest extends TestCase
         $this->temporaryFiles[] = $path;
         file_put_contents($path, json_encode($value, JSON_THROW_ON_ERROR));
         return $path;
+    }
+
+    private function contrastRatio(string $first, string $second): float
+    {
+        $firstLuminance = $this->relativeLuminance($first);
+        $secondLuminance = $this->relativeLuminance($second);
+
+        return (max($firstLuminance, $secondLuminance) + 0.05) / (min($firstLuminance, $secondLuminance) + 0.05);
+    }
+
+    private function relativeLuminance(string $color): float
+    {
+        $channels = array_map(
+            static function (string $hex): float {
+                $channel = hexdec($hex) / 255;
+                return $channel <= 0.04045 ? $channel / 12.92 : (($channel + 0.055) / 1.055) ** 2.4;
+            },
+            str_split(substr($color, 1), 2),
+        );
+
+        return 0.2126 * $channels[0] + 0.7152 * $channels[1] + 0.0722 * $channels[2];
     }
 }

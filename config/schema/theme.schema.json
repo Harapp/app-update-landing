@@ -1,9 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
-  "required": ["primaryColor", "accentColor", "backgroundColor", "textColor", "logoUrl", "maxContentWidth"],
+  "required": ["logoUrl", "maxContentWidth"],
   "additionalProperties": false,
   "properties": {
+    "colorPreset": {"type": "string", "enum": ["purple", "red", "blue", "green"]},
     "primaryColor": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
     "accentColor": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
     "backgroundColor": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},

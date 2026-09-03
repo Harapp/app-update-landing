@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+project_root="$(cd -- "$script_dir/.." && pwd)"
+cd "$project_root"
+
+usage() {
+    printf 'Usage: %s [--plan]\n' "$0"
+}
+
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    usage
+    exit 0
+fi
+
+if [[ "${1:-}" == "--plan" ]]; then
+    exec vendor/bin/dep deploy coreserver --plan
+fi
+
+if [[ $# -ne 0 ]]; then
+    usage >&2
+    exit 2
+fi
+
+if [[ ! -x vendor/bin/dep ]]; then
+    printf 'Deployer is unavailable. Run composer install first.\n' >&2
+    exit 1
+fi
+
+if [[ -n "$(git status --porcelain --untracked-files=normal)" ]]; then
+    printf 'The working tree is not clean. Commit the intended release changes first.\n' >&2
+    exit 1
+fi
+
+composer test
+composer validate:config
+composer smoke
+
+revision="$(git rev-parse --short=12 HEAD)"
+printf 'Local tests passed. Production release target: coreserver / PurrfectSpirits / %s\n' "$revision"
+read -r -p 'Deploy this commit to production? [y/N] ' answer
+if [[ "$answer" != "y" && "$answer" != "Y" ]]; then
+    printf 'Release cancelled.\n'
+    exit 1
+fi
+
+exec vendor/bin/dep deploy coreserver

@@ -1,0 +1,53 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+use App\Config\ThemeRepository;
+use App\Config\UpdatePageRepository;
+use App\Domain\LocaleResolver;
+use App\Domain\UpdatePageEvaluator;
+use App\Http\RequestValidator;
+use App\Presentation\HtmlRenderer;
+use App\Presentation\TemplateRegistry;
+use App\SystemClock;
+
+$root = dirname(__DIR__);
+require $root . '/vendor/autoload.php';
+
+$game = require $root . '/config/game.php';
+$repository = new UpdatePageRepository($game['updatePagesPath'], $game['allowedHosts']);
+$theme = (new ThemeRepository($game['themePath'], $game['allowedHosts']))->load();
+$evaluator = new UpdatePageEvaluator($repository, new SystemClock(), new LocaleResolver(), $theme);
+$validator = new RequestValidator();
+$renderer = new HtmlRenderer(new TemplateRegistry($root . '/templates'));
+
+$destinations = [
+    'ios' => 'https://itunes.apple.com/jp/app/id1269423920',
+    'android' => 'https://play.google.com/store/apps/details?id=okinawa.harapeco.catRestaurant',
+    'pc' => 'https://www.harapeco.okinawa/info/app/neko_boku.html',
+];
+
+foreach ($destinations as $platform => $destination) {
+    $request = $validator->validate([
+        'appVersion' => '0.0.0',
+        'targetVersion' => '0.1.0',
+        'locale' => 'en',
+        'platform' => $platform,
+        'osVersion' => '1',
+    ]);
+    $viewModel = $evaluator->evaluate($request);
+    $html = $renderer->render($viewModel);
+
+    if ($viewModel->state !== 'available'
+        || !$viewModel->showUpdate
+        || $viewModel->destinationUrl !== $destination
+        || !str_contains($html, 'PurrfectSpirits')
+        || !str_contains($html, htmlspecialchars($destination, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'))
+    ) {
+        fwrite(STDERR, "PurrfectSpirits release smoke test failed.\n");
+        exit(1);
+    }
+}
+
+fwrite(STDOUT, "PurrfectSpirits release smoke test passed.\n");

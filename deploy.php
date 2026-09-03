@@ -19,19 +19,105 @@ host('coreserver')
 
 set('application', 'purrfect-spirits-event-update');
 set('keep_releases', 5);
-set('update_code_strategy', 'local_archive');
 set('default_timeout', 300);
+set('deploy_source_paths', [
+    'bin',
+    'composer.json',
+    'composer.lock',
+    'config',
+    'games/purrfect-spirits',
+    'public',
+    'src',
+    'templates',
+]);
 
 desc('Run the application test suite and PurrfectSpirits configuration validation locally.');
 task('deploy:validate', function (): void {
     runLocally('composer test', timeout: 300);
     runLocally('composer validate:config', timeout: 60);
+    runLocally('composer smoke', timeout: 60);
 })->once();
 
-desc('Remove files that are not part of the fixed PurrfectSpirits deployment.');
-task('deploy:filter', function (): void {
-    run("find {{release_path}}/games -mindepth 1 -maxdepth 1 ! -name purrfect-spirits -exec rm -rf -- {} +; "
-        . "rm -rf {{release_path}}/docs {{release_path}}/tests");
+desc('Upload only the files required by the PurrfectSpirits release.');
+task('deploy:update_code', function (): void {
+    $gitRoot = runLocally('git rev-parse --show-toplevel');
+    $target = get('target');
+    $sourcePaths = get('deploy_source_paths');
+    if (!is_array($sourcePaths) || $sourcePaths === []) {
+        throw new \RuntimeException('Deployment source paths are unavailable.');
+    }
+
+    $archivePath = tempnam(sys_get_temp_dir(), 'purrfect-spirits-release-');
+    if ($archivePath === false) {
+        throw new \RuntimeException('Unable to prepare the deployment archive.');
+    }
+
+    try {
+        $quotedPaths = array_map(static fn (string $path): string => quote($path), $sourcePaths);
+        runLocally(
+            'git -C ' . quote($gitRoot)
+            . ' archive --format=tar --output=' . quote($archivePath)
+            . ' ' . quote($target) . ' -- ' . implode(' ', $quotedPaths)
+        );
+
+        $archiveEntries = preg_split('/\R/', trim(runLocally('tar -tf ' . quote($archivePath))));
+        $allowedFiles = ['composer.json', 'composer.lock'];
+        $allowedPrefixes = ['bin/', 'config/', 'games/purrfect-spirits/', 'public/', 'src/', 'templates/'];
+        foreach ($archiveEntries ?: [] as $entry) {
+            $allowed = in_array($entry, $allowedFiles, true);
+            foreach ($allowedPrefixes as $prefix) {
+                if ($entry === $prefix || str_starts_with($entry, $prefix)) {
+                    $allowed = true;
+                    break;
+                }
+            }
+            if (!$allowed) {
+                throw new \RuntimeException('The release archive contains an unapproved path.');
+            }
+        }
+
+        upload($archivePath, '{{release_path}}/.release.tar');
+        run('tar -xf {{release_path}}/.release.tar -C {{release_path}}');
+        run('rm {{release_path}}/.release.tar');
+    } finally {
+        if (is_file($archivePath)) {
+            unlink($archivePath);
+        }
+    }
+
+    $revision = quote(runLocally('git -C ' . quote($gitRoot) . ' rev-list -1 ' . quote($target)));
+    run("echo $revision > {{release_path}}/REVISION");
+});
+
+desc('Verify that the uploaded release contains only approved top-level paths.');
+task('deploy:verify_payload', function (): void {
+    $allowedEntries = [
+        'REVISION', 'bin', 'composer.json', 'composer.lock', 'config',
+        'games', 'public', 'src', 'templates',
+    ];
+    $excludedNames = implode(' ', array_map(
+        static fn (string $name): string => '! -name ' . quote($name),
+        $allowedEntries,
+    ));
+    $unexpected = trim(run("find {{release_path}} -mindepth 1 -maxdepth 1 $excludedNames -print"));
+    $unexpectedGames = trim(run(
+        'find {{release_path}}/games -mindepth 1 -maxdepth 1 ! -name purrfect-spirits -print'
+    ));
+
+    if ($unexpected !== '' || $unexpectedGames !== '') {
+        throw new \RuntimeException('The uploaded release contains an unapproved path.');
+    }
+});
+
+desc('Validate the release candidate on the server before switching current.');
+task('deploy:candidate_validate', function (): void {
+    run('cd {{release_path}} && {{bin/composer}} check-platform-reqs --no-dev');
+    run("find {{release_path}}/config {{release_path}}/public {{release_path}}/src {{release_path}}/templates "
+        . "-type f -name '*.php' -print0 | xargs -0 -n 1 {{bin/php}} -l >/dev/null");
+    run('{{bin/php}} -l {{release_path}}/bin/validate-purrfect-spirits >/dev/null');
+    run('{{bin/php}} -l {{release_path}}/bin/smoke-test-purrfect-spirits >/dev/null');
+    run('cd {{release_path}} && {{bin/php}} bin/validate-purrfect-spirits');
+    run('cd {{release_path}} && {{bin/php}} bin/smoke-test-purrfect-spirits');
 });
 
 desc('Link the public URL to the current release public directory.');
@@ -80,7 +166,8 @@ task('deploy:publish', [
     'deploy:success',
 ]);
 
-after('deploy:update_code', 'deploy:filter');
+after('deploy:update_code', 'deploy:verify_payload');
+after('deploy:vendors', 'deploy:candidate_validate');
 before('deploy:prepare', 'deploy:validate');
 after('rollback', 'deploy:public_link');
 after('deploy:failed', 'deploy:unlock');

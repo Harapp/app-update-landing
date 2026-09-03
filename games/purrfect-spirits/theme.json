@@ -1,8 +1,5 @@
 {
-    "primaryColor": "#6D4C8D",
-    "accentColor": "#D977A9",
-    "backgroundColor": "#F7F1FA",
-    "textColor": "#2F2440",
+    "colorPreset": "red",
     "logoUrl": "https://neko.harapeco.okinawa/event-update/assets/purrfect-spirits-logo.webp",
     "maxContentWidth": 640
 }
