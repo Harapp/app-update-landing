@@ -61,7 +61,7 @@ task('deploy:update_code', function (): void {
         );
 
         $archiveEntries = preg_split('/\R/', trim(runLocally('tar -tf ' . quote($archivePath))));
-        $allowedFiles = ['composer.json', 'composer.lock'];
+        $allowedFiles = ['composer.json', 'composer.lock', 'games/'];
         $allowedPrefixes = ['bin/', 'config/', 'games/purrfect-spirits/', 'public/', 'src/', 'templates/'];
         foreach ($archiveEntries ?: [] as $entry) {
             $allowed = in_array($entry, $allowedFiles, true);
