@@ -160,6 +160,7 @@ task('deploy:verify_payload', function (): void {
 desc('Validate the release candidate on the server before switching current.');
 task('deploy:candidate_validate', function (): void {
     run('test -s {{release_path}}/public/assets/banner.webp');
+    run("test \"\$(stat -c '%a' {{release_path}}/public/assets/banner.webp)\" = 644");
     run('cd {{release_path}} && {{bin/composer}} check-platform-reqs --no-dev');
     run("find {{release_path}}/config {{release_path}}/public {{release_path}}/src {{release_path}}/templates "
         . "-type f -name '*.php' -print0 | xargs -0 -n 1 {{bin/php}} -l >/dev/null");

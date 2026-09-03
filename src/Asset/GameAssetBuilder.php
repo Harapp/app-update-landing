@@ -93,6 +93,9 @@ final class GameAssetBuilder
 
             try {
                 $this->convert($asset['source'], $temporaryPath, $asset['relative']);
+                if (!chmod($temporaryPath, 0644)) {
+                    throw new RuntimeException(sprintf('Unable to set generated asset permissions: %s', $asset['relative']));
+                }
                 if (!rename($temporaryPath, $targetPath)) {
                     throw new RuntimeException(sprintf('Unable to publish generated asset: %s', $asset['relative']));
                 }

@@ -47,6 +47,8 @@ final class GameAssetBuilderTest extends TestCase
         self::assertSame(2, $count);
         self::assertFileExists($output . '/banner.webp');
         self::assertFileExists($output . '/events/card.webp');
+        self::assertSame(0644, fileperms($output . '/banner.webp') & 0777);
+        self::assertSame(0644, fileperms($output . '/events/card.webp') & 0777);
         $banner = file_get_contents($output . '/banner.webp');
         $card = file_get_contents($output . '/events/card.webp');
         self::assertIsString($banner);
