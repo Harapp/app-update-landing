@@ -49,7 +49,7 @@ final readonly class UpdatePageViewModel
         ?string $storeNotice = null,
         ?string $osRequirementMessage = null,
     ) {
-        $this->eventPeriod = $eventPeriod ?? self::formatEventPeriod($startAt, $endAt);
+        $this->eventPeriod = $eventPeriod;
         $this->updateButtonLabel = $updateButtonLabel ?? 'Update and play the event';
         $this->updateButtonAriaLabel = $updateButtonAriaLabel
             ?? sprintf('Update to version %s and play the event', $targetVersion ?? '');
@@ -68,13 +68,5 @@ final readonly class UpdatePageViewModel
             $statusMessage,
             null, null, null, null, null, null, null, false, false, 'event-update', self::DEFAULT_THEME, ''
         );
-    }
-
-    private static function formatEventPeriod(?DateTimeImmutable $startAt, ?DateTimeImmutable $endAt): string
-    {
-        $start = $startAt?->format('Y-m-d H:i \\U\\T\\C') ?? 'Immediately';
-        $end = $endAt?->format('Y-m-d H:i \\U\\T\\C') ?? 'No end date';
-
-        return sprintf('Event period: %s – %s', $start, $end);
     }
 }

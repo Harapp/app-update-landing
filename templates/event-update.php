@@ -32,8 +32,9 @@ $pageTitle = $viewModel->description !== '' ? $viewModel->description : 'App upd
         .banner { display: block; width: 100%; height: auto; }
         h1 { margin: 0 0 1rem; font-size: 1.25rem; }
         .status { margin: 0 0 1rem; font-weight: 600; }
+        .period { margin: 0; color: #4b5563; font-weight: 600; text-align: center; }
         .os-version { margin: .5rem 0; color: #4b5563; }
-        .update-action { display: flex; justify-content: center; margin-top: 1.5rem; }
+        .update-action { display: flex; justify-content: center; margin-top: 1.25rem; }
         .update-link { box-sizing: border-box; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; min-width: 12rem; padding: .8rem 1.25rem; border-radius: .6rem; background: <?= $escape($viewModel->theme['primaryColor']) ?>; color: #fff; font-weight: 700; line-height: 1.25; text-align: center; text-decoration: none; }
         .update-link small { margin-top: .2rem; font-size: .9rem; }
         .notice { margin: 1.75rem 0 0; color: #6b7280; font-size: .85rem; line-height: 1.5; }
@@ -51,8 +52,11 @@ $pageTitle = $viewModel->description !== '' ? $viewModel->description : 'App upd
         <?php if ($viewModel->description !== ''): ?>
             <h1><?= $escape($viewModel->description) ?></h1>
         <?php endif; ?>
-        <?php if ($viewModel->state !== 'available'): ?>
+        <?php if (!in_array($viewModel->state, ['available', 'not-started', 'ended'], true)): ?>
             <p class="status"><?= $escape($viewModel->statusMessage) ?></p>
+        <?php endif; ?>
+        <?php if ($viewModel->eventPeriod !== null && $viewModel->eventPeriod !== ''): ?>
+            <p class="period"><?= $escape($viewModel->eventPeriod) ?></p>
         <?php endif; ?>
         <?php if ($viewModel->osRequirementMessage !== null): ?>
             <p class="os-version"><?= $escape($viewModel->osRequirementMessage) ?></p>

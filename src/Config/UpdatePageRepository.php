@@ -123,14 +123,14 @@ final class UpdatePageRepository
 
         foreach (['startAt', 'endAt'] as $dateField) {
             if (array_key_exists($dateField, $page) && $page[$dateField] !== null) {
-                if (!is_string($page[$dateField]) || $this->parseUtcDate($page[$dateField]) === null) {
+                if (!is_string($page[$dateField]) || $this->parseDateTime($page[$dateField]) === null) {
                     throw new ConfigException('Configuration is invalid.');
                 }
             }
         }
 
-        $startAt = isset($page['startAt']) && is_string($page['startAt']) ? $this->parseUtcDate($page['startAt']) : null;
-        $endAt = isset($page['endAt']) && is_string($page['endAt']) ? $this->parseUtcDate($page['endAt']) : null;
+        $startAt = isset($page['startAt']) && is_string($page['startAt']) ? $this->parseDateTime($page['startAt']) : null;
+        $endAt = isset($page['endAt']) && is_string($page['endAt']) ? $this->parseDateTime($page['endAt']) : null;
         if ($startAt !== null && $endAt !== null && $startAt >= $endAt) {
             throw new ConfigException('Configuration is invalid.');
         }
@@ -231,14 +231,19 @@ final class UpdatePageRepository
         return $resolved;
     }
 
-    private function parseUtcDate(string $value): ?DateTimeImmutable
+    private function parseDateTime(string $value): ?DateTimeImmutable
     {
-        if (!preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/D', $value)) {
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:Z|[+-]\d{2}:\d{2})$/D', $value)) {
             return null;
         }
 
-        $date = DateTimeImmutable::createFromFormat('!Y-m-d\\TH:i:s\\Z', $value, new DateTimeZone('UTC'));
-        return $date !== false && $date->format('Y-m-d\\TH:i:s\\Z') === $value ? $date : null;
+        if (str_ends_with($value, 'Z')) {
+            $date = DateTimeImmutable::createFromFormat('!Y-m-d\\TH:i:s\\Z', $value, new DateTimeZone('UTC'));
+            return $date !== false && $date->format('Y-m-d\\TH:i:s\\Z') === $value ? $date : null;
+        }
+
+        $date = DateTimeImmutable::createFromFormat('!Y-m-d\\TH:i:sP', $value);
+        return $date !== false && $date->format('Y-m-d\\TH:i:sP') === $value ? $date : null;
     }
 
     /** @param mixed $translations @return array<string, string> */

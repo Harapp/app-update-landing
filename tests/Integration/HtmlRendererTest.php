@@ -35,19 +35,20 @@ final class HtmlRendererTest extends TestCase
             'available', 'en', null, null, 'Event description', 'A new version is available.',
             '1.0.0', '2.0.0', null, null, null, null, 'https://example.com/download', true, false,
             'event-update', UpdatePageViewModel::DEFAULT_THEME,
-            'Event period: 2026-09-03 10:00 UTC – 2026-09-04 10:00 UTC',
+            'Sep 3–4 (1 day remaining)',
             '更新してイベントを遊ぶ',
             'バージョン2.0.0に更新してイベントを遊ぶ',
         );
         $html = (new HtmlRenderer(new TemplateRegistry(dirname(__DIR__, 2) . '/templates')))->render($view);
 
         self::assertStringNotContainsString('A new version is available.', $html);
-        self::assertStringNotContainsString('Event period:', $html);
+        self::assertStringContainsString('<p class="period">Sep 3–4 (1 day remaining)</p>', $html);
         self::assertStringNotContainsString('Current: V', $html);
         self::assertStringContainsString('<span>V2.0.0</span>', $html);
         self::assertStringContainsString('<small>更新してイベントを遊ぶ</small>', $html);
         self::assertStringContainsString('aria-label="バージョン2.0.0に更新してイベントを遊ぶ"', $html);
         self::assertStringContainsString('<title>Event description</title>', $html);
         self::assertStringNotContainsString('<meta property="og:image"', $html);
+        self::assertLessThan(strpos($html, '<a class="update-link"'), strpos($html, '<p class="period">'));
     }
 }

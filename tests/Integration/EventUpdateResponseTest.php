@@ -43,6 +43,7 @@ final class EventUpdateResponseTest extends TestCase
         bool $hasUpdateButton,
         bool $hasStoreNotice,
         bool $showsStatusMessage,
+        ?string $expectedPeriod,
     ): void {
         if ($changes !== []) {
             $page = $this->basePage();
@@ -66,10 +67,15 @@ final class EventUpdateResponseTest extends TestCase
         self::assertSame($hasStoreNotice, strpos($html, 'Updates may take some time') !== false);
         self::assertStringNotContainsString('Event period:', $html);
         self::assertStringNotContainsString('Current: V', $html);
+        if ($expectedPeriod === null) {
+            self::assertStringNotContainsString('<p class="period">', $html);
+        } else {
+            self::assertStringContainsString('<p class="period">' . $expectedPeriod . '</p>', $html);
+        }
     }
 
     /**
-     * @return array<string, array{string, array<string, string>, array<string, mixed>, string, bool, bool, bool}>
+     * @return array<string, array{string, array<string, string>, array<string, mixed>, string, bool, bool, bool, ?string}>
      */
     public static function stateCases(): array
     {
@@ -82,14 +88,14 @@ final class EventUpdateResponseTest extends TestCase
         ];
 
         return [
-            'available' => ['2026-09-03T12:00:00Z', $baseRequest, [], 'A new version is available.', true, true, false],
-            'up-to-date' => ['2026-09-03T12:00:00Z', [...$baseRequest, 'appVersion' => '2.0.0'], [], "You're using the latest version.", false, false, true],
-            'disabled' => ['2026-09-03T12:00:00Z', $baseRequest, ['enabled' => false], 'This update is currently unavailable.', false, false, true],
-            'not-started' => ['2026-09-03T12:00:00Z', $baseRequest, ['startAt' => '2026-09-03T13:00:00Z'], 'This update is not available yet.', false, false, true],
-            'ended' => ['2026-09-03T12:00:00Z', $baseRequest, ['endAt' => '2026-09-03T11:00:00Z'], 'This update period has ended.', false, false, true],
-            'unsupported-os' => ['2026-09-03T12:00:00Z', [...$baseRequest, 'osVersion' => '17.0'], [], 'This update requires a newer OS version.', false, false, true],
-            'missing-destination' => ['2026-09-03T12:00:00Z', [...$baseRequest, 'platform' => 'android', 'osVersion' => '14'], ['destinationUrls' => ['ios' => 'https://apps.apple.com/app/id1']], 'This update is temporarily unavailable.', false, false, true],
-            'unavailable' => ['2026-09-03T12:00:00Z', [...$baseRequest, 'targetVersion' => '3.0.0'], [], 'This update page is currently unavailable.', false, false, true],
+            'available' => ['2026-09-03T12:00:00Z', $baseRequest, [], 'A new version is available.', true, true, false, 'Sep 3–4 (1 day remaining)'],
+            'up-to-date' => ['2026-09-03T12:00:00Z', [...$baseRequest, 'appVersion' => '2.0.0'], [], "You're using the latest version.", false, false, true, 'Sep 3–4 (1 day remaining)'],
+            'disabled' => ['2026-09-03T12:00:00Z', $baseRequest, ['enabled' => false], 'This update is currently unavailable.', false, false, true, 'Sep 3–4 (1 day remaining)'],
+            'not-started' => ['2026-09-03T12:00:00Z', $baseRequest, ['startAt' => '2026-09-03T13:00:00Z'], 'This update is not available yet.', false, false, false, 'Sep 3–4 (starts in 1 day)'],
+            'ended' => ['2026-09-03T12:00:00Z', $baseRequest, ['endAt' => '2026-09-03T11:00:00Z'], 'This update period has ended.', false, false, false, 'Ended.'],
+            'unsupported-os' => ['2026-09-03T12:00:00Z', [...$baseRequest, 'osVersion' => '17.0'], [], 'This update requires a newer OS version.', false, false, true, 'Sep 3–4 (1 day remaining)'],
+            'missing-destination' => ['2026-09-03T12:00:00Z', [...$baseRequest, 'platform' => 'android', 'osVersion' => '14'], ['destinationUrls' => ['ios' => 'https://apps.apple.com/app/id1']], 'This update is temporarily unavailable.', false, false, true, 'Sep 3–4 (1 day remaining)'],
+            'unavailable' => ['2026-09-03T12:00:00Z', [...$baseRequest, 'targetVersion' => '3.0.0'], [], 'This update page is currently unavailable.', false, false, true, null],
         ];
     }
 

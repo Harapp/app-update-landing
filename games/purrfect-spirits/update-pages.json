@@ -7,8 +7,8 @@
             "template": "event-update",
             "enabled": true,
             "imageUrl": "assets/banner.webp",
-            "startAt": null,
-            "endAt": null,
+            "startAt": "2026-09-10T00:00:00+09:00",
+            "endAt": "2026-09-30T23:59:59+09:00",
             "minimumOsVersions": {},
             "destinationUrls": {
                 "ios": "https://itunes.apple.com/jp/app/id1269423920",

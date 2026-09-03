@@ -8,6 +8,7 @@ use App\Clock;
 use App\Config\UpdatePageRepository;
 use App\Http\UpdatePageRequest;
 use App\Presentation\UpdatePageViewModel;
+use DateTimeImmutable;
 
 final class UpdatePageEvaluator
 {
@@ -24,6 +25,12 @@ final class UpdatePageEvaluator
         'button.update' => ['en' => 'Update and play the event'],
         'button.updateAriaLabel' => ['en' => 'Update to version {version} and play the event'],
         'notice.storeDelay' => ['en' => 'Updates may take some time to appear on the App Store or Google Play. If the update is not available yet, please try again later.'],
+        'period.range' => ['en' => '{start}–{end}'],
+        'period.remaining.one' => ['en' => '{range} (1 day remaining)'],
+        'period.remaining.other' => ['en' => '{range} ({days} days remaining)'],
+        'period.startsIn.one' => ['en' => '{range} (starts in 1 day)'],
+        'period.startsIn.other' => ['en' => '{range} (starts in {days} days)'],
+        'period.ended' => ['en' => 'Ended.'],
         'os.requirement' => ['en' => 'OS: {current} · Required: {required}'],
     ];
 
@@ -48,6 +55,7 @@ final class UpdatePageEvaluator
             );
         }
 
+        $now = $this->clock->now()->setTimezone(new \DateTimeZone('UTC'));
         $common = [
             'locale' => $request->locale,
             'imageUrl' => $page['imageUrl'],
@@ -57,6 +65,7 @@ final class UpdatePageEvaluator
             'targetVersion' => $page['targetVersion'],
             'startAt' => $page['startAt'],
             'endAt' => $page['endAt'],
+            'now' => $now,
             'template' => $page['template'],
             'updateButtonLabel' => $this->text('button.update', $request->locale),
             'updateButtonAriaLabel' => $this->text(
@@ -69,7 +78,6 @@ final class UpdatePageEvaluator
 
         $appVersion = Version::fromString($request->appVersion);
         $targetVersion = Version::fromString($request->targetVersion);
-        $now = $this->clock->now()->setTimezone(new \DateTimeZone('UTC'));
 
         if (!$page['enabled']) {
             return $this->view($common, 'disabled', 'status.disabled');
@@ -80,7 +88,7 @@ final class UpdatePageEvaluator
         if ($page['startAt'] !== null && $now < $page['startAt']) {
             return $this->view($common, 'not-started', 'status.notStarted');
         }
-        if ($page['endAt'] !== null && $now >= $page['endAt']) {
+        if ($page['endAt'] !== null && $now > $page['endAt']) {
             return $this->view($common, 'ended', 'status.ended');
         }
 
@@ -125,7 +133,12 @@ final class UpdatePageEvaluator
             $showStoreNotice && $state === 'available',
             $common['template'],
             $this->theme ?? UpdatePageViewModel::DEFAULT_THEME,
-            null,
+            $this->formatEventPeriod(
+                $common['startAt'],
+                $common['endAt'],
+                $common['now'],
+                $common['locale'],
+            ),
             $common['updateButtonLabel'],
             $common['updateButtonAriaLabel'],
             $common['storeNotice'],
@@ -139,5 +152,86 @@ final class UpdatePageEvaluator
         $texts = $this->uiTexts ?? self::DEFAULT_UI_TEXTS;
         $translations = $texts[$key] ?? self::DEFAULT_UI_TEXTS[$key];
         return strtr($this->localeResolver->resolve($translations, $locale), $replacements);
+    }
+
+    private function formatEventPeriod(
+        ?DateTimeImmutable $startAt,
+        ?DateTimeImmutable $endAt,
+        DateTimeImmutable $now,
+        string $locale,
+    ): ?string {
+        if ($startAt === null && $endAt === null) {
+            return null;
+        }
+        if ($endAt !== null && $now > $endAt) {
+            return $this->text('period.ended', $locale);
+        }
+
+        $range = $this->formatDateRange($startAt, $endAt, $locale);
+        if ($startAt !== null && $now < $startAt) {
+            $days = $this->roundedUpDaysBetween($now, $startAt);
+            return $this->text(
+                $days === 1 ? 'period.startsIn.one' : 'period.startsIn.other',
+                $locale,
+                ['{range}' => $range, '{days}' => (string) $days],
+            );
+        }
+        if ($endAt !== null) {
+            $days = $this->roundedUpDaysBetween($now, $endAt);
+            return $this->text(
+                $days === 1 ? 'period.remaining.one' : 'period.remaining.other',
+                $locale,
+                ['{range}' => $range, '{days}' => (string) $days],
+            );
+        }
+
+        return $range;
+    }
+
+    private function roundedUpDaysBetween(DateTimeImmutable $from, DateTimeImmutable $to): int
+    {
+        return max(1, (int) ceil(($to->getTimestamp() - $from->getTimestamp()) / 86400));
+    }
+
+    private function formatDateRange(?DateTimeImmutable $startAt, ?DateTimeImmutable $endAt, string $locale): string
+    {
+        $timeZone = ($startAt ?? $endAt)?->getTimezone();
+        $start = $startAt?->setTimezone($timeZone);
+        $end = $endAt?->setTimezone($timeZone);
+        if ($start === null) {
+            return $this->formatDate($end, $locale, true);
+        }
+        if ($end === null) {
+            return $this->formatDate($start, $locale, true);
+        }
+
+        $sameYear = $start->format('Y') === $end->format('Y');
+        $sameMonth = $sameYear && $start->format('n') === $end->format('n');
+        $language = strtolower(explode('-', $locale, 2)[0]);
+
+        if ($language === 'ja') {
+            $startText = $this->formatDate($start, $locale, !$sameYear);
+            $endText = $sameMonth ? $end->format('j日') : $this->formatDate($end, $locale, !$sameYear);
+        } else {
+            $startText = $this->formatDate($start, $locale, !$sameYear);
+            $endText = $sameMonth ? $end->format('j') : $this->formatDate($end, $locale, !$sameYear);
+        }
+
+        return $this->text('period.range', $locale, ['{start}' => $startText, '{end}' => $endText]);
+    }
+
+    private function formatDate(?DateTimeImmutable $date, string $locale, bool $includeYear): string
+    {
+        if ($date === null) {
+            return '';
+        }
+
+        if (strtolower(explode('-', $locale, 2)[0]) === 'ja') {
+            return ($includeYear ? $date->format('Y年') : '') . $date->format('n月j日');
+        }
+
+        $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        $formatted = $months[(int) $date->format('n') - 1] . ' ' . $date->format('j');
+        return $includeYear ? $formatted . ', ' . $date->format('Y') : $formatted;
     }
 }

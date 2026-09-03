@@ -3,6 +3,7 @@
 
 declare(strict_types=1);
 
+use App\Clock;
 use App\Config\ThemeRepository;
 use App\Config\UiTextRepository;
 use App\Config\UpdatePageRepository;
@@ -11,7 +12,6 @@ use App\Domain\UpdatePageEvaluator;
 use App\Http\RequestValidator;
 use App\Presentation\HtmlRenderer;
 use App\Presentation\TemplateRegistry;
-use App\SystemClock;
 
 $root = dirname(__DIR__);
 require $root . '/vendor/autoload.php';
@@ -22,9 +22,27 @@ $repository = new UpdatePageRepository(
     $game['allowedHosts'],
 );
 $release = $repository->releaseConfig();
+$releasePage = $repository->findByTargetVersion($release['releaseTargetVersion']);
+if ($releasePage === null) {
+    fwrite(STDERR, "PurrfectSpirits release smoke test failed.\n");
+    exit(1);
+}
+$smokeTime = $releasePage['startAt']
+    ?? $releasePage['endAt']?->modify('-1 second')
+    ?? new DateTimeImmutable('now', new DateTimeZone('UTC'));
+$clock = new class($smokeTime) implements Clock {
+    public function __construct(private readonly DateTimeImmutable $value)
+    {
+    }
+
+    public function now(): DateTimeImmutable
+    {
+        return $this->value;
+    }
+};
 $theme = (new ThemeRepository($game['themePath'], $game['allowedHosts']))->load();
 $uiTexts = (new UiTextRepository($game['uiTextsPath']))->load();
-$evaluator = new UpdatePageEvaluator($repository, new SystemClock(), new LocaleResolver(), $theme, $uiTexts);
+$evaluator = new UpdatePageEvaluator($repository, $clock, new LocaleResolver(), $theme, $uiTexts);
 $validator = new RequestValidator();
 $renderer = new HtmlRenderer(new TemplateRegistry($root . '/templates'));
 

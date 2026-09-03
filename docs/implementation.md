@@ -147,8 +147,8 @@ templates/
       "template": "event-update",
       "enabled": true,
       "imageUrl": "assets/banner.webp",
-      "startAt": "2026-09-10T00:00:00Z",
-      "endAt": "2026-10-10T00:00:00Z",
+      "startAt": "2026-09-10T00:00:00+09:00",
+      "endAt": "2026-10-10T23:59:59+09:00",
       "minimumOsVersions": {
         "ios": "18.0",
         "android": "14"
@@ -180,7 +180,7 @@ templates/
 | 両方なし | `enabled=true`の間は常時有効 |
 | `startAt`のみ | 指定日時から無期限 |
 | `endAt`のみ | 即時開始し、指定日時で終了 |
-| 両方あり | `startAt <= now < endAt`の期間だけ有効 |
+| 両方あり | `startAt <= now <= endAt`の期間だけ有効 |
 
 期間の有無はテンプレート選択に影響させません。
 
@@ -191,7 +191,7 @@ JSON Schemaでは少なくとも次を検証します。
 - `targetVersion`の形式
 - `template`が許可された識別子であること
 - `enabled`がbooleanであること
-- `startAt`と`endAt`がUTCのISO 8601形式であること
+- `startAt`と`endAt`がタイムゾーン付きISO 8601形式であること
 - `en`の説明と画像altが存在すること
 - platformが`ios`、`android`、`pc`のいずれかであること
 - 画像が安全な相対WebPパス、または許可された絶対HTTPS URLであること

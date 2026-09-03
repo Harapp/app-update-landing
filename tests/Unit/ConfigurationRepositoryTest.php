@@ -349,6 +349,8 @@ final class ConfigurationRepositoryTest extends TestCase
         self::assertSame('https://neko.harapeco.okinawa/event-update', $release['publicBaseUrl']);
         self::assertSame('2.9.0', $release['releaseTargetVersion']);
         self::assertSame('https://neko.harapeco.okinawa/event-update/assets/banner.webp', $page['imageUrl']);
+        self::assertSame('2026-09-10T00:00:00+09:00', $page['startAt']?->format('Y-m-d\\TH:i:sP'));
+        self::assertSame('2026-09-30T23:59:59+09:00', $page['endAt']?->format('Y-m-d\\TH:i:sP'));
         self::assertSame('https://itunes.apple.com/jp/app/id1269423920', $page['destinationUrls']['ios']);
         self::assertSame('https://play.google.com/store/apps/details?id=okinawa.harapeco.catRestaurant', $page['destinationUrls']['android']);
         self::assertSame('https://www.harapeco.okinawa/info/app/neko_boku.html', $page['destinationUrls']['pc']);

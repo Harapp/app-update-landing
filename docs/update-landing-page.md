@@ -100,8 +100,8 @@ query parameterは表示判定の入力であり、認証・認可や秘密情�
       "template": "event-update",
       "enabled": true,
       "imageUrl": "assets/banner.webp",
-      "startAt": "2026-09-10T03:00:00Z",
-      "endAt": "2026-09-30T15:00:00Z",
+      "startAt": "2026-09-10T00:00:00+09:00",
+      "endAt": "2026-09-30T23:59:59+09:00",
       "minimumOsVersions": {
         "ios": "18.0",
         "android": "14"
@@ -141,17 +141,17 @@ query parameterは表示判定の入力であり、認証・認可や秘密情�
 
 - 判定には端末時刻ではなくWebサーバーの現在時刻を使う
 - 保存と比較はUTCに統一する
-- 開始日時は期間に含み、終了日時は期間に含めない
+- 開始日時と終了日時を期間に含む
 
 ```text
-startAt <= now < endAt
+startAt <= now <= endAt
 ```
 
 - `startAt` 未設定: 即時開始
 - `endAt` 未設定: 無期限
 - 両方未設定: `enabled=true`の間は常時有効
 - `now < startAt`: 期間前
-- `endAt <= now`: 期間終了
+- `endAt < now`: 期間終了
 
 ## 表示判定
 
@@ -163,7 +163,7 @@ startAt <= now < endAt
 | 2 | `enabled=false` | 現在利用できない | 非表示 |
 | 3 | `appVersion >= targetVersion` | 更新済み | 非表示 |
 | 4 | `now < startAt` | 期間前 | 非表示 |
-| 5 | `endAt <= now` | 期間終了 | 非表示 |
+| 5 | `endAt < now` | 期間終了 | 非表示 |
 | 6 | 未対応の`platform` | 更新不可 | 非表示 |
 | 7 | `osVersion`が最低対応バージョン未満 | OS非対応 | 非表示 |
 | 8 | 対応する更新先URLがない | 一時的に更新不可 | 非表示 |
@@ -181,8 +181,9 @@ startAt <= now < endAt
 
 - バナー画像
 - イベント説明
+- `Sep 10–30 (21 days remaining)` / `9月10日〜30日（残り21日）`形式の期間と残り日数
 - ボタンは1段目に`V2.9.0`、2段目に`Update and play the event`などのローカライズ済み行動文言を表示する
-- 状態文、イベント期間、現在バージョンと対象バージョンの補助行は表示しない
+- 状態文、現在バージョンと対象バージョンの補助行は表示しない
 - ボタン押下時は`platform`に対応する`destinationUrls`を開く
 - iOS / Androidでは、ボタンの下にストア反映の遅延に関する小さな注意書きを表示する
 
@@ -197,14 +198,14 @@ startAt <= now < endAt
 
 - バナー画像
 - イベント説明
-- `This update is not available yet.`
+- `Sep 10–30 (starts in 7 days)` / `9月10日〜30日（7日後に開始）`形式の期間と開始までの日数
 - 更新ボタンは表示しない
 
 ### 期間終了
 
 - バナー画像
 - イベント説明
-- `This update period has ended.`
+- `Ended.` / `終了しました。`
 - 更新ボタンは表示しない
 
 ### OS非対応
@@ -307,7 +308,8 @@ Updates may take some time to appear on the App Store or Google Play. If the upd
 - バナー取得失敗時にも説明文と状態案内が表示されることを確認する
 - iOS、Android、PCで正しい更新先が選択されることを確認する
 - ボタンに`V{targetVersion}`とローカライズされた行動文言が2段で表示されることを確認する
-- 更新可能状態で状態文、イベント期間、現在・対象バージョンの補助行が表示されないことを確認する
+- 更新可能状態で状態文と現在・対象バージョンの補助行が表示されず、期間と残り日数が表示されることを確認する
+- 期間前は開始までの日数、期間終了後は終了文言が表示されることを確認する
 - `ja`と`ja-*`で日本語、未対応localeで`en`へフォールバックすることを確認する
 - iOS / Androidの更新可能状態だけで、ページ最下部にストア反映の注意書きが表示されることを確認する
 - 不正なquery parameter、存在しない`targetVersion`、無効な外部URLを安全に拒否する

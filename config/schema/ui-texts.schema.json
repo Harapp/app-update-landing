@@ -13,6 +13,12 @@
     "button.update",
     "button.updateAriaLabel",
     "notice.storeDelay",
+    "period.range",
+    "period.remaining.one",
+    "period.remaining.other",
+    "period.startsIn.one",
+    "period.startsIn.other",
+    "period.ended",
     "os.requirement"
   ],
   "additionalProperties": false,
@@ -28,6 +34,12 @@
     "button.update": {"type": "object", "required": ["en"], "additionalProperties": false, "properties": {"en": {"type": "string", "minLength": 1, "maxLength": 500}}, "patternProperties": {"^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$": {"type": "string", "minLength": 1, "maxLength": 500}}},
     "button.updateAriaLabel": {"type": "object", "required": ["en"], "additionalProperties": false, "properties": {"en": {"type": "string", "minLength": 1, "maxLength": 500}}, "patternProperties": {"^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$": {"type": "string", "minLength": 1, "maxLength": 500}}},
     "notice.storeDelay": {"type": "object", "required": ["en"], "additionalProperties": false, "properties": {"en": {"type": "string", "minLength": 1, "maxLength": 500}}, "patternProperties": {"^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$": {"type": "string", "minLength": 1, "maxLength": 500}}},
+    "period.range": {"type": "object", "required": ["en"], "additionalProperties": false, "properties": {"en": {"type": "string", "minLength": 1, "maxLength": 500}}, "patternProperties": {"^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$": {"type": "string", "minLength": 1, "maxLength": 500}}},
+    "period.remaining.one": {"type": "object", "required": ["en"], "additionalProperties": false, "properties": {"en": {"type": "string", "minLength": 1, "maxLength": 500}}, "patternProperties": {"^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$": {"type": "string", "minLength": 1, "maxLength": 500}}},
+    "period.remaining.other": {"type": "object", "required": ["en"], "additionalProperties": false, "properties": {"en": {"type": "string", "minLength": 1, "maxLength": 500}}, "patternProperties": {"^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$": {"type": "string", "minLength": 1, "maxLength": 500}}},
+    "period.startsIn.one": {"type": "object", "required": ["en"], "additionalProperties": false, "properties": {"en": {"type": "string", "minLength": 1, "maxLength": 500}}, "patternProperties": {"^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$": {"type": "string", "minLength": 1, "maxLength": 500}}},
+    "period.startsIn.other": {"type": "object", "required": ["en"], "additionalProperties": false, "properties": {"en": {"type": "string", "minLength": 1, "maxLength": 500}}, "patternProperties": {"^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$": {"type": "string", "minLength": 1, "maxLength": 500}}},
+    "period.ended": {"type": "object", "required": ["en"], "additionalProperties": false, "properties": {"en": {"type": "string", "minLength": 1, "maxLength": 500}}, "patternProperties": {"^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$": {"type": "string", "minLength": 1, "maxLength": 500}}},
     "os.requirement": {"type": "object", "required": ["en"], "additionalProperties": false, "properties": {"en": {"type": "string", "minLength": 1, "maxLength": 500}}, "patternProperties": {"^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$": {"type": "string", "minLength": 1, "maxLength": 500}}}
   }
 }

@@ -131,7 +131,7 @@ final class UpdatePageEvaluatorTest extends TestCase
         self::assertFalse($view->showUpdate);
     }
 
-    public function testUpdateIsNotShownBeforeStartAndAtEndBoundary(): void
+    public function testUpdateIsNotShownBeforeStartAndEndsAfterTheEndBoundary(): void
     {
         $repository = new UpdatePageRepository($this->configPath, ['cdn.example.com', 'apps.apple.com']);
         $request = (new RequestValidator())->validate([
@@ -144,10 +144,37 @@ final class UpdatePageEvaluatorTest extends TestCase
 
         $before = (new UpdatePageEvaluator($repository, new FixedClock('2026-09-03T09:59:59Z')))->evaluate($request);
         $atEnd = (new UpdatePageEvaluator($repository, new FixedClock('2026-09-04T10:00:00Z')))->evaluate($request);
+        $afterEnd = (new UpdatePageEvaluator($repository, new FixedClock('2026-09-04T10:00:01Z')))->evaluate($request);
 
         self::assertSame('not-started', $before->state);
         self::assertFalse($before->showUpdate);
-        self::assertSame('ended', $atEnd->state);
+        self::assertSame('available', $atEnd->state);
+        self::assertSame('ended', $afterEnd->state);
+    }
+
+    public function testJapaneseEventPeriodShowsCountdownRemainingDaysAndEndedState(): void
+    {
+        $this->replacePage([
+            'startAt' => '2026-09-10T00:00:00+09:00',
+            'endAt' => '2026-09-30T23:59:59+09:00',
+        ]);
+        $repository = new UpdatePageRepository($this->configPath, ['cdn.example.com', 'apps.apple.com']);
+        $texts = (new UiTextRepository(dirname(__DIR__, 2) . '/templates/event-update/ui-texts.json'))->load();
+        $request = (new RequestValidator())->validate([
+            'appVersion' => '1.0.0',
+            'targetVersion' => '2.0.0',
+            'locale' => 'ja-JP',
+            'platform' => 'ios',
+            'osVersion' => '18.0',
+        ]);
+
+        $before = (new UpdatePageEvaluator($repository, new FixedClock('2026-09-03T00:00:00+09:00'), uiTexts: $texts))->evaluate($request);
+        $active = (new UpdatePageEvaluator($repository, new FixedClock('2026-09-20T00:00:00+09:00'), uiTexts: $texts))->evaluate($request);
+        $ended = (new UpdatePageEvaluator($repository, new FixedClock('2026-10-01T00:00:00+09:00'), uiTexts: $texts))->evaluate($request);
+
+        self::assertSame('9月10日〜30日（7日後に開始）', $before->eventPeriod);
+        self::assertSame('9月10日〜30日（残り11日）', $active->eventPeriod);
+        self::assertSame('終了しました。', $ended->eventPeriod);
     }
 
     public function testUnsupportedOsAndMissingDestinationAreSafeStates(): void

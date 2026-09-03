@@ -43,6 +43,30 @@
         "en": "Updates may take some time to appear on the App Store or Google Play. If the update is not available yet, please try again later.",
         "ja": "App StoreまたはGoogle Playにアップデートが反映されるまで、時間がかかる場合があります。まだ更新できない場合は、しばらくしてからもう一度お試しください。"
     },
+    "period.range": {
+        "en": "{start}–{end}",
+        "ja": "{start}〜{end}"
+    },
+    "period.remaining.one": {
+        "en": "{range} (1 day remaining)",
+        "ja": "{range}（残り1日）"
+    },
+    "period.remaining.other": {
+        "en": "{range} ({days} days remaining)",
+        "ja": "{range}（残り{days}日）"
+    },
+    "period.startsIn.one": {
+        "en": "{range} (starts in 1 day)",
+        "ja": "{range}（1日後に開始）"
+    },
+    "period.startsIn.other": {
+        "en": "{range} (starts in {days} days)",
+        "ja": "{range}（{days}日後に開始）"
+    },
+    "period.ended": {
+        "en": "Ended.",
+        "ja": "終了しました。"
+    },
     "os.requirement": {
         "en": "OS: {current} · Required: {required}",
         "ja": "OS：{current}・必要バージョン：{required}"
