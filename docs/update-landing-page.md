@@ -71,7 +71,7 @@ query parameterは表示判定の入力であり、認証・認可や秘密情�
 - `locale` に一致する翻訳が将来追加された場合は、その翻訳を優先する
 - 完全一致する翻訳がない場合は言語部分を確認し、最終的に必ず `en` へフォールバックする
 - イベント説明、画像alt、状態メッセージ、ボタン文言は同じ言語解決規則を使う
-- 状態メッセージ、ボタン文言、注意書きはゲームごとの`ui-texts.json`へ、意味を表すキー単位で保存する
+- 状態メッセージ、ボタン文言、注意書きは`templates/event-update/ui-texts.json`へ、意味を表すキー単位で保存する
 
 初期状態のイベント固有文言は次の形です。
 
@@ -88,31 +88,37 @@ query parameterは表示判定の入力であり、認証・認可や秘密情�
 
 ## Updateページ設定
 
-`targetVersion` に対応する設定として、少なくとも次の値を保持します。
+ファイル直下に公開ルートとリリース対象版を持ち、`pages`内に各`targetVersion`の表示設定を保持します。
 
 ```json
 {
-  "targetVersion": "2.0.0",
-  "template": "event-update",
-  "enabled": true,
-  "imageUrl": "assets/banner.webp",
-  "startAt": "2026-09-10T03:00:00Z",
-  "endAt": "2026-09-30T15:00:00Z",
-  "minimumOsVersions": {
-    "ios": "18.0",
-    "android": "14"
-  },
-  "destinationUrls": {
-    "ios": "https://apps.apple.com/app/id000000000",
-    "android": "https://play.google.com/store/apps/details?id=com.example.app",
-    "pc": "https://example.com/download"
-  },
-  "descriptions": {
-    "en": "A new version is available for the latest event."
-  },
-  "imageAltTexts": {
-    "en": "Latest event update"
-  }
+  "publicBaseUrl": "https://game-a.update.example.com/event-update",
+  "releaseTargetVersion": "2.0.0",
+  "pages": [
+    {
+      "targetVersion": "2.0.0",
+      "template": "event-update",
+      "enabled": true,
+      "imageUrl": "assets/banner.webp",
+      "startAt": "2026-09-10T03:00:00Z",
+      "endAt": "2026-09-30T15:00:00Z",
+      "minimumOsVersions": {
+        "ios": "18.0",
+        "android": "14"
+      },
+      "destinationUrls": {
+        "ios": "https://apps.apple.com/app/id000000000",
+        "android": "https://play.google.com/store/apps/details?id=com.example.app",
+        "pc": "https://example.com/download"
+      },
+      "descriptions": {
+        "en": "A new version is available for the latest event."
+      },
+      "imageAltTexts": {
+        "en": "Latest event update"
+      }
+    }
+  ]
 }
 ```
 

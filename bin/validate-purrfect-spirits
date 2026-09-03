@@ -14,11 +14,9 @@ $game = require $root . '/config/game.php';
 
 $expected = [
     'key' => 'purrfect-spirits',
-    'publicBaseUrl' => 'https://neko.harapeco.okinawa/event-update',
-    'releaseTargetVersion' => '2.9.0',
     'updatePagesPath' => $root . '/games/purrfect-spirits/update-pages.json',
     'themePath' => $root . '/games/purrfect-spirits/theme.json',
-    'uiTextsPath' => $root . '/games/purrfect-spirits/ui-texts.json',
+    'uiTextsPath' => $root . '/templates/event-update/ui-texts.json',
 ];
 
 foreach ($expected as $key => $value) {
@@ -34,11 +32,9 @@ if (!is_array($allowedHosts)) {
     exit(1);
 }
 
-$page = (new UpdatePageRepository(
-    $game['updatePagesPath'],
-    $allowedHosts,
-    publicBaseUrl: $game['publicBaseUrl'],
-))->findByTargetVersion($game['releaseTargetVersion']);
+$repository = new UpdatePageRepository($game['updatePagesPath'], $allowedHosts);
+$release = $repository->releaseConfig();
+$page = $repository->findByTargetVersion($release['releaseTargetVersion']);
 if ($page === null) {
     fwrite(STDERR, "Fixed game configuration validation failed.\n");
     exit(1);

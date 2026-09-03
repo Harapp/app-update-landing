@@ -13,19 +13,16 @@ final class UpdatePageRepository
 {
     /** @var array<string, true> */
     private array $allowedHosts;
-    private readonly ?string $publicBaseUrl;
 
     /** @param list<string> $allowedHosts */
     public function __construct(
         private readonly string $path,
         array $allowedHosts,
         ?string $schemaPath = null,
-        ?string $publicBaseUrl = null,
     )
     {
         $this->allowedHosts = array_fill_keys(array_map('strtolower', $allowedHosts), true);
         $this->schemaPath = $schemaPath ?? dirname(__DIR__, 2) . '/config/schema/update-pages.schema.json';
-        $this->publicBaseUrl = $publicBaseUrl === null ? null : $this->normalizePublicBaseUrl($publicBaseUrl);
     }
 
     private readonly string $schemaPath;
@@ -39,22 +36,8 @@ final class UpdatePageRepository
             throw new ConfigException('Configuration lookup is invalid.', 0, $exception);
         }
 
-        $contents = @file_get_contents($this->path);
-        if ($contents === false) {
-            throw new ConfigException('Configuration is unavailable.');
-        }
-
-        try {
-            $document = json_decode($contents, true, 16, JSON_THROW_ON_ERROR);
-        } catch (JsonException $exception) {
-            throw new ConfigException('Configuration is invalid.', 0, $exception);
-        }
-
-        (new JsonSchemaValidator($this->schemaPath))->validate($document);
-
-        if (!is_array($document) || array_diff(array_keys($document), ['pages']) !== [] || !isset($document['pages']) || !is_array($document['pages']) || !array_is_list($document['pages'])) {
-            throw new ConfigException('Configuration is invalid.');
-        }
+        $document = $this->loadDocument();
+        $publicBaseUrl = $this->normalizePublicBaseUrl($document['publicBaseUrl']);
 
         $found = null;
         $targetVersions = [];
@@ -63,7 +46,7 @@ final class UpdatePageRepository
                 throw new ConfigException('Configuration is invalid.');
             }
 
-            $validated = $this->validatePage($page);
+            $validated = $this->validatePage($page, $publicBaseUrl);
             $pageVersion = Version::fromString($validated['targetVersion']);
             foreach ($targetVersions as $knownVersion) {
                 if ($pageVersion->compare($knownVersion) === 0) {
@@ -84,8 +67,26 @@ final class UpdatePageRepository
         return $found;
     }
 
+    /** @return array{publicBaseUrl: string, releaseTargetVersion: string} */
+    public function releaseConfig(): array
+    {
+        $document = $this->loadDocument();
+        $publicBaseUrl = $this->normalizePublicBaseUrl($document['publicBaseUrl']);
+        $releaseTargetVersion = $document['releaseTargetVersion'];
+        if (!is_string($releaseTargetVersion)
+            || $this->findByTargetVersion($releaseTargetVersion) === null
+        ) {
+            throw new ConfigException('Configuration is invalid.');
+        }
+
+        return [
+            'publicBaseUrl' => $publicBaseUrl,
+            'releaseTargetVersion' => $releaseTargetVersion,
+        ];
+    }
+
     /** @param array<string, mixed> $page @return array<string, mixed> */
-    private function validatePage(array $page): array
+    private function validatePage(array $page, string $publicBaseUrl): array
     {
         $allowedFields = [
             'targetVersion', 'template', 'enabled', 'imageUrl', 'startAt', 'endAt',
@@ -113,7 +114,7 @@ final class UpdatePageRepository
         if (!is_bool($page['enabled']) || !is_string($page['imageUrl'])) {
             throw new ConfigException('Configuration is invalid.');
         }
-        $imageUrl = $this->resolveImageUrl($page['imageUrl']);
+        $imageUrl = $this->resolveImageUrl($page['imageUrl'], $publicBaseUrl);
 
         $template = $page['template'] ?? 'event-update';
         if (!is_string($template) || $template !== 'event-update') {
@@ -168,6 +169,36 @@ final class UpdatePageRepository
             && isset($this->allowedHosts[strtolower($parts['host'])]);
     }
 
+    /** @return array{publicBaseUrl: string, releaseTargetVersion: string, pages: list<mixed>} */
+    private function loadDocument(): array
+    {
+        $contents = @file_get_contents($this->path);
+        if ($contents === false) {
+            throw new ConfigException('Configuration is unavailable.');
+        }
+
+        try {
+            $document = json_decode($contents, true, 16, JSON_THROW_ON_ERROR);
+        } catch (JsonException $exception) {
+            throw new ConfigException('Configuration is invalid.', 0, $exception);
+        }
+
+        (new JsonSchemaValidator($this->schemaPath))->validate($document);
+
+        if (!is_array($document)
+            || array_diff(array_keys($document), ['publicBaseUrl', 'releaseTargetVersion', 'pages']) !== []
+            || !isset($document['publicBaseUrl'], $document['releaseTargetVersion'], $document['pages'])
+            || !is_string($document['publicBaseUrl'])
+            || !is_string($document['releaseTargetVersion'])
+            || !is_array($document['pages'])
+            || !array_is_list($document['pages'])
+        ) {
+            throw new ConfigException('Configuration is invalid.');
+        }
+
+        return $document;
+    }
+
     private function normalizePublicBaseUrl(string $value): string
     {
         $parts = parse_url($value);
@@ -181,19 +212,18 @@ final class UpdatePageRepository
         return rtrim($value, '/');
     }
 
-    private function resolveImageUrl(string $value): string
+    private function resolveImageUrl(string $value, string $publicBaseUrl): string
     {
         if ($this->isAllowedHttpsUrl($value)) {
             return $value;
         }
 
-        if ($this->publicBaseUrl === null
-            || !preg_match('/^[A-Za-z0-9][A-Za-z0-9._~-]*(?:\/[A-Za-z0-9][A-Za-z0-9._~-]*)*\.webp$/D', $value)
+        if (!preg_match('/^[A-Za-z0-9][A-Za-z0-9._~-]*(?:\/[A-Za-z0-9][A-Za-z0-9._~-]*)*\.webp$/D', $value)
         ) {
             throw new ConfigException('Configuration is invalid.');
         }
 
-        $resolved = $this->publicBaseUrl . '/' . $value;
+        $resolved = $publicBaseUrl . '/' . $value;
         if (!$this->isAllowedHttpsUrl($resolved)) {
             throw new ConfigException('Configuration is invalid.');
         }

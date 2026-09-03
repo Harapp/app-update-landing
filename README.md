@@ -73,16 +73,20 @@ app-update-landing/
 │       ├── assets/
 │       │   └── banner.png
 │       ├── update-pages.json
-│       ├── theme.json
-│       └── ui-texts.json
+│       └── theme.json
 ├── public/
 │   ├── index.php
 │   └── assets/
 ├── src/
 ├── templates/
-│   └── event-update.php
+│   ├── event-update.php
+│   └── event-update/
+│       └── ui-texts.json
 ├── tests/
 ├── deploy.php
+├── scripts/
+│   ├── deploy-event-update
+│   └── release-event-update
 └── composer.json
 ```
 

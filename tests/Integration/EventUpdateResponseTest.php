@@ -96,7 +96,11 @@ final class EventUpdateResponseTest extends TestCase
     /** @param array<string, mixed> $page */
     private function writePage(array $page): void
     {
-        file_put_contents($this->configPath, json_encode(['pages' => [$page]], JSON_THROW_ON_ERROR));
+        file_put_contents($this->configPath, json_encode([
+            'publicBaseUrl' => 'https://cdn.example.com/event-update',
+            'releaseTargetVersion' => '2.0.0',
+            'pages' => [$page],
+        ], JSON_THROW_ON_ERROR));
     }
 
     /** @return array<string, mixed> */

@@ -1,4 +1,6 @@
 {
+    "publicBaseUrl": "https://neko.harapeco.okinawa/event-update",
+    "releaseTargetVersion": "2.9.0",
     "pages": [
         {
             "targetVersion": "2.9.0",

@@ -124,11 +124,14 @@ en
 games/
 ├── game-a/
 │   ├── update-pages.json
-│   ├── theme.json
-│   └── ui-texts.json
+│   └── theme.json
 └── game-b/
     ├── update-pages.json
-    ├── theme.json
+    └── theme.json
+
+templates/
+├── event-update.php
+└── event-update/
     └── ui-texts.json
 ```
 
@@ -136,6 +139,8 @@ games/
 
 ```json
 {
+  "publicBaseUrl": "https://game-a.update.example.com/event-update",
+  "releaseTargetVersion": "2.2.0",
   "pages": [
     {
       "targetVersion": "2.2.0",
@@ -195,7 +200,7 @@ JSON Schemaでは少なくとも次を検証します。
 
 ### UI翻訳
 
-状態文、ボタン、注意書きなどの共通UI翻訳は、ゲームごとの`ui-texts.json`で管理します。AIや翻訳担当者が文脈を把握しやすいよう、意味を表すキーごとに言語を並べます。
+状態文、ボタン、注意書きなどの共通UI翻訳は、テンプレートごとの`templates/{template}/ui-texts.json`で管理します。AIや翻訳担当者が文脈を把握しやすいよう、意味を表すキーごとに言語を並べます。イベント説明と画像altだけはゲーム固有のため、`update-pages.json`に保持します。
 
 ```json
 {

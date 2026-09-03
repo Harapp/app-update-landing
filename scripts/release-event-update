@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+project_root="$(cd -- "$script_dir/.." && pwd)"
+cd "$project_root"
+
+usage() {
+    printf 'Usage: %s <game-key> <deployer-host> [--plan]\n' "$0"
+}
+
+if [[ $# -lt 2 || $# -gt 3 ]]; then
+    usage >&2
+    exit 2
+fi
+
+game_key="$1"
+deployer_host="$2"
+mode="${3:-}"
+
+if [[ "$mode" == "--help" || "$mode" == "-h" ]]; then
+    usage
+    exit 0
+fi
+
+if [[ "$mode" == "--plan" ]]; then
+    exec "$script_dir/deploy-event-update" "$game_key" "$deployer_host" --plan
+fi
+
+if [[ -n "$mode" ]]; then
+    usage >&2
+    exit 2
+fi
+
+if [[ -n "$(git status --porcelain --untracked-files=normal)" ]]; then
+    printf 'The working tree is not clean. Commit the intended release changes first.\n' >&2
+    exit 1
+fi
+
+revision="$(git rev-parse --short=12 HEAD)"
+printf 'Starting production release: %s / %s / %s\n' "$deployer_host" "$game_key" "$revision"
+
+exec "$script_dir/deploy-event-update" "$game_key" "$deployer_host"

@@ -22,6 +22,8 @@ final class UpdatePageEvaluatorTest extends TestCase
     {
         $this->configPath = tempnam(sys_get_temp_dir(), 'update-pages-');
         file_put_contents($this->configPath, json_encode([
+            'publicBaseUrl' => 'https://cdn.example.com/event-update',
+            'releaseTargetVersion' => '2.0.0',
             'pages' => [
                 [
                     'targetVersion' => '2.0.0',
@@ -50,7 +52,7 @@ final class UpdatePageEvaluatorTest extends TestCase
             new FixedClock('2026-09-03T12:00:00Z'),
             new LocaleResolver(),
             null,
-            (new UiTextRepository(dirname(__DIR__, 2) . '/games/purrfect-spirits/ui-texts.json'))->load(),
+            (new UiTextRepository(dirname(__DIR__, 2) . '/templates/event-update/ui-texts.json'))->load(),
         );
         $request = (new RequestValidator())->validate([
             'appVersion' => '1.10.0',

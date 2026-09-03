@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+project_root="$(cd -- "$script_dir/.." && pwd)"
+cd "$project_root"
+
+usage() {
+    printf 'Usage: %s <game-key> <deployer-host> [--plan]\n' "$0"
+}
+
+if [[ $# -lt 2 || $# -gt 3 ]]; then
+    usage >&2
+    exit 2
+fi
+
+game_key="$1"
+deployer_host="$2"
+mode="${3:-}"
+
+if [[ "$mode" == "--help" || "$mode" == "-h" ]]; then
+    usage
+    exit 0
+fi
+
+if [[ ! "$game_key" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]] \
+    || [[ ! "$deployer_host" =~ ^[A-Za-z0-9._-]+$ ]] \
+    || [[ -n "$mode" && "$mode" != "--plan" ]]; then
+    usage >&2
+    exit 2
+fi
+
+if [[ ! -x vendor/bin/dep ]]; then
+    printf 'Deployer is unavailable. Run composer install first.\n' >&2
+    exit 1
+fi
+
+configured_game="$(php -r '$config = require "config/game.php"; echo $config["key"] ?? "";')"
+if [[ "$configured_game" != "$game_key" ]]; then
+    printf 'Configured game does not match requested game: %s\n' "$game_key" >&2
+    exit 1
+fi
+
+if [[ "$mode" == "--plan" ]]; then
+    exec env EVENT_UPDATE_GAME_KEY="$game_key" vendor/bin/dep deploy "$deployer_host" --plan
+fi
+
+if [[ -n "$(git status --porcelain --untracked-files=normal)" ]]; then
+    printf 'The working tree is not clean. Commit the intended release changes first.\n' >&2
+    exit 1
+fi
+
+exec env EVENT_UPDATE_GAME_KEY="$game_key" vendor/bin/dep deploy "$deployer_host"

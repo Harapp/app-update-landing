@@ -6,11 +6,9 @@ declare(strict_types=1);
 // another game's deployment; do not select a game from request parameters.
 return [
     'key' => 'purrfect-spirits',
-    'publicBaseUrl' => 'https://neko.harapeco.okinawa/event-update',
-    'releaseTargetVersion' => '2.9.0',
     'updatePagesPath' => dirname(__DIR__) . '/games/purrfect-spirits/update-pages.json',
     'themePath' => dirname(__DIR__) . '/games/purrfect-spirits/theme.json',
-    'uiTextsPath' => dirname(__DIR__) . '/games/purrfect-spirits/ui-texts.json',
+    'uiTextsPath' => dirname(__DIR__) . '/templates/event-update/ui-texts.json',
     'allowedHosts' => [
         'neko.harapeco.okinawa',
         'itunes.apple.com',

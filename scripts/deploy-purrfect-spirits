@@ -3,43 +3,4 @@
 set -euo pipefail
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-project_root="$(cd -- "$script_dir/.." && pwd)"
-cd "$project_root"
-
-usage() {
-    printf 'Usage: %s [--plan]\n' "$0"
-}
-
-if [[ $# -gt 1 ]]; then
-    usage >&2
-    exit 2
-fi
-
-case "${1:-}" in
-    --help|-h)
-        usage
-        exit 0
-        ;;
-    --plan|"")
-        ;;
-    *)
-        usage >&2
-        exit 2
-        ;;
-esac
-
-if [[ ! -x vendor/bin/dep ]]; then
-    printf 'Deployer is unavailable. Run composer install first.\n' >&2
-    exit 1
-fi
-
-if [[ "${1:-}" == "--plan" ]]; then
-    exec vendor/bin/dep deploy coreserver --plan
-fi
-
-if [[ -n "$(git status --porcelain --untracked-files=normal)" ]]; then
-    printf 'The working tree is not clean. Commit the intended release changes first.\n' >&2
-    exit 1
-fi
-
-exec vendor/bin/dep deploy coreserver
+exec "$script_dir/deploy-event-update" purrfect-spirits coreserver "$@"

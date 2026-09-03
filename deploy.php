@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace Deployer;
 
+use App\Config\UpdatePageRepository;
+
 require 'recipe/composer.php';
 
 function removeLocalReleaseDirectory(string $path): void
 {
     $expectedPrefix = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR)
         . DIRECTORY_SEPARATOR
-        . 'purrfect-spirits-release-';
+        . 'event-update-release-';
     if (!str_starts_with($path, $expectedPrefix) || !is_dir($path)) {
         return;
     }
@@ -45,41 +47,56 @@ set('application', 'purrfect-spirits-event-update');
 set('keep_releases', 5);
 set('default_timeout', 300);
 $gameConfig = require __DIR__ . '/config/game.php';
-set('public_base_url', $gameConfig['publicBaseUrl']);
-set('release_target_version', $gameConfig['releaseTargetVersion']);
+$gameKey = $gameConfig['key'];
+if (!is_string($gameKey) || !preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/D', $gameKey)) {
+    throw new \RuntimeException('Configured game key is invalid.');
+}
+$requestedGameKey = getenv('EVENT_UPDATE_GAME_KEY');
+if ($requestedGameKey !== false && $requestedGameKey !== $gameKey) {
+    throw new \RuntimeException('Requested game does not match the deployment configuration.');
+}
+$releaseConfig = (new UpdatePageRepository(
+    $gameConfig['updatePagesPath'],
+    $gameConfig['allowedHosts'],
+))->releaseConfig();
+set('public_base_url', $releaseConfig['publicBaseUrl']);
+set('release_target_version', $releaseConfig['releaseTargetVersion']);
+set('game_key', $gameKey);
 set('deploy_source_paths', [
     'bin',
     'composer.json',
     'composer.lock',
     'config',
-    'games/purrfect-spirits',
+    'games/' . $gameKey,
     'public',
     'src',
     'templates',
 ]);
 
-desc('Run the application test suite and PurrfectSpirits configuration validation locally.');
+desc('Run the application test suite and selected game validation locally.');
 task('deploy:validate', function (): void {
+    $gameKey = (string) get('game_key');
     runLocally('composer test', timeout: 300);
-    runLocally('composer validate:config', timeout: 60);
-    runLocally('composer smoke', timeout: 60);
+    runLocally(quote(PHP_BINARY) . ' ' . quote('bin/validate-' . $gameKey), timeout: 60);
+    runLocally(quote(PHP_BINARY) . ' ' . quote('bin/smoke-test-' . $gameKey), timeout: 60);
 })->once();
 
-desc('Upload only the files required by the PurrfectSpirits release.');
+desc('Upload only the files required by the selected game release.');
 task('deploy:update_code', function (): void {
     $gitRoot = runLocally('git rev-parse --show-toplevel');
+    $gameKey = (string) get('game_key');
     $target = get('target');
     $sourcePaths = get('deploy_source_paths');
     if (!is_array($sourcePaths) || $sourcePaths === []) {
         throw new \RuntimeException('Deployment source paths are unavailable.');
     }
 
-    $archivePath = tempnam(sys_get_temp_dir(), 'purrfect-spirits-release-');
+    $archivePath = tempnam(sys_get_temp_dir(), 'event-update-release-');
     if ($archivePath === false) {
         throw new \RuntimeException('Unable to prepare the deployment archive.');
     }
 
-    $stagingPath = sys_get_temp_dir() . '/purrfect-spirits-release-' . bin2hex(random_bytes(12));
+    $stagingPath = sys_get_temp_dir() . '/event-update-release-' . bin2hex(random_bytes(12));
     if (!mkdir($stagingPath, 0700)) {
         unlink($archivePath);
         throw new \RuntimeException('Unable to prepare the local release staging directory.');
@@ -97,11 +114,11 @@ task('deploy:update_code', function (): void {
         runLocally(
             quote(PHP_BINARY)
             . ' ' . quote($stagingPath . '/bin/build-game-assets')
-            . ' purrfect-spirits ' . quote($stagingPath . '/public/assets')
+            . ' ' . quote($gameKey) . ' ' . quote($stagingPath . '/public/assets')
         );
         if (!is_file($stagingPath . '/public/assets/banner.webp')) {
             throw new \RuntimeException(
-                'The release banner is missing. Add games/purrfect-spirits/assets/banner.png, .jpg, or .jpeg.'
+                "The release banner is missing. Add games/$gameKey/assets/banner.png, .jpg, or .jpeg."
             );
         }
         runLocally(
@@ -112,7 +129,7 @@ task('deploy:update_code', function (): void {
 
         $archiveEntries = preg_split('/\R/', trim(runLocally('tar -tf ' . quote($archivePath))));
         $allowedFiles = ['composer.json', 'composer.lock', 'games/'];
-        $allowedPrefixes = ['bin/', 'config/', 'games/purrfect-spirits/', 'public/', 'src/', 'templates/'];
+        $allowedPrefixes = ['bin/', 'config/', 'games/' . $gameKey . '/', 'public/', 'src/', 'templates/'];
         foreach ($archiveEntries ?: [] as $entry) {
             $allowed = in_array($entry, $allowedFiles, true);
             foreach ($allowedPrefixes as $prefix) {
@@ -142,6 +159,7 @@ task('deploy:update_code', function (): void {
 
 desc('Verify that the uploaded release contains only approved top-level paths.');
 task('deploy:verify_payload', function (): void {
+    $gameKey = (string) get('game_key');
     $allowedEntries = [
         'REVISION', 'bin', 'composer.json', 'composer.lock', 'config',
         'games', 'public', 'src', 'templates',
@@ -152,7 +170,7 @@ task('deploy:verify_payload', function (): void {
     ));
     $unexpected = trim(run("find {{release_path}} -mindepth 1 -maxdepth 1 $excludedNames -print"));
     $unexpectedGames = trim(run(
-        'find {{release_path}}/games -mindepth 1 -maxdepth 1 ! -name purrfect-spirits -print'
+        'find {{release_path}}/games -mindepth 1 -maxdepth 1 ! -name ' . quote($gameKey) . ' -print'
     ));
 
     if ($unexpected !== '' || $unexpectedGames !== '') {
@@ -162,15 +180,18 @@ task('deploy:verify_payload', function (): void {
 
 desc('Validate the release candidate on the server before switching current.');
 task('deploy:candidate_validate', function (): void {
+    $gameKey = (string) get('game_key');
+    $validateCommand = 'bin/validate-' . $gameKey;
+    $smokeCommand = 'bin/smoke-test-' . $gameKey;
     run('test -s {{release_path}}/public/assets/banner.webp');
     run("test \"\$(stat -c '%a' {{release_path}}/public/assets/banner.webp)\" = 644");
     run('cd {{release_path}} && {{bin/composer}} check-platform-reqs --no-dev');
     run("find {{release_path}}/config {{release_path}}/public {{release_path}}/src {{release_path}}/templates "
         . "-type f -name '*.php' -print0 | xargs -0 -n 1 {{bin/php}} -l >/dev/null");
-    run('{{bin/php}} -l {{release_path}}/bin/validate-purrfect-spirits >/dev/null');
-    run('{{bin/php}} -l {{release_path}}/bin/smoke-test-purrfect-spirits >/dev/null');
-    run('cd {{release_path}} && {{bin/php}} bin/validate-purrfect-spirits');
-    run('cd {{release_path}} && {{bin/php}} bin/smoke-test-purrfect-spirits');
+    run('{{bin/php}} -l {{release_path}}/' . $validateCommand . ' >/dev/null');
+    run('{{bin/php}} -l {{release_path}}/' . $smokeCommand . ' >/dev/null');
+    run('cd {{release_path}} && {{bin/php}} ' . $validateCommand);
+    run('cd {{release_path}} && {{bin/php}} ' . $smokeCommand);
 });
 
 desc('Link the public URL to the current release public directory.');
@@ -213,7 +234,7 @@ function publishedUrls(): array
     ];
 }
 
-desc('Verify the published PurrfectSpirits page over HTTPS.');
+desc('Verify the published event update page over HTTPS.');
 task('deploy:health', function (): void {
     $urls = publishedUrls();
     try {
@@ -221,7 +242,7 @@ task('deploy:health', function (): void {
             . '--output /dev/null ' . quote($urls['banner']));
         run("curl --fail --silent --show-error --location --max-time 15 "
             . quote($urls['page']) . ' '
-            . "| grep -F 'PurrfectSpirits'");
+            . "| grep -F '<main>'");
     } catch (\Throwable $exception) {
         warning('Health check failed; restoring the previous release.');
         invoke('rollback');
@@ -229,7 +250,7 @@ task('deploy:health', function (): void {
     }
 });
 
-desc('Show the published PurrfectSpirits URLs.');
+desc('Show the published event update URLs.');
 task('deploy:show_urls', function (): void {
     $urls = publishedUrls();
     writeln('');

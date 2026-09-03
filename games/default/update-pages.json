@@ -1,10 +1,12 @@
 {
+    "publicBaseUrl": "https://neko.harapeco.okinawa/event-update",
+    "releaseTargetVersion": "2.2.0",
     "pages": [
         {
             "targetVersion": "2.2.0",
             "template": "event-update",
             "enabled": true,
-            "imageUrl": "https://neko.harapeco.okinawa/event-update/assets/banner.webp",
+            "imageUrl": "assets/banner.webp",
             "startAt": null,
             "endAt": null,
             "minimumOsVersions": {

@@ -28,7 +28,7 @@ final class ConfigurationRepositoryTest extends TestCase
     public function testUpdatePageSchemaAndRuntimeValuesAreLoaded(): void
     {
         $page = $this->basePage();
-        $repository = new UpdatePageRepository($this->writeJson(['pages' => [$page]]), ['cdn.example.com', 'apps.apple.com']);
+        $repository = new UpdatePageRepository($this->writeJson($this->document([$page])), ['cdn.example.com', 'apps.apple.com']);
 
         $loaded = $repository->findByTargetVersion('2.0');
 
@@ -42,9 +42,8 @@ final class ConfigurationRepositoryTest extends TestCase
         $page = $this->basePage();
         $page['imageUrl'] = 'assets/banner.webp';
         $repository = new UpdatePageRepository(
-            $this->writeJson(['pages' => [$page]]),
+            $this->writeJson($this->document([$page])),
             ['cdn.example.com', 'apps.apple.com'],
-            publicBaseUrl: 'https://cdn.example.com/event-update/',
         );
 
         $loaded = $repository->findByTargetVersion('2.0.0');
@@ -57,10 +56,12 @@ final class ConfigurationRepositoryTest extends TestCase
     {
         $page = $this->basePage();
         $page['imageUrl'] = 'assets/banner.webp';
+        $document = $this->document([$page]);
+        unset($document['publicBaseUrl']);
 
         $this->expectException(ConfigException::class);
         (new UpdatePageRepository(
-            $this->writeJson(['pages' => [$page]]),
+            $this->writeJson($document),
             ['cdn.example.com'],
         ))->findByTargetVersion('2.0.0');
     }
@@ -72,10 +73,21 @@ final class ConfigurationRepositoryTest extends TestCase
 
         $this->expectException(ConfigException::class);
         (new UpdatePageRepository(
-            $this->writeJson(['pages' => [$page]]),
+            $this->writeJson($this->document([$page])),
             ['cdn.example.com'],
-            publicBaseUrl: 'https://cdn.example.com/event-update',
         ))->findByTargetVersion('2.0.0');
+    }
+
+    public function testReleaseTargetVersionMustReferenceAnExistingPage(): void
+    {
+        $document = $this->document([$this->basePage()]);
+        $document['releaseTargetVersion'] = '3.0.0';
+
+        $this->expectException(ConfigException::class);
+        (new UpdatePageRepository(
+            $this->writeJson($document),
+            ['cdn.example.com', 'apps.apple.com'],
+        ))->releaseConfig();
     }
 
     public function testMalformedJsonIsRejected(): void
@@ -96,7 +108,7 @@ final class ConfigurationRepositoryTest extends TestCase
         unset($page['descriptions']['en']);
 
         $this->expectException(ConfigException::class);
-        (new UpdatePageRepository($this->writeJson(['pages' => [$page]]), ['cdn.example.com']))->findByTargetVersion('2.0.0');
+        (new UpdatePageRepository($this->writeJson($this->document([$page])), ['cdn.example.com']))->findByTargetVersion('2.0.0');
     }
 
     public function testSchemaRejectsNonHttpsImageUrl(): void
@@ -105,7 +117,7 @@ final class ConfigurationRepositoryTest extends TestCase
         $page['imageUrl'] = 'http://cdn.example.com/banner.webp';
 
         $this->expectException(ConfigException::class);
-        (new UpdatePageRepository($this->writeJson(['pages' => [$page]]), ['cdn.example.com']))->findByTargetVersion('2.0.0');
+        (new UpdatePageRepository($this->writeJson($this->document([$page])), ['cdn.example.com']))->findByTargetVersion('2.0.0');
     }
 
     public function testSchemaRejectsNonWebpImageUrl(): void
@@ -114,7 +126,7 @@ final class ConfigurationRepositoryTest extends TestCase
         $page['imageUrl'] = 'https://cdn.example.com/banner.png';
 
         $this->expectException(ConfigException::class);
-        (new UpdatePageRepository($this->writeJson(['pages' => [$page]]), ['cdn.example.com']))->findByTargetVersion('2.0.0');
+        (new UpdatePageRepository($this->writeJson($this->document([$page])), ['cdn.example.com']))->findByTargetVersion('2.0.0');
     }
 
     public function testAdditionalValidationRejectsDuplicateVersions(): void
@@ -124,7 +136,7 @@ final class ConfigurationRepositoryTest extends TestCase
         $second['targetVersion'] = '2.0';
 
         $this->expectException(ConfigException::class);
-        (new UpdatePageRepository($this->writeJson(['pages' => [$first, $second]]), ['cdn.example.com']))->findByTargetVersion('2.0.0');
+        (new UpdatePageRepository($this->writeJson($this->document([$first, $second])), ['cdn.example.com']))->findByTargetVersion('2.0.0');
     }
 
     public function testAdditionalValidationRejectsInvalidPeriodOrder(): void
@@ -134,7 +146,7 @@ final class ConfigurationRepositoryTest extends TestCase
         $page['endAt'] = '2026-09-03T00:00:00Z';
 
         $this->expectException(ConfigException::class);
-        (new UpdatePageRepository($this->writeJson(['pages' => [$page]]), ['cdn.example.com']))->findByTargetVersion('2.0.0');
+        (new UpdatePageRepository($this->writeJson($this->document([$page])), ['cdn.example.com']))->findByTargetVersion('2.0.0');
     }
 
     public function testAdditionalValidationRejectsDestinationHostOutsideAllowlist(): void
@@ -143,7 +155,7 @@ final class ConfigurationRepositoryTest extends TestCase
         $page['destinationUrls']['ios'] = 'https://not-allowed.example/download';
 
         $this->expectException(ConfigException::class);
-        (new UpdatePageRepository($this->writeJson(['pages' => [$page]]), ['cdn.example.com']))->findByTargetVersion('2.0.0');
+        (new UpdatePageRepository($this->writeJson($this->document([$page])), ['cdn.example.com']))->findByTargetVersion('2.0.0');
     }
 
     public function testThemeSchemaAndHostValidationLoadTheFixedGameTheme(): void
@@ -324,16 +336,18 @@ final class ConfigurationRepositoryTest extends TestCase
     {
         $root = dirname(__DIR__, 2);
         $hosts = ['neko.harapeco.okinawa', 'itunes.apple.com', 'play.google.com', 'www.harapeco.okinawa'];
-        $page = (new UpdatePageRepository(
+        $repository = new UpdatePageRepository(
             $root . '/games/purrfect-spirits/update-pages.json',
             $hosts,
-            publicBaseUrl: 'https://neko.harapeco.okinawa/event-update',
-        ))
-            ->findByTargetVersion('2.9.0');
+        );
+        $release = $repository->releaseConfig();
+        $page = $repository->findByTargetVersion($release['releaseTargetVersion']);
         $theme = (new ThemeRepository($root . '/games/purrfect-spirits/theme.json', $hosts))->load();
-        $uiTexts = (new UiTextRepository($root . '/games/purrfect-spirits/ui-texts.json'))->load();
+        $uiTexts = (new UiTextRepository($root . '/templates/event-update/ui-texts.json'))->load();
 
         self::assertNotNull($page);
+        self::assertSame('https://neko.harapeco.okinawa/event-update', $release['publicBaseUrl']);
+        self::assertSame('2.9.0', $release['releaseTargetVersion']);
         self::assertSame('https://neko.harapeco.okinawa/event-update/assets/banner.webp', $page['imageUrl']);
         self::assertSame('https://itunes.apple.com/jp/app/id1269423920', $page['destinationUrls']['ios']);
         self::assertSame('https://play.google.com/store/apps/details?id=okinawa.harapeco.catRestaurant', $page['destinationUrls']['android']);
@@ -364,6 +378,16 @@ final class ConfigurationRepositoryTest extends TestCase
         ];
     }
 
+    /** @param list<array<string, mixed>> $pages @return array<string, mixed> */
+    private function document(array $pages): array
+    {
+        return [
+            'publicBaseUrl' => 'https://cdn.example.com/event-update',
+            'releaseTargetVersion' => '2.0.0',
+            'pages' => $pages,
+        ];
+    }
+
     /** @param array<string, mixed> $value */
     private function writeJson(array $value): string
     {
@@ -377,7 +401,7 @@ final class ConfigurationRepositoryTest extends TestCase
     /** @return array<string, array<string, string>> */
     private function purrfectUiTexts(): array
     {
-        $path = dirname(__DIR__, 2) . '/games/purrfect-spirits/ui-texts.json';
+        $path = dirname(__DIR__, 2) . '/templates/event-update/ui-texts.json';
         $texts = json_decode((string) file_get_contents($path), true, 16, JSON_THROW_ON_ERROR);
         self::assertIsArray($texts);
         return $texts;
