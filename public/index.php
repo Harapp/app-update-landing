@@ -26,11 +26,11 @@ try {
     $request = (new RequestValidator())->validate($_GET);
     $repository = new UpdatePageRepository(
         dirname(__DIR__) . '/games/default/update-pages.json',
-        ['cdn.example.com', 'apps.apple.com', 'play.google.com', 'example.com']
+        ['cdn.example.com', 'neko.harapeco.okinawa', 'apps.apple.com', 'play.google.com', 'example.com']
     );
     $theme = (new ThemeRepository(
         dirname(__DIR__) . '/games/default/theme.json',
-        ['cdn.example.com', 'apps.apple.com', 'play.google.com', 'example.com']
+        ['cdn.example.com', 'neko.harapeco.okinawa', 'apps.apple.com', 'play.google.com', 'example.com']
     ))->load();
     $viewModel = (new UpdatePageEvaluator($repository, new App\SystemClock(), new LocaleResolver(), $theme))->evaluate($request);
     $statusCode = $viewModel->state === 'unavailable' ? 404 : 200;

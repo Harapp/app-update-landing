@@ -18,6 +18,7 @@ $escape = static fn (string $value): string => htmlspecialchars($value, ENT_QUOT
         .banner { display: block; width: 100%; height: auto; }
         h1 { margin: 0 0 1rem; font-size: 1.25rem; }
         .status { margin: 0 0 1rem; font-weight: 600; }
+        .period { margin: 0 0 1rem; color: #374151; }
         .version, .os-version { margin: .5rem 0; color: #4b5563; }
         .update-link { display: inline-flex; flex-direction: column; align-items: center; min-width: 12rem; margin-top: 1rem; padding: .8rem 1.25rem; border-radius: .6rem; background: <?= $escape($viewModel->theme['primaryColor']) ?>; color: #fff; font-weight: 700; text-decoration: none; }
         .update-link small { margin-top: .2rem; font-size: .9rem; }
@@ -37,6 +38,9 @@ $escape = static fn (string $value): string => htmlspecialchars($value, ENT_QUOT
             <h1><?= $escape($viewModel->description) ?></h1>
         <?php endif; ?>
         <p class="status"><?= $escape($viewModel->statusMessage) ?></p>
+        <?php if ($viewModel->eventPeriod !== null && $viewModel->eventPeriod !== ''): ?>
+            <p class="period"><?= $escape($viewModel->eventPeriod) ?></p>
+        <?php endif; ?>
         <?php if ($viewModel->currentVersion !== null && $viewModel->targetVersion !== null): ?>
             <p class="version">Current: V<?= $escape($viewModel->currentVersion) ?> · Target: V<?= $escape($viewModel->targetVersion) ?></p>
         <?php endif; ?>

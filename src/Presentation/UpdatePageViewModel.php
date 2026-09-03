@@ -8,6 +8,8 @@ use DateTimeImmutable;
 
 final readonly class UpdatePageViewModel
 {
+    public ?string $eventPeriod;
+
     /** @var array{primaryColor: string, accentColor: string, backgroundColor: string, textColor: string, logoUrl: ?string, maxContentWidth: int} */
     public const DEFAULT_THEME = [
         'primaryColor' => '#14532d',
@@ -37,7 +39,9 @@ final readonly class UpdatePageViewModel
         public string $template,
         /** @var array{primaryColor: string, accentColor: string, backgroundColor: string, textColor: string, logoUrl: ?string, maxContentWidth: int} */
         public array $theme = self::DEFAULT_THEME,
+        ?string $eventPeriod = null,
     ) {
+        $this->eventPeriod = $eventPeriod ?? self::formatEventPeriod($startAt, $endAt);
     }
 
     public static function unavailable(): self
@@ -45,7 +49,15 @@ final readonly class UpdatePageViewModel
         return new self(
             'unavailable', 'en', null, null, '',
             'This update page is currently unavailable.',
-            null, null, null, null, null, null, null, false, false, 'event-update', self::DEFAULT_THEME
+            null, null, null, null, null, null, null, false, false, 'event-update', self::DEFAULT_THEME, ''
         );
+    }
+
+    private static function formatEventPeriod(?DateTimeImmutable $startAt, ?DateTimeImmutable $endAt): string
+    {
+        $start = $startAt?->format('Y-m-d H:i \\U\\T\\C') ?? 'Immediately';
+        $end = $endAt?->format('Y-m-d H:i \\U\\T\\C') ?? 'No end date';
+
+        return sprintf('Event period: %s – %s', $start, $end);
     }
 }
