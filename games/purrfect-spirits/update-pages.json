@@ -11,7 +11,7 @@
             "endAt": "2026-09-30T23:59:59+09:00",
             "released": {
                 "ios": true,
-                "android": false,
+                "android": true,
                 "pc": true
             },
             "minimumOsVersions": {},
