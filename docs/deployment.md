@@ -15,9 +15,9 @@ composer install
 scripts/release-purrfect-spirits
 ```
 
-リリーススクリプトは未コミット差分がないことを確認し、ローカル検証の成功後に対象commitと本番環境を表示してデプロイ確認を求めます。実行計画だけを見る場合は`scripts/release-purrfect-spirits --plan`を使用します。
+`scripts/release-purrfect-spirits`の実行自体を本番デプロイの承認として扱います。リリーススクリプトは未コミット差分がないことを確認し、対象commitと本番環境を表示したうえで、確認プロンプトを挟まずデプロイを開始します。実行計画だけを見る場合は`scripts/release-purrfect-spirits --plan`を使用します。
 
-デプロイ前にローカルで`composer test`、`composer validate:config`、`composer smoke`を実行します。配布元は実行時のGitアーカイブで、`bin`、Composer定義、固定ゲーム設定、公開コード、アプリケーションコード、テンプレートだけを許可リストで選択します。`.claude`、ドキュメント、テスト、既定ゲーム設定など、本番実行に不要なファイルはアーカイブへ含めず、サーバーへ転送しません。
+リリーススクリプトは低レベルの`scripts/deploy-purrfect-spirits`を呼び出します。Deployerの最初のタスクとして、ローカルで`composer test`、`composer validate:config`、`composer smoke`を実行します。配布元は実行時のGitアーカイブで、`bin`、Composer定義、固定ゲーム設定、公開コード、アプリケーションコード、テンプレートだけを許可リストで選択します。`.claude`、ドキュメント、テスト、既定ゲーム設定など、本番実行に不要なファイルはアーカイブへ含めず、サーバーへ転送しません。
 
 転送後はまだ`current`を切り替えず、候補release上でComposerのplatform要件、PHP構文、JSON Schemaと固定ゲーム設定、iOS・Android・PCの更新先とHTML生成を検証します。すべて成功した場合だけ`current`と公開リンクを切り替え、その後に公開URLのHTTPS health checkを実行します。
 
@@ -134,6 +134,7 @@ coreserver本番だけを対象にし、selectorを省略せず明示します�
 
 ```bash
 scripts/release-purrfect-spirits
+scripts/deploy-purrfect-spirits --plan
 vendor/bin/dep rollback coreserver
 ```
 

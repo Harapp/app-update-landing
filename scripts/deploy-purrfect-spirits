@@ -20,10 +20,7 @@ case "${1:-}" in
         usage
         exit 0
         ;;
-    --plan)
-        exec "$script_dir/deploy-purrfect-spirits" --plan
-        ;;
-    "")
+    --plan|"")
         ;;
     *)
         usage >&2
@@ -31,12 +28,18 @@ case "${1:-}" in
         ;;
 esac
 
+if [[ ! -x vendor/bin/dep ]]; then
+    printf 'Deployer is unavailable. Run composer install first.\n' >&2
+    exit 1
+fi
+
+if [[ "${1:-}" == "--plan" ]]; then
+    exec vendor/bin/dep deploy coreserver --plan
+fi
+
 if [[ -n "$(git status --porcelain --untracked-files=normal)" ]]; then
     printf 'The working tree is not clean. Commit the intended release changes first.\n' >&2
     exit 1
 fi
 
-revision="$(git rev-parse --short=12 HEAD)"
-printf 'Starting production release: coreserver / PurrfectSpirits / %s\n' "$revision"
-
-exec "$script_dir/deploy-purrfect-spirits"
+exec vendor/bin/dep deploy coreserver

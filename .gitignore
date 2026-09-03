@@ -29,6 +29,7 @@ dist/
 build/
 out/
 .cache/
+.phpunit.result.cache
 .tmp/
 tmp/
 coverage/
