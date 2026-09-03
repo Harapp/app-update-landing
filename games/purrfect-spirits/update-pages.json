@@ -1,0 +1,24 @@
+{
+    "pages": [
+        {
+            "targetVersion": "0.1.0",
+            "template": "event-update",
+            "enabled": true,
+            "imageUrl": "https://neko.harapeco.okinawa/event-update/assets/purrfect-spirits-banner.webp",
+            "startAt": null,
+            "endAt": null,
+            "minimumOsVersions": {},
+            "destinationUrls": {
+                "ios": "https://apps.apple.com/app/id000000000",
+                "android": "https://play.google.com/store/apps/details?id=com.example.purrfectspirits",
+                "pc": "https://neko.harapeco.okinawa/purrfect-spirits/download"
+            },
+            "descriptions": {
+                "en": "PurrfectSpirits event update (provisional content)."
+            },
+            "imageAltTexts": {
+                "en": "PurrfectSpirits provisional event update banner"
+            }
+        }
+    ]
+}
