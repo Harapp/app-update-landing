@@ -375,10 +375,10 @@ final class ConfigurationRepositoryTest extends TestCase
         self::assertSame('https://itunes.apple.com/jp/app/id1269423920', $page['destinationUrls']['ios']);
         self::assertSame('https://play.google.com/store/apps/details?id=okinawa.harapeco.catRestaurant', $page['destinationUrls']['android']);
         self::assertSame('https://www.harapeco.okinawa/info/app/neko_boku.html', $page['destinationUrls']['pc']);
-        self::assertSame('#D92D3A', $theme['primaryColor']);
-        self::assertSame('#C92F3C', $theme['accentColor']);
-        self::assertSame('#FFF0EA', $theme['backgroundColor']);
-        self::assertSame('#3B1F22', $theme['textColor']);
+        self::assertSame('#0E7490', $theme['primaryColor']);
+        self::assertSame('#155E75', $theme['accentColor']);
+        self::assertSame('#ECFEFF', $theme['backgroundColor']);
+        self::assertSame('#083344', $theme['textColor']);
         self::assertNull($theme['logoUrl']);
         self::assertSame('Update and play the event', $uiTexts['button.update']['en']);
         self::assertSame('更新してイベントを遊ぶ', $uiTexts['button.update']['ja']);
