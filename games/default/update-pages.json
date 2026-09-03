@@ -1,0 +1,27 @@
+{
+    "pages": [
+        {
+            "targetVersion": "2.2.0",
+            "template": "event-update",
+            "enabled": true,
+            "imageUrl": "https://cdn.example.com/updates/2.2.0/banner.webp",
+            "startAt": null,
+            "endAt": null,
+            "minimumOsVersions": {
+                "ios": "18.0",
+                "android": "14"
+            },
+            "destinationUrls": {
+                "ios": "https://apps.apple.com/app/id000000000",
+                "android": "https://play.google.com/store/apps/details?id=com.example.app",
+                "pc": "https://example.com/download"
+            },
+            "descriptions": {
+                "en": "A new version is available for the latest event."
+            },
+            "imageAltTexts": {
+                "en": "Latest event update"
+            }
+        }
+    ]
+}
