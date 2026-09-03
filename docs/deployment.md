@@ -15,7 +15,7 @@ composer install
 scripts/release-purrfect-spirits
 ```
 
-`scripts/release-purrfect-spirits`の実行自体を本番デプロイの承認として扱います。リリーススクリプトは未コミット差分がないことを確認し、対象commitと本番環境を表示したうえで、確認プロンプトを挟まずデプロイを開始します。実行計画だけを見る場合は`scripts/release-purrfect-spirits --plan`を使用します。
+`scripts/release-purrfect-spirits`の実行自体を本番デプロイの承認として扱います。リリーススクリプトは未コミット差分がないことを確認し、対象commitと本番環境を表示したうえで、確認プロンプトを挟まずデプロイを開始します。成功時は最後に公開ページURLとバナーURLを表示します。実行計画だけを見る場合は`scripts/release-purrfect-spirits --plan`を使用します。
 
 リリーススクリプトは低レベルの`scripts/deploy-purrfect-spirits`を呼び出します。Deployerの最初のタスクとして、ローカルで`composer test`、`composer validate:config`、`composer smoke`を実行します。配布元は実行時のGitアーカイブで、`bin`、Composer定義、固定ゲーム設定、公開コード、アプリケーションコード、テンプレートだけを許可リストで選択します。`.claude`、ドキュメント、テスト、既定ゲーム設定など、本番実行に不要なファイルはアーカイブへ含めず、サーバーへ転送しません。
 
@@ -29,7 +29,7 @@ composer assets:build
 
 リリース実行環境には`cwebp`が必要です。macOSではHomebrewの`webp` formulaなどで用意します。元画像がない場合や`banner.webp`を生成できない場合、デプロイは公開リンクを切り替える前に失敗します。
 
-転送後はまだ`current`を切り替えず、候補release上でComposerのplatform要件、PHP構文、JSON Schemaと固定ゲーム設定、iOS・Android・PCの更新先とHTML生成を検証します。すべて成功した場合だけ`current`と公開リンクを切り替え、その後に公開URLのHTTPS health checkを実行します。
+転送後はまだ`current`を切り替えず、候補release上でComposerのplatform要件、PHP構文、JSON Schemaと固定ゲーム設定、iOS・Android・PCの更新先とHTML生成を検証します。すべて成功した場合だけ`current`と公開リンクを切り替え、その後に公開URLのHTTPS health checkを実行します。公開ルートは`config/game.php`の`publicBaseUrl`を正とし、相対画像パスの解決、health check、完了時URL表示で共用します。
 
 Deployerのリリース領域は公開ディレクトリ外に置きます。
 
@@ -170,6 +170,8 @@ SSHまたはrsyncで新しいreleaseへ転送
 current symlinkを切り替え
   ↓
 HTTP health check
+  ↓
+公開ページURLとバナーURLを表示
 ```
 
 テスト、Schema検証、配布物作成に失敗した場合は、`current`を切り替えません。切り替え後のhealth checkに失敗した場合は、直前のreleaseへ戻せるようにします。

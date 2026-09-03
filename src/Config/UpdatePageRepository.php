@@ -13,16 +13,19 @@ final class UpdatePageRepository
 {
     /** @var array<string, true> */
     private array $allowedHosts;
+    private readonly ?string $publicBaseUrl;
 
     /** @param list<string> $allowedHosts */
     public function __construct(
         private readonly string $path,
         array $allowedHosts,
         ?string $schemaPath = null,
+        ?string $publicBaseUrl = null,
     )
     {
         $this->allowedHosts = array_fill_keys(array_map('strtolower', $allowedHosts), true);
         $this->schemaPath = $schemaPath ?? dirname(__DIR__, 2) . '/config/schema/update-pages.schema.json';
+        $this->publicBaseUrl = $publicBaseUrl === null ? null : $this->normalizePublicBaseUrl($publicBaseUrl);
     }
 
     private readonly string $schemaPath;
@@ -107,9 +110,10 @@ final class UpdatePageRepository
             throw new ConfigException('Configuration is invalid.', 0, $exception);
         }
 
-        if (!is_bool($page['enabled']) || !is_string($page['imageUrl']) || !$this->isAllowedHttpsUrl($page['imageUrl'])) {
+        if (!is_bool($page['enabled']) || !is_string($page['imageUrl'])) {
             throw new ConfigException('Configuration is invalid.');
         }
+        $imageUrl = $this->resolveImageUrl($page['imageUrl']);
 
         $template = $page['template'] ?? 'event-update';
         if (!is_string($template) || $template !== 'event-update') {
@@ -143,7 +147,7 @@ final class UpdatePageRepository
             'targetVersion' => $page['targetVersion'],
             'template' => $template,
             'enabled' => $page['enabled'],
-            'imageUrl' => $page['imageUrl'],
+            'imageUrl' => $imageUrl,
             'startAt' => $startAt,
             'endAt' => $endAt,
             'minimumOsVersions' => $minimumOsVersions,
@@ -162,6 +166,39 @@ final class UpdatePageRepository
             && isset($parts['host'])
             && !isset($parts['user'], $parts['pass'], $parts['port'])
             && isset($this->allowedHosts[strtolower($parts['host'])]);
+    }
+
+    private function normalizePublicBaseUrl(string $value): string
+    {
+        $parts = parse_url($value);
+        if (!$this->isAllowedHttpsUrl($value)
+            || !is_array($parts)
+            || isset($parts['query'], $parts['fragment'])
+        ) {
+            throw new ConfigException('Configuration is invalid.');
+        }
+
+        return rtrim($value, '/');
+    }
+
+    private function resolveImageUrl(string $value): string
+    {
+        if ($this->isAllowedHttpsUrl($value)) {
+            return $value;
+        }
+
+        if ($this->publicBaseUrl === null
+            || !preg_match('/^[A-Za-z0-9][A-Za-z0-9._~-]*(?:\/[A-Za-z0-9][A-Za-z0-9._~-]*)*\.webp$/D', $value)
+        ) {
+            throw new ConfigException('Configuration is invalid.');
+        }
+
+        $resolved = $this->publicBaseUrl . '/' . $value;
+        if (!$this->isAllowedHttpsUrl($resolved)) {
+            throw new ConfigException('Configuration is invalid.');
+        }
+
+        return $resolved;
     }
 
     private function parseUtcDate(string $value): ?DateTimeImmutable

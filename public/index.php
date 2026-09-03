@@ -25,11 +25,12 @@ $statusCode = 503;
 
 try {
     $request = (new RequestValidator())->validate($_GET);
-    /** @var array{key: string, updatePagesPath: string, themePath: string, uiTextsPath: string, allowedHosts: list<string>} $gameConfig */
+    /** @var array{key: string, publicBaseUrl: string, releaseTargetVersion: string, updatePagesPath: string, themePath: string, uiTextsPath: string, allowedHosts: list<string>} $gameConfig */
     $gameConfig = require dirname(__DIR__) . '/config/game.php';
     $repository = new UpdatePageRepository(
         $gameConfig['updatePagesPath'],
-        $gameConfig['allowedHosts']
+        $gameConfig['allowedHosts'],
+        publicBaseUrl: $gameConfig['publicBaseUrl'],
     );
     $theme = (new ThemeRepository(
         $gameConfig['themePath'],

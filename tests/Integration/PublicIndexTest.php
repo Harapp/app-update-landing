@@ -37,6 +37,7 @@ final class PublicIndexTest extends TestCase
 
                 self::assertIsString($body);
                 self::assertStringContainsString('https://neko.harapeco.okinawa/event-update/assets/banner.webp', $body);
+                self::assertStringNotContainsString('content="assets/banner.webp"', $body);
                 self::assertStringNotContainsString('alt="App logo"', $body);
                 self::assertStringContainsString('PurrfectSpirits event update', $body);
                 self::assertStringContainsString(

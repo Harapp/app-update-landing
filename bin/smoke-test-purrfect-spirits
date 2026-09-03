@@ -17,7 +17,11 @@ $root = dirname(__DIR__);
 require $root . '/vendor/autoload.php';
 
 $game = require $root . '/config/game.php';
-$repository = new UpdatePageRepository($game['updatePagesPath'], $game['allowedHosts']);
+$repository = new UpdatePageRepository(
+    $game['updatePagesPath'],
+    $game['allowedHosts'],
+    publicBaseUrl: $game['publicBaseUrl'],
+);
 $theme = (new ThemeRepository($game['themePath'], $game['allowedHosts']))->load();
 $uiTexts = (new UiTextRepository($game['uiTextsPath']))->load();
 $evaluator = new UpdatePageEvaluator($repository, new SystemClock(), new LocaleResolver(), $theme, $uiTexts);
@@ -33,7 +37,7 @@ $destinations = [
 foreach ($destinations as $platform => $destination) {
     $request = $validator->validate([
         'appVersion' => '0.0.0',
-        'targetVersion' => '2.9.0',
+        'targetVersion' => $game['releaseTargetVersion'],
         'locale' => 'en',
         'platform' => $platform,
         'osVersion' => '1',

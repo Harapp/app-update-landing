@@ -15,7 +15,14 @@
           "targetVersion": {"type": "string", "pattern": "^\\d{1,9}(?:\\.\\d{1,9}){1,3}$"},
           "template": {"type": "string", "enum": ["event-update"]},
           "enabled": {"type": "boolean"},
-          "imageUrl": {"type": "string", "pattern": "^https://[^\\s]+\\.webp(?:[?#][^\\s]*)?$", "maxLength": 2048},
+          "imageUrl": {
+            "type": "string",
+            "maxLength": 2048,
+            "oneOf": [
+              {"pattern": "^https://[^\\s]+\\.webp(?:[?#][^\\s]*)?$"},
+              {"pattern": "^[A-Za-z0-9][A-Za-z0-9._~-]*(?:/[A-Za-z0-9][A-Za-z0-9._~-]*)*\\.webp$"}
+            ]
+          },
           "startAt": {"type": ["string", "null"], "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"},
           "endAt": {"type": ["string", "null"], "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"},
           "minimumOsVersions": {

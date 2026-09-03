@@ -37,6 +37,47 @@ final class ConfigurationRepositoryTest extends TestCase
         self::assertSame('https://cdn.example.com/banner.webp', $loaded['imageUrl']);
     }
 
+    public function testRelativeImagePathIsResolvedAgainstPublicBaseUrl(): void
+    {
+        $page = $this->basePage();
+        $page['imageUrl'] = 'assets/banner.webp';
+        $repository = new UpdatePageRepository(
+            $this->writeJson(['pages' => [$page]]),
+            ['cdn.example.com', 'apps.apple.com'],
+            publicBaseUrl: 'https://cdn.example.com/event-update/',
+        );
+
+        $loaded = $repository->findByTargetVersion('2.0.0');
+
+        self::assertNotNull($loaded);
+        self::assertSame('https://cdn.example.com/event-update/assets/banner.webp', $loaded['imageUrl']);
+    }
+
+    public function testRelativeImagePathRequiresPublicBaseUrl(): void
+    {
+        $page = $this->basePage();
+        $page['imageUrl'] = 'assets/banner.webp';
+
+        $this->expectException(ConfigException::class);
+        (new UpdatePageRepository(
+            $this->writeJson(['pages' => [$page]]),
+            ['cdn.example.com'],
+        ))->findByTargetVersion('2.0.0');
+    }
+
+    public function testSchemaRejectsRelativeImagePathTraversal(): void
+    {
+        $page = $this->basePage();
+        $page['imageUrl'] = '../assets/banner.webp';
+
+        $this->expectException(ConfigException::class);
+        (new UpdatePageRepository(
+            $this->writeJson(['pages' => [$page]]),
+            ['cdn.example.com'],
+            publicBaseUrl: 'https://cdn.example.com/event-update',
+        ))->findByTargetVersion('2.0.0');
+    }
+
     public function testMalformedJsonIsRejected(): void
     {
         $path = tempnam(sys_get_temp_dir(), 'invalid-config-');
@@ -283,7 +324,11 @@ final class ConfigurationRepositoryTest extends TestCase
     {
         $root = dirname(__DIR__, 2);
         $hosts = ['neko.harapeco.okinawa', 'itunes.apple.com', 'play.google.com', 'www.harapeco.okinawa'];
-        $page = (new UpdatePageRepository($root . '/games/purrfect-spirits/update-pages.json', $hosts))
+        $page = (new UpdatePageRepository(
+            $root . '/games/purrfect-spirits/update-pages.json',
+            $hosts,
+            publicBaseUrl: 'https://neko.harapeco.okinawa/event-update',
+        ))
             ->findByTargetVersion('2.9.0');
         $theme = (new ThemeRepository($root . '/games/purrfect-spirits/theme.json', $hosts))->load();
         $uiTexts = (new UiTextRepository($root . '/games/purrfect-spirits/ui-texts.json'))->load();

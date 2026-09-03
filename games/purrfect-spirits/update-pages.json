@@ -4,7 +4,7 @@
             "targetVersion": "2.9.0",
             "template": "event-update",
             "enabled": true,
-            "imageUrl": "https://neko.harapeco.okinawa/event-update/assets/banner.webp",
+            "imageUrl": "assets/banner.webp",
             "startAt": null,
             "endAt": null,
             "minimumOsVersions": {},

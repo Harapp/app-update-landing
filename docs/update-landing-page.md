@@ -95,7 +95,7 @@ query parameterは表示判定の入力であり、認証・認可や秘密情�
   "targetVersion": "2.0.0",
   "template": "event-update",
   "enabled": true,
-  "imageUrl": "https://cdn.example.com/updates/2.0.0/banner.webp",
+  "imageUrl": "assets/banner.webp",
   "startAt": "2026-09-10T03:00:00Z",
   "endAt": "2026-09-30T15:00:00Z",
   "minimumOsVersions": {
@@ -218,9 +218,10 @@ startAt <= now < endAt
 
 ## バナー画像
 
-- `imageUrl` はホストを持つ絶対HTTPS URLとする
-- 許可されたCDNまたは画像配信ドメインだけを使用する
-- PNG、JPEG、WebPを対象とする
+- `imageUrl`はゲーム設定の`publicBaseUrl`を基準とする相対WebPパスを基本とする
+- 外部配信する場合だけ、許可されたホストを持つ絶対HTTPS URLも使用できる
+- 相対パスは先頭の`/`、`.`、`..`を許可せず、公開ルート外を参照できない形式に限定する
+- 元画像はPNGまたはJPEGで管理し、リリース時にWebPへ変換する
 - 画面幅に追従し、縦横比を維持する
 - 画像取得に失敗しても、説明文と状態案内を表示する
 - `imageAltTexts.en` を必須とする
@@ -269,7 +270,7 @@ Updates may take some time to appear on the App Store or Google Play. If the upd
 - ページ全体をHTTPSで提供する
 - query parameterと設定値を信頼せず、長さ・形式・許容値を検証する
 - 表示時にすべての外部入力をescapeし、XSSを防ぐ
-- `imageUrl`と更新先URLにhost allowlistを適用する
+- 解決後の`imageUrl`と更新先URLにhost allowlistを適用する
 - 任意URLへ転送できるopen redirectを作らない
 - Content Security Policyを設定し、画像・script・遷移先を必要なoriginへ限定する
 - 個人識別子、通知トークン、credentialを受け取らず、ログにも記録しない

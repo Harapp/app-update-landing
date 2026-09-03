@@ -44,6 +44,9 @@ host('coreserver')
 set('application', 'purrfect-spirits-event-update');
 set('keep_releases', 5);
 set('default_timeout', 300);
+$gameConfig = require __DIR__ . '/config/game.php';
+set('public_base_url', $gameConfig['publicBaseUrl']);
+set('release_target_version', $gameConfig['releaseTargetVersion']);
 set('deploy_source_paths', [
     'bin',
     'composer.json',
@@ -192,19 +195,47 @@ task('deploy:public_link', function (): void {
     run("{{bin/symlink}} {{current_path}}/public $publicPath; rm -f $temporaryLink");
 });
 
+/** @return array{page: string, banner: string} */
+function publishedUrls(): array
+{
+    $baseUrl = rtrim((string) get('public_base_url'), '/');
+    $query = http_build_query([
+        'appVersion' => '0.0.0',
+        'targetVersion' => (string) get('release_target_version'),
+        'locale' => 'en',
+        'platform' => 'pc',
+        'osVersion' => '1',
+    ], '', '&', PHP_QUERY_RFC3986);
+
+    return [
+        'page' => $baseUrl . '/?' . $query,
+        'banner' => $baseUrl . '/assets/banner.webp',
+    ];
+}
+
 desc('Verify the published PurrfectSpirits page over HTTPS.');
 task('deploy:health', function (): void {
+    $urls = publishedUrls();
     try {
         run("curl --fail --silent --show-error --location --max-time 15 "
-            . "--output /dev/null 'https://neko.harapeco.okinawa/event-update/assets/banner.webp'");
+            . '--output /dev/null ' . quote($urls['banner']));
         run("curl --fail --silent --show-error --location --max-time 15 "
-            . "'https://neko.harapeco.okinawa/event-update/?appVersion=0.0.0&targetVersion=2.9.0&locale=en&platform=pc&osVersion=1' "
+            . quote($urls['page']) . ' '
             . "| grep -F 'PurrfectSpirits'");
     } catch (\Throwable $exception) {
         warning('Health check failed; restoring the previous release.');
         invoke('rollback');
         throw $exception;
     }
+});
+
+desc('Show the published PurrfectSpirits URLs.');
+task('deploy:show_urls', function (): void {
+    $urls = publishedUrls();
+    writeln('');
+    writeln('<info>Published URLs</info>');
+    writeln('Page:   ' . $urls['page']);
+    writeln('Banner: ' . $urls['banner']);
 });
 
 // The public mount is updated only after Deployer has switched current. Health
@@ -216,6 +247,7 @@ task('deploy:publish', [
     'deploy:unlock',
     'deploy:cleanup',
     'deploy:success',
+    'deploy:show_urls',
 ]);
 
 after('deploy:update_code', 'deploy:verify_payload');

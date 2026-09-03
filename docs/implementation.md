@@ -141,7 +141,7 @@ games/
       "targetVersion": "2.2.0",
       "template": "event-update",
       "enabled": true,
-      "imageUrl": "https://cdn.example.com/updates/2.2.0/banner.webp",
+      "imageUrl": "assets/banner.webp",
       "startAt": "2026-09-10T00:00:00Z",
       "endAt": "2026-10-10T00:00:00Z",
       "minimumOsVersions": {
@@ -189,7 +189,8 @@ JSON Schemaでは少なくとも次を検証します。
 - `startAt`と`endAt`がUTCのISO 8601形式であること
 - `en`の説明と画像altが存在すること
 - platformが`ios`、`android`、`pc`のいずれかであること
-- 外部URLが絶対HTTPS URLであること
+- 画像が安全な相対WebPパス、または許可された絶対HTTPS URLであること
+- 外部遷移URLが絶対HTTPS URLであること
 - 未知のフィールドがないこと
 
 ### UI翻訳
@@ -215,7 +216,8 @@ JSON Schemaでは少なくとも次を検証します。
 
 - 同じゲーム内で`targetVersion`が一意であること
 - 両方指定された場合に`startAt < endAt`であること
-- 画像URLと更新先URLのhostが許可リストに含まれること
+- 相対画像パスをゲーム設定の`publicBaseUrl`へ解決できること
+- 解決後の画像URLと更新先URLのhostが許可リストに含まれること
 
 Schema検証と追加検証はデプロイ前に実行します。実行時にも、ページを安全に表示するために必要な検証をPHP側で行います。
 
