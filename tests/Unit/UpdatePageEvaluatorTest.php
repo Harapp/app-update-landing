@@ -65,6 +65,64 @@ final class UpdatePageEvaluatorTest extends TestCase
         self::assertTrue($view->showStoreNotice);
     }
 
+    public function testDisabledUpdateTakesPriority(): void
+    {
+        $this->replacePage(['enabled' => false]);
+        $request = (new RequestValidator())->validate([
+            'appVersion' => '1.0.0',
+            'targetVersion' => '2.0.0',
+            'locale' => 'en-US',
+            'platform' => 'ios',
+            'osVersion' => '18.0',
+        ]);
+
+        $view = (new UpdatePageEvaluator(
+            new UpdatePageRepository($this->configPath, ['cdn.example.com', 'apps.apple.com']),
+            new FixedClock('2026-09-03T12:00:00Z'),
+        ))->evaluate($request);
+
+        self::assertSame('disabled', $view->state);
+        self::assertFalse($view->showUpdate);
+    }
+
+    public function testMatchingTargetVersionIsReportedAsUpToDate(): void
+    {
+        $request = (new RequestValidator())->validate([
+            'appVersion' => '2.0',
+            'targetVersion' => '2.0.0',
+            'locale' => 'en-US',
+            'platform' => 'ios',
+            'osVersion' => '18.0',
+        ]);
+
+        $view = (new UpdatePageEvaluator(
+            new UpdatePageRepository($this->configPath, ['cdn.example.com', 'apps.apple.com']),
+            new FixedClock('2026-09-03T09:00:00Z'),
+        ))->evaluate($request);
+
+        self::assertSame('up-to-date', $view->state);
+        self::assertFalse($view->showUpdate);
+    }
+
+    public function testUnknownTargetVersionMakesThePageUnavailable(): void
+    {
+        $request = (new RequestValidator())->validate([
+            'appVersion' => '1.0.0',
+            'targetVersion' => '3.0.0',
+            'locale' => 'en-US',
+            'platform' => 'ios',
+            'osVersion' => '18.0',
+        ]);
+
+        $view = (new UpdatePageEvaluator(
+            new UpdatePageRepository($this->configPath, ['cdn.example.com', 'apps.apple.com']),
+            new FixedClock('2026-09-03T12:00:00Z'),
+        ))->evaluate($request);
+
+        self::assertSame('unavailable', $view->state);
+        self::assertFalse($view->showUpdate);
+    }
+
     public function testUpdateIsNotShownBeforeStartAndAtEndBoundary(): void
     {
         $repository = new UpdatePageRepository($this->configPath, ['cdn.example.com', 'apps.apple.com']);
@@ -101,6 +159,14 @@ final class UpdatePageEvaluatorTest extends TestCase
         self::assertSame('unsupported-os', $unsupported->state);
         self::assertSame('missing-destination', $missingDestination->state);
         self::assertFalse($missingDestination->showUpdate);
+    }
+
+    /** @param array<string, mixed> $changes */
+    private function replacePage(array $changes): void
+    {
+        $config = json_decode((string) file_get_contents($this->configPath), true, 16, JSON_THROW_ON_ERROR);
+        $config['pages'][0] = [...$config['pages'][0], ...$changes];
+        file_put_contents($this->configPath, json_encode($config, JSON_THROW_ON_ERROR));
     }
 }
 
