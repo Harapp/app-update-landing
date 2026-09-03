@@ -4,7 +4,7 @@
   "required": ["logoUrl", "maxContentWidth"],
   "additionalProperties": false,
   "properties": {
-    "colorPreset": {"type": "string", "enum": ["purple", "red", "blue", "green", "orange", "pink", "gray"]},
+    "colorPreset": {"type": "string", "enum": ["purple", "red", "blue", "light-blue", "green", "orange", "pink", "gray"]},
     "primaryColor": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
     "accentColor": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
     "backgroundColor": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},

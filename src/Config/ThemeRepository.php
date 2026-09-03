@@ -28,6 +28,12 @@ final class ThemeRepository
             'backgroundColor' => '#EDF7FF',
             'textColor' => '#172D46',
         ],
+        'light-blue' => [
+            'primaryColor' => '#0E7490',
+            'accentColor' => '#155E75',
+            'backgroundColor' => '#ECFEFF',
+            'textColor' => '#083344',
+        ],
         'green' => [
             'primaryColor' => '#11854F',
             'accentColor' => '#087A45',

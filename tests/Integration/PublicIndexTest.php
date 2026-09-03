@@ -101,8 +101,8 @@ final class PublicIndexTest extends TestCase
                 $this->userAgentContext(self::ANDROID_USER_AGENT),
             );
             self::assertIsString($androidBodyFromSharedIosUrl);
-            self::assertStringContainsString('<small>Coming Soon</small>', $androidBodyFromSharedIosUrl);
-            self::assertStringNotContainsString('<a class="update-link"', $androidBodyFromSharedIosUrl);
+            self::assertStringContainsString('href="https://play.google.com/store/apps/details?id=okinawa.harapeco.catRestaurant"', $androidBodyFromSharedIosUrl);
+            self::assertStringNotContainsString('itunes.apple.com', $androidBodyFromSharedIosUrl);
             self::assertStringContainsString('Updates may take some time to appear', $androidBodyFromSharedIosUrl);
 
             $androidBodyWithoutPlatform = file_get_contents(
@@ -111,7 +111,7 @@ final class PublicIndexTest extends TestCase
                 $this->userAgentContext(self::ANDROID_USER_AGENT),
             );
             self::assertIsString($androidBodyWithoutPlatform);
-            self::assertStringContainsString('<small>Coming Soon</small>', $androidBodyWithoutPlatform);
+            self::assertStringContainsString('href="https://play.google.com/store/apps/details?id=okinawa.harapeco.catRestaurant"', $androidBodyWithoutPlatform);
             self::assertStringContainsString('Updates may take some time to appear', $androidBodyWithoutPlatform);
         } finally {
             proc_terminate($process);

@@ -221,6 +221,12 @@ final class ConfigurationRepositoryTest extends TestCase
             'backgroundColor' => '#EDF7FF',
             'textColor' => '#172D46',
         ]];
+        yield 'light-blue' => ['light-blue', [
+            'primaryColor' => '#0E7490',
+            'accentColor' => '#155E75',
+            'backgroundColor' => '#ECFEFF',
+            'textColor' => '#083344',
+        ]];
         yield 'green' => ['green', [
             'primaryColor' => '#11854F',
             'accentColor' => '#087A45',
@@ -364,7 +370,7 @@ final class ConfigurationRepositoryTest extends TestCase
         self::assertSame('2026-09-10T00:00:00+09:00', $page['startAt']?->format('Y-m-d\\TH:i:sP'));
         self::assertSame('2026-09-30T23:59:59+09:00', $page['endAt']?->format('Y-m-d\\TH:i:sP'));
         self::assertTrue($page['released']['ios']);
-        self::assertFalse($page['released']['android']);
+        self::assertTrue($page['released']['android']);
         self::assertTrue($page['released']['pc']);
         self::assertSame('https://itunes.apple.com/jp/app/id1269423920', $page['destinationUrls']['ios']);
         self::assertSame('https://play.google.com/store/apps/details?id=okinawa.harapeco.catRestaurant', $page['destinationUrls']['android']);
