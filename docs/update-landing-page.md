@@ -1,0 +1,310 @@
+# Updateランディングページ要件
+
+NativeNotifydのUpdate通知をタップした利用者へ表示する、顧客向けWebページの要件です。
+通知入力画面やUnity内のUIではなく、固定Update URLの遷移先となるWebページを対象とします。
+
+## 目的
+
+- 更新が必要な利用者をOSに対応した更新先へ案内する
+- 更新済み、期間外、OS非対応の場合も、何も表示されない状態にせず理由を伝える
+- Update URLを固定し、`targetVersion` に応じてバナー、説明文、期間、遷移先を切り替える
+- Unity packageには更新可否の業務判断を持たせず、Webページ側へ集約する
+
+## ページ構成
+
+ページは次の要素で構成します。
+
+1. バナー画像1枚
+2. イベントの短い説明文1件
+3. 状態に応じた案内テキスト
+4. 対象バージョン
+5. 更新可能な場合だけ表示するボタン1件
+6. 必要な場合だけ表示する小さな注意書き
+
+```text
+┌─────────────────────────┐
+│                         │
+│        バナー画像         │
+│                         │
+├─────────────────────────┤
+│ イベントの短い説明文        │
+│ 状態に応じた案内テキスト     │
+│ イベント期間              │
+│      [ V2.2.0 ]         │
+│      [ Update ]         │
+│ ストア反映に関する注意書き    │
+└─────────────────────────┘
+```
+
+ボタンは1ページにつき最大1件とし、OSに対応する更新先を開きます。
+対象バージョンは`V{targetVersion}`の形式で表示し、`V`は表示時だけ付けます。
+
+## URL契約
+
+Unityは固定Update URLへ、タップ時点の情報をquery parameterとして付与します。
+
+```text
+https://updates.example.com/update
+  ?appVersion=1.4.2
+  &targetVersion=2.0.0
+  &locale=en-US
+  &platform=ios
+  &osVersion=18.1
+```
+
+| parameter | 必須 | 内容 |
+| --- | --- | --- |
+| `appVersion` | 必須 | タップ時点でインストールされているアプリバージョン |
+| `targetVersion` | 必須 | 通知が案内する対象アプリバージョン |
+| `locale` | 必須 | タップ時点の言語・ロケール |
+| `platform` | 必須 | `ios`、`android`、または`pc` |
+| `osVersion` | 必須 | タップ時点のOSバージョン |
+
+query parameterは表示判定の入力であり、認証・認可や秘密情報の受け渡しには使用しません。
+端末ID、通知トークン、認証情報はURLへ含めません。
+
+ゲームはドメインまたはデプロイ先で固定し、ゲーム識別子をquery parameterとして受け取りません。
+
+## 言語
+
+- 既定言語は `en` 固定とする
+- 初期リリースでは英語文言を必須とする
+- `en` は削除や別言語への変更を不可とする
+- `locale` に一致する翻訳が将来追加された場合は、その翻訳を優先する
+- 完全一致する翻訳がない場合は言語部分を確認し、最終的に必ず `en` へフォールバックする
+- イベント説明、画像alt、状態メッセージ、ボタン文言は同じ言語解決規則を使う
+
+初期状態のイベント固有文言は次の形です。
+
+```json
+{
+  "descriptions": {
+    "en": "A new version is available for the latest event."
+  },
+  "imageAltTexts": {
+    "en": "Latest event update"
+  }
+}
+```
+
+## Updateページ設定
+
+`targetVersion` に対応する設定として、少なくとも次の値を保持します。
+
+```json
+{
+  "targetVersion": "2.0.0",
+  "template": "event-update",
+  "enabled": true,
+  "imageUrl": "https://cdn.example.com/updates/2.0.0/banner.webp",
+  "startAt": "2026-09-10T03:00:00Z",
+  "endAt": "2026-09-30T15:00:00Z",
+  "minimumOsVersions": {
+    "ios": "18.0",
+    "android": "14"
+  },
+  "destinationUrls": {
+    "ios": "https://apps.apple.com/app/id000000000",
+    "android": "https://play.google.com/store/apps/details?id=com.example.app",
+    "pc": "https://example.com/download"
+  },
+  "descriptions": {
+    "en": "A new version is available for the latest event."
+  },
+  "imageAltTexts": {
+    "en": "Latest event update"
+  }
+}
+```
+
+`template`は任意とし、未設定の場合は`event-update`を使用します。利用可能なテンプレートはサーバー側の許可リストで管理します。
+
+`startAt`と`endAt`はそれぞれ任意です。両方未設定の場合は、`enabled=true`の間は期間制限なしで有効とします。
+通常のアプリ更新では終了期限がない場合があるためです。
+
+`minimumOsVersions`もplatformごとに任意とし、PCを含め、値がないplatformには最低OS制限を適用しません。
+
+## テンプレート
+
+- 初期テンプレートは`event-update`とする
+- 期間の有無はテンプレート選択に影響させない
+- テンプレートは表示だけを担当し、期間やバージョンの判定を行わない
+- テンプレート名は許可リストから解決し、任意のファイルパスとして使用しない
+- 未知のテンプレート名は設定不正として扱う
+
+## 期間判定
+
+- 判定には端末時刻ではなくWebサーバーの現在時刻を使う
+- 保存と比較はUTCに統一する
+- 開始日時は期間に含み、終了日時は期間に含めない
+
+```text
+startAt <= now < endAt
+```
+
+- `startAt` 未設定: 即時開始
+- `endAt` 未設定: 無期限
+- 両方未設定: `enabled=true`の間は常時有効
+- `now < startAt`: 期間前
+- `endAt <= now`: 期間終了
+
+## 表示判定
+
+判定は次の優先順で行います。
+
+| 優先順 | 条件 | 表示状態 | ボタン |
+| --- | --- | --- | --- |
+| 1 | parameter不正、または`targetVersion`に対応する設定がない | ページを表示できない | 非表示 |
+| 2 | `enabled=false` | 現在利用できない | 非表示 |
+| 3 | `appVersion >= targetVersion` | 更新済み | 非表示 |
+| 4 | `now < startAt` | 期間前 | 非表示 |
+| 5 | `endAt <= now` | 期間終了 | 非表示 |
+| 6 | 未対応の`platform` | 更新不可 | 非表示 |
+| 7 | `osVersion`が最低対応バージョン未満 | OS非対応 | 非表示 |
+| 8 | 対応する更新先URLがない | 一時的に更新不可 | 非表示 |
+| 9 | 上記以外 | アップデート可能 | 表示 |
+
+更新済み判定を期間判定より先に行います。更新後に古い通知をタップした利用者には、期間終了ではなく最新版を利用中であることを伝えます。
+
+判定結果はイベント説明とは別の案内テキストとして表示します。更新不可や設定不正の場合も空欄にせず、利用者向けの理由を表示します。
+
+## 状態別表示
+
+システム文言の初期値も英語固定とします。
+
+### アップデート可能
+
+- バナー画像
+- イベント説明
+- `A new version is available.`
+- 対象バージョン: `V2.2.0`
+- ボタンは1段目に`V2.2.0`、2段目に`Update`を表示する
+- ボタン押下時は`platform`に対応する`destinationUrls`を開く
+- iOS / Androidでは、ボタンの下にストア反映の遅延に関する小さな注意書きを表示する
+
+### 更新済み
+
+- バナー画像
+- イベント説明
+- `You're using the latest version.`
+- 現在のバージョンと対象バージョンを表示する
+- 更新ボタンは表示しない
+
+### 期間前
+
+- バナー画像
+- イベント説明
+- `This update is not available yet.`
+- 必要であれば開始日時を利用者のロケールで表示する
+- 更新ボタンは表示しない
+
+### 期間終了
+
+- バナー画像
+- イベント説明
+- `This update period has ended.`
+- 更新ボタンは表示しない
+
+### OS非対応
+
+- バナー画像
+- イベント説明
+- `This update requires a newer OS version.`
+- 現在のOSバージョンと最低対応OSバージョンを表示する
+- 更新ボタンは表示しない
+
+### 設定不正・取得失敗
+
+- バナーを取得できる場合は表示する
+- `This update page is currently unavailable.`
+- 更新ボタンは表示しない
+- 内部エラー、設定値、stack traceは利用者へ表示しない
+
+## バナー画像
+
+- `imageUrl` はホストを持つ絶対HTTPS URLとする
+- 許可されたCDNまたは画像配信ドメインだけを使用する
+- PNG、JPEG、WebPを対象とする
+- 画面幅に追従し、縦横比を維持する
+- 画像取得に失敗しても、説明文と状態案内を表示する
+- `imageAltTexts.en` を必須とする
+- 初期仕様では全言語で1つの`imageUrl`を使用する
+- バナー内には翻訳が必要な文章を埋め込まないことを推奨する
+
+## ボタンと遷移
+
+- ボタンはアップデート可能な場合だけ表示する
+- ボタンの表示は2段とし、1段目に`V{targetVersion}`、2段目にローカライズされた`Update`を表示する
+- ボタンのアクセシブルな名前には対象バージョンを含める。英語初期値は`Update to version 2.2.0`とする
+- `platform=ios` はiOS用URL、`platform=android`はAndroid用URLを使用する
+- `platform=pc` はPC用の案内、ストア、またはダウンロードURLを使用する
+- PC用URLは特定ストアへ固定せず、Updateページ設定で任意のHTTPS URLを指定できるようにする
+- 遷移先は事前設定されたHTTPS URLに限定し、query parameterから任意の遷移先を受け取らない
+- ボタンの連打による多重遷移を防ぐ
+- 遷移できない場合はページ内で安全なエラー文言を表示する
+
+## ストア反映に関する注意書き
+
+`platform`が`ios`または`android`で、アップデート可能と判定された場合は、ページの一番下に次の注意書きを表示します。
+
+```text
+Updates may take some time to appear on the App Store or Google Play. If the update is not available yet, please try again later.
+```
+
+- 既定言語は`en`とし、ほかのページ文言と同じ言語解決規則を使う
+- ボタンより視覚的な優先度を下げ、小さめの文字とする
+- 読めないほど薄い色や小さい文字にはせず、本文より小さくても十分なコントラストを確保する
+- PCでは表示しない
+- 更新済み、期間前、期間終了、OS非対応など、更新ボタンがない状態では表示しない
+
+## バージョン比較
+
+- `appVersion`、`targetVersion`、`osVersion`の許容形式を明示し、Server・Unity・Webで同じ規則を使う
+- 初期仕様では`1.2.3`のような数値をピリオドで区切った形式に限定する
+- 数値として各segmentを比較し、文字列の辞書順では比較しない
+- `1.2`と`1.2.0`の扱いを統一し、初期仕様では同一として扱う
+- 不正な形式は推測で補正せず、更新不可またはページ利用不可として扱う
+
+## セキュリティとプライバシー
+
+- ページ全体をHTTPSで提供する
+- query parameterと設定値を信頼せず、長さ・形式・許容値を検証する
+- 表示時にすべての外部入力をescapeし、XSSを防ぐ
+- `imageUrl`と更新先URLにhost allowlistを適用する
+- 任意URLへ転送できるopen redirectを作らない
+- Content Security Policyを設定し、画像・script・遷移先を必要なoriginへ限定する
+- 個人識別子、通知トークン、credentialを受け取らず、ログにも記録しない
+- query parameterだけで権限や限定コンテンツの閲覧可否を決めない
+
+## UI・アクセシビリティ
+
+- モバイル表示を優先する
+- バナー、説明文、状態案内テキスト、イベント期間、ボタン、注意書きの順序を固定する
+- ボタンは十分なタップ領域とコントラストを持つ
+- 画像には解決後の言語に対応するaltを設定する
+- 状態を色だけで表現しない
+- 読み込み中、画像失敗、設定取得失敗でもレイアウトが大きく崩れない
+
+## テスト要件
+
+- 更新可能、更新済み、期間前、期間終了、OS非対応、platform非対応をそれぞれ確認する
+- `startAt`と`endAt`の境界時刻を確認する
+- 期間設定がない場合、開始日時だけの場合、終了日時だけの場合を確認する
+- `1.2`、`1.2.0`、`1.10.0`など、文字列比較で誤りやすいバージョンを確認する
+- `en-US`、未対応locale、不正localeが`en`へフォールバックすることを確認する
+- バナー取得失敗時にも説明文と状態案内が表示されることを確認する
+- iOS、Android、PCで正しい更新先が選択されることを確認する
+- ボタンに`V{targetVersion}`とローカライズされた更新文言が2段で表示されることを確認する
+- iOS / Androidの更新可能状態だけで、ページ最下部にストア反映の注意書きが表示されることを確認する
+- 不正なquery parameter、存在しない`targetVersion`、無効な外部URLを安全に拒否する
+- 未指定のテンプレートが`event-update`へ解決され、未知のテンプレートが安全に拒否されることを確認する
+- Consoleから表示するテストリンクで、固定URLと指定`targetVersion`のページを確認できる
+
+## 対象外
+
+- 通知の作成・送信画面
+- Unity package内での更新可否判定
+- Update通知の配信対象抽出
+- App Store / Google Playの公開状態取得
+- 強制アップデートによるアプリ操作のブロック
+- `releaseId`の導入

@@ -1,0 +1,72 @@
+# OS and editor files
+.DS_Store
+Thumbs.db
+Desktop.ini
+Icon?
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*credentials*.json
+*service-account*.json
+
+# Dependencies
+node_modules/
+vendor/
+
+# Build outputs and caches
+dist/
+build/
+out/
+.cache/
+.tmp/
+tmp/
+coverage/
+.nyc_output/
+
+# Logs and local runtime files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Genie local issue notes
+.genie/
+
+# Genie local references
+genie-playbook
+skills
+.agents/skills/
+.claude/skills/
+
+# Python local files
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Google Drive conflict artifacts
+*.gdoc
+*.gsheet
+*.gslides
+
+# Obsidian
+.obsidian/
+
+# Claude Code local settings
+.claude/settings.local.json
+.pino-a/
