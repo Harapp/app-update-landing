@@ -11,18 +11,19 @@ $escape = static fn (string $value): string => htmlspecialchars($value, ENT_QUOT
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>App update</title>
     <style>
-        :root { color-scheme: light; font-family: system-ui, sans-serif; --accent-color: <?= $escape($viewModel->theme['accentColor']) ?>; }
+        :root { color-scheme: light; font-family: system-ui, sans-serif; }
         body { margin: 0; background: <?= $escape($viewModel->theme['backgroundColor']) ?>; color: <?= $escape($viewModel->theme['textColor']) ?>; }
         main { box-sizing: border-box; width: min(100% - 2rem, <?= $viewModel->theme['maxContentWidth'] ?>px); margin: 2rem auto; overflow: hidden; border-radius: 1rem; background: #fff; box-shadow: 0 0.5rem 2rem #2021241f; }
         .content { padding: 1.5rem; }
         .banner { display: block; width: 100%; height: auto; }
         h1 { margin: 0 0 1rem; font-size: 1.25rem; }
         .status { margin: 0 0 1rem; font-weight: 600; }
-        .period { margin: 0 0 1rem; color: #374151; }
-        .version, .os-version { margin: .5rem 0; color: #4b5563; }
-        .update-link { display: inline-flex; flex-direction: column; align-items: center; min-width: 12rem; margin-top: 1rem; padding: .8rem 1.25rem; border-radius: .6rem; background: <?= $escape($viewModel->theme['primaryColor']) ?>; color: #fff; font-weight: 700; text-decoration: none; }
-        .update-link small { margin-top: .2rem; font-size: .9rem; }
-        .notice { margin: 1.5rem 0 0; color: var(--accent-color); font-size: .85rem; }
+        .os-version { margin: .5rem 0; color: #4b5563; }
+        .update-action { display: flex; justify-content: center; margin-top: 1.5rem; }
+        .update-link { box-sizing: border-box; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; width: min(100%, 22rem); min-height: 6rem; padding: 1rem 2rem; border-radius: .75rem; background: <?= $escape($viewModel->theme['primaryColor']) ?>; color: #fff; font-weight: 700; line-height: 1.25; text-align: center; text-decoration: none; }
+        .update-link span { font-size: 1.3rem; }
+        .update-link small { margin-top: .35rem; font-size: 1rem; }
+        .notice { margin: 1.75rem 0 0; color: #6b7280; font-size: .85rem; line-height: 1.5; }
     </style>
 </head>
 <body>
@@ -37,24 +38,22 @@ $escape = static fn (string $value): string => htmlspecialchars($value, ENT_QUOT
         <?php if ($viewModel->description !== ''): ?>
             <h1><?= $escape($viewModel->description) ?></h1>
         <?php endif; ?>
-        <p class="status"><?= $escape($viewModel->statusMessage) ?></p>
-        <?php if ($viewModel->eventPeriod !== null && $viewModel->eventPeriod !== ''): ?>
-            <p class="period"><?= $escape($viewModel->eventPeriod) ?></p>
+        <?php if ($viewModel->state !== 'available'): ?>
+            <p class="status"><?= $escape($viewModel->statusMessage) ?></p>
         <?php endif; ?>
-        <?php if ($viewModel->currentVersion !== null && $viewModel->targetVersion !== null): ?>
-            <p class="version">Current: V<?= $escape($viewModel->currentVersion) ?> · Target: V<?= $escape($viewModel->targetVersion) ?></p>
-        <?php endif; ?>
-        <?php if ($viewModel->osVersion !== null && $viewModel->minimumOsVersion !== null): ?>
-            <p class="os-version">OS: <?= $escape($viewModel->osVersion) ?> · Required: <?= $escape($viewModel->minimumOsVersion) ?></p>
+        <?php if ($viewModel->osRequirementMessage !== null): ?>
+            <p class="os-version"><?= $escape($viewModel->osRequirementMessage) ?></p>
         <?php endif; ?>
         <?php if ($viewModel->showUpdate && $viewModel->destinationUrl !== null && $viewModel->targetVersion !== null): ?>
-            <a class="update-link" href="<?= $escape($viewModel->destinationUrl) ?>" aria-label="Update to version <?= $escape($viewModel->targetVersion) ?>">
-                <span>V<?= $escape($viewModel->targetVersion) ?></span>
-                <small>Update</small>
-            </a>
+            <div class="update-action">
+                <a class="update-link" href="<?= $escape($viewModel->destinationUrl) ?>" aria-label="<?= $escape($viewModel->updateButtonAriaLabel) ?>">
+                    <span>V<?= $escape($viewModel->targetVersion) ?></span>
+                    <small><?= $escape($viewModel->updateButtonLabel) ?></small>
+                </a>
+            </div>
         <?php endif; ?>
         <?php if ($viewModel->showStoreNotice): ?>
-            <p class="notice">Updates may take some time to appear on the App Store or Google Play. If the update is not available yet, please try again later.</p>
+            <p class="notice"><?= $escape($viewModel->storeNotice) ?></p>
         <?php endif; ?>
     </div>
 </main>

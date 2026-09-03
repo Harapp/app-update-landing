@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Config\ThemeRepository;
+use App\Config\UiTextRepository;
 use App\Config\UpdatePageRepository;
 use App\Domain\LocaleResolver;
 use App\Domain\UpdatePageEvaluator;
@@ -24,7 +25,7 @@ $statusCode = 503;
 
 try {
     $request = (new RequestValidator())->validate($_GET);
-    /** @var array{key: string, updatePagesPath: string, themePath: string, allowedHosts: list<string>} $gameConfig */
+    /** @var array{key: string, updatePagesPath: string, themePath: string, uiTextsPath: string, allowedHosts: list<string>} $gameConfig */
     $gameConfig = require dirname(__DIR__) . '/config/game.php';
     $repository = new UpdatePageRepository(
         $gameConfig['updatePagesPath'],
@@ -34,7 +35,14 @@ try {
         $gameConfig['themePath'],
         $gameConfig['allowedHosts']
     ))->load();
-    $viewModel = (new UpdatePageEvaluator($repository, new App\SystemClock(), new LocaleResolver(), $theme))->evaluate($request);
+    $uiTexts = (new UiTextRepository($gameConfig['uiTextsPath']))->load();
+    $viewModel = (new UpdatePageEvaluator(
+        $repository,
+        new App\SystemClock(),
+        new LocaleResolver(),
+        $theme,
+        $uiTexts,
+    ))->evaluate($request);
     $statusCode = $viewModel->state === 'unavailable' ? 404 : 200;
 } catch (InvalidArgumentException $exception) {
     $statusCode = 400;

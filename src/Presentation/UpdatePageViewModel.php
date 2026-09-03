@@ -9,6 +9,10 @@ use DateTimeImmutable;
 final readonly class UpdatePageViewModel
 {
     public ?string $eventPeriod;
+    public string $updateButtonLabel;
+    public string $updateButtonAriaLabel;
+    public string $storeNotice;
+    public ?string $osRequirementMessage;
 
     /** @var array{primaryColor: string, accentColor: string, backgroundColor: string, textColor: string, logoUrl: ?string, maxContentWidth: int} */
     public const DEFAULT_THEME = [
@@ -40,15 +44,28 @@ final readonly class UpdatePageViewModel
         /** @var array{primaryColor: string, accentColor: string, backgroundColor: string, textColor: string, logoUrl: ?string, maxContentWidth: int} */
         public array $theme = self::DEFAULT_THEME,
         ?string $eventPeriod = null,
+        ?string $updateButtonLabel = null,
+        ?string $updateButtonAriaLabel = null,
+        ?string $storeNotice = null,
+        ?string $osRequirementMessage = null,
     ) {
         $this->eventPeriod = $eventPeriod ?? self::formatEventPeriod($startAt, $endAt);
+        $this->updateButtonLabel = $updateButtonLabel ?? 'Update and play the event';
+        $this->updateButtonAriaLabel = $updateButtonAriaLabel
+            ?? sprintf('Update to version %s and play the event', $targetVersion ?? '');
+        $this->storeNotice = $storeNotice
+            ?? 'Updates may take some time to appear on the App Store or Google Play. If the update is not available yet, please try again later.';
+        $this->osRequirementMessage = $osRequirementMessage;
     }
 
-    public static function unavailable(): self
+    public static function unavailable(
+        string $locale = 'en',
+        string $statusMessage = 'This update page is currently unavailable.',
+    ): self
     {
         return new self(
-            'unavailable', 'en', null, null, '',
-            'This update page is currently unavailable.',
+            'unavailable', $locale, null, null, '',
+            $statusMessage,
             null, null, null, null, null, null, null, false, false, 'event-update', self::DEFAULT_THEME, ''
         );
     }

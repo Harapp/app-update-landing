@@ -4,6 +4,7 @@
 declare(strict_types=1);
 
 use App\Config\ThemeRepository;
+use App\Config\UiTextRepository;
 use App\Config\UpdatePageRepository;
 use App\Domain\LocaleResolver;
 use App\Domain\UpdatePageEvaluator;
@@ -18,7 +19,8 @@ require $root . '/vendor/autoload.php';
 $game = require $root . '/config/game.php';
 $repository = new UpdatePageRepository($game['updatePagesPath'], $game['allowedHosts']);
 $theme = (new ThemeRepository($game['themePath'], $game['allowedHosts']))->load();
-$evaluator = new UpdatePageEvaluator($repository, new SystemClock(), new LocaleResolver(), $theme);
+$uiTexts = (new UiTextRepository($game['uiTextsPath']))->load();
+$evaluator = new UpdatePageEvaluator($repository, new SystemClock(), new LocaleResolver(), $theme, $uiTexts);
 $validator = new RequestValidator();
 $renderer = new HtmlRenderer(new TemplateRegistry($root . '/templates'));
 
@@ -43,6 +45,10 @@ foreach ($destinations as $platform => $destination) {
         || !$viewModel->showUpdate
         || $viewModel->destinationUrl !== $destination
         || !str_contains($html, 'PurrfectSpirits')
+        || !str_contains($html, 'Update and play the event')
+        || str_contains($html, 'A new version is available.')
+        || str_contains($html, 'Event period:')
+        || str_contains($html, 'Current: V')
         || !str_contains($html, htmlspecialchars($destination, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'))
     ) {
         fwrite(STDERR, "PurrfectSpirits release smoke test failed.\n");

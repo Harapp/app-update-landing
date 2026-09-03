@@ -104,6 +104,7 @@ en
 | `UpdatePageRequest` | query parameterの取得と入力状態の保持 |
 | `RequestValidator` | リクエスト値の形式と許容値の検証 |
 | `UpdatePageRepository` | JSONの読み込みと`targetVersion`による取得 |
+| `UiTextRepository` | UI翻訳JSONの検証と読み込み |
 | `UpdatePageConfigValidator` | JSON設定の実行時検証 |
 | `Version` | 数値segmentによるバージョン比較 |
 | `LocaleResolver` | ロケール解決と`en`フォールバック |
@@ -123,10 +124,12 @@ en
 games/
 ├── game-a/
 │   ├── update-pages.json
-│   └── theme.json
+│   ├── theme.json
+│   └── ui-texts.json
 └── game-b/
     ├── update-pages.json
-    └── theme.json
+    ├── theme.json
+    └── ui-texts.json
 ```
 
 `update-pages.json`の想定例です。
@@ -189,6 +192,25 @@ JSON Schemaでは少なくとも次を検証します。
 - 外部URLが絶対HTTPS URLであること
 - 未知のフィールドがないこと
 
+### UI翻訳
+
+状態文、ボタン、注意書きなどの共通UI翻訳は、ゲームごとの`ui-texts.json`で管理します。AIや翻訳担当者が文脈を把握しやすいよう、意味を表すキーごとに言語を並べます。
+
+```json
+{
+  "button.update": {
+    "en": "Update and play the event",
+    "ja": "更新してイベントを遊ぶ"
+  },
+  "notice.storeDelay": {
+    "en": "Updates may take some time to appear...",
+    "ja": "アップデートが反映されるまで、時間がかかる場合があります..."
+  }
+}
+```
+
+すべての文言キーで`en`を必須とし、完全一致、言語部分、`en`の順で解決します。アクセシブルな名前などで使用する`{version}`等のplaceholderは、すべての翻訳に残す必要があります。
+
 標準のJSON Schemaだけでは表現しにくい次の整合性は、デプロイ前の追加検証で確認します。
 
 - 同じゲーム内で`targetVersion`が一意であること
@@ -222,10 +244,8 @@ $templates = [
 - バナー画像とalt
 - イベント説明
 - 状態メッセージ
-- 現在バージョンと対象バージョン
-- 表示用のイベント期間
-- 表示可能な場合だけ設定されたUpdateボタン
-- 表示可能な場合だけ設定された注意書き
+- 表示可能な場合だけローカライズ済みのUpdateボタン
+- 表示可能な場合だけローカライズ済みの注意書き
 - ゲームテーマ
 
 ## テーマ

@@ -6,6 +6,7 @@ namespace Tests\Unit;
 
 use App\Config\ConfigException;
 use App\Config\ThemeRepository;
+use App\Config\UiTextRepository;
 use App\Config\UpdatePageRepository;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
@@ -260,6 +261,24 @@ final class ConfigurationRepositoryTest extends TestCase
         (new ThemeRepository($this->writeJson($theme), ['cdn.example.com']))->load();
     }
 
+    public function testUiTextsRequireEnglishAsTheFallback(): void
+    {
+        $texts = $this->purrfectUiTexts();
+        unset($texts['button.update']['en']);
+
+        $this->expectException(ConfigException::class);
+        (new UiTextRepository($this->writeJson($texts)))->load();
+    }
+
+    public function testUiTextsRequirePlaceholdersInEveryTranslation(): void
+    {
+        $texts = $this->purrfectUiTexts();
+        $texts['button.updateAriaLabel']['ja'] = '更新してイベントを遊ぶ';
+
+        $this->expectException(ConfigException::class);
+        (new UiTextRepository($this->writeJson($texts)))->load();
+    }
+
     public function testPurrfectSpiritsConfigurationPassesSchemaAndUsesFixedDestinations(): void
     {
         $root = dirname(__DIR__, 2);
@@ -267,6 +286,7 @@ final class ConfigurationRepositoryTest extends TestCase
         $page = (new UpdatePageRepository($root . '/games/purrfect-spirits/update-pages.json', $hosts))
             ->findByTargetVersion('2.9.0');
         $theme = (new ThemeRepository($root . '/games/purrfect-spirits/theme.json', $hosts))->load();
+        $uiTexts = (new UiTextRepository($root . '/games/purrfect-spirits/ui-texts.json'))->load();
 
         self::assertNotNull($page);
         self::assertSame('https://neko.harapeco.okinawa/event-update/assets/banner.webp', $page['imageUrl']);
@@ -278,6 +298,9 @@ final class ConfigurationRepositoryTest extends TestCase
         self::assertSame('#FFF0EA', $theme['backgroundColor']);
         self::assertSame('#3B1F22', $theme['textColor']);
         self::assertNull($theme['logoUrl']);
+        self::assertSame('Update and play the event', $uiTexts['button.update']['en']);
+        self::assertSame('更新してイベントを遊ぶ', $uiTexts['button.update']['ja']);
+        self::assertArrayHasKey('en', $uiTexts['notice.storeDelay']);
     }
 
     /** @return array<string, mixed> */
@@ -304,6 +327,15 @@ final class ConfigurationRepositoryTest extends TestCase
         $this->temporaryFiles[] = $path;
         file_put_contents($path, json_encode($value, JSON_THROW_ON_ERROR));
         return $path;
+    }
+
+    /** @return array<string, array<string, string>> */
+    private function purrfectUiTexts(): array
+    {
+        $path = dirname(__DIR__, 2) . '/games/purrfect-spirits/ui-texts.json';
+        $texts = json_decode((string) file_get_contents($path), true, 16, JSON_THROW_ON_ERROR);
+        self::assertIsArray($texts);
+        return $texts;
     }
 
     private function contrastRatio(string $first, string $second): float

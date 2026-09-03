@@ -8,6 +8,7 @@ return [
     'key' => 'purrfect-spirits',
     'updatePagesPath' => dirname(__DIR__) . '/games/purrfect-spirits/update-pages.json',
     'themePath' => dirname(__DIR__) . '/games/purrfect-spirits/theme.json',
+    'uiTextsPath' => dirname(__DIR__) . '/games/purrfect-spirits/ui-texts.json',
     'allowedHosts' => [
         'neko.harapeco.okinawa',
         'itunes.apple.com',

@@ -14,10 +14,12 @@
                 "pc": "https://www.harapeco.okinawa/info/app/neko_boku.html"
             },
             "descriptions": {
-                "en": "PurrfectSpirits event update (provisional content)."
+                "en": "PurrfectSpirits event update (provisional content).",
+                "ja": "PurrfectSpirits イベントアップデート（仮コンテンツ）"
             },
             "imageAltTexts": {
-                "en": "PurrfectSpirits provisional event update banner"
+                "en": "PurrfectSpirits provisional event update banner",
+                "ja": "PurrfectSpirits イベントアップデートの仮バナー"
             }
         }
     ]

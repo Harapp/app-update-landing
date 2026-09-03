@@ -73,7 +73,8 @@ app-update-landing/
 │       ├── assets/
 │       │   └── banner.png
 │       ├── update-pages.json
-│       └── theme.json
+│       ├── theme.json
+│       └── ui-texts.json
 ├── public/
 │   ├── index.php
 │   └── assets/

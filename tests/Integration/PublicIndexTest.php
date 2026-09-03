@@ -44,6 +44,25 @@ final class PublicIndexTest extends TestCase
                     $body
                 );
             }
+
+            $japaneseBody = file_get_contents(
+                "http://127.0.0.1:$port/?appVersion=0.0.0&targetVersion=2.9.0&locale=ja-JP&platform=ios&osVersion=1"
+            );
+            self::assertIsString($japaneseBody);
+            self::assertStringContainsString('PurrfectSpirits イベントアップデート（仮コンテンツ）', $japaneseBody);
+            self::assertStringContainsString('<small>更新してイベントを遊ぶ</small>', $japaneseBody);
+            self::assertStringContainsString('バージョン2.9.0に更新してイベントを遊ぶ', $japaneseBody);
+            self::assertStringContainsString('アップデートが反映されるまで、時間がかかる場合があります。', $japaneseBody);
+            self::assertStringNotContainsString('A new version is available.', $japaneseBody);
+            self::assertStringNotContainsString('Event period:', $japaneseBody);
+            self::assertStringNotContainsString('Current: V', $japaneseBody);
+
+            $fallbackBody = file_get_contents(
+                "http://127.0.0.1:$port/?appVersion=0.0.0&targetVersion=2.9.0&locale=fr-FR&platform=ios&osVersion=1"
+            );
+            self::assertIsString($fallbackBody);
+            self::assertStringContainsString('<small>Update and play the event</small>', $fallbackBody);
+            self::assertStringContainsString('Updates may take some time to appear', $fallbackBody);
             self::assertContainsHeader('Content-Security-Policy:', $http_response_header ?? []);
             self::assertContainsHeader('X-Content-Type-Options: nosniff', $http_response_header ?? []);
             self::assertContainsHeader('Referrer-Policy: no-referrer', $http_response_header ?? []);

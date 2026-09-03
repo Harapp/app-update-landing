@@ -6,6 +6,7 @@ namespace Tests\Unit;
 
 use App\Clock;
 use App\Config\UpdatePageRepository;
+use App\Config\UiTextRepository;
 use App\Domain\LocaleResolver;
 use App\Domain\UpdatePageEvaluator;
 use App\Http\RequestValidator;
@@ -48,6 +49,8 @@ final class UpdatePageEvaluatorTest extends TestCase
             new UpdatePageRepository($this->configPath, ['cdn.example.com', 'apps.apple.com']),
             new FixedClock('2026-09-03T12:00:00Z'),
             new LocaleResolver(),
+            null,
+            (new UiTextRepository(dirname(__DIR__, 2) . '/games/purrfect-spirits/ui-texts.json'))->load(),
         );
         $request = (new RequestValidator())->validate([
             'appVersion' => '1.10.0',
@@ -63,6 +66,9 @@ final class UpdatePageEvaluatorTest extends TestCase
         self::assertSame('日本語', $view->description);
         self::assertTrue($view->showUpdate);
         self::assertTrue($view->showStoreNotice);
+        self::assertSame('更新してイベントを遊ぶ', $view->updateButtonLabel);
+        self::assertSame('バージョン2.0.0に更新してイベントを遊ぶ', $view->updateButtonAriaLabel);
+        self::assertStringContainsString('時間がかかる場合があります', $view->storeNotice);
     }
 
     public function testDisabledUpdateTakesPriority(): void

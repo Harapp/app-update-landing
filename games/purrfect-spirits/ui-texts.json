@@ -1,0 +1,50 @@
+{
+    "status.available": {
+        "en": "A new version is available.",
+        "ja": "新しいバージョンを利用できます。"
+    },
+    "status.disabled": {
+        "en": "This update is currently unavailable.",
+        "ja": "このアップデートは現在利用できません。"
+    },
+    "status.upToDate": {
+        "en": "You're using the latest version.",
+        "ja": "最新バージョンをご利用中です。"
+    },
+    "status.notStarted": {
+        "en": "This update is not available yet.",
+        "ja": "このアップデートはまだ利用できません。"
+    },
+    "status.ended": {
+        "en": "This update period has ended.",
+        "ja": "このアップデート期間は終了しました。"
+    },
+    "status.unsupportedOs": {
+        "en": "This update requires a newer OS version.",
+        "ja": "このアップデートには新しいOSバージョンが必要です。"
+    },
+    "status.missingDestination": {
+        "en": "This update is temporarily unavailable.",
+        "ja": "このアップデートは一時的に利用できません。"
+    },
+    "status.unavailable": {
+        "en": "This update page is currently unavailable.",
+        "ja": "このアップデートページは現在利用できません。"
+    },
+    "button.update": {
+        "en": "Update and play the event",
+        "ja": "更新してイベントを遊ぶ"
+    },
+    "button.updateAriaLabel": {
+        "en": "Update to version {version} and play the event",
+        "ja": "バージョン{version}に更新してイベントを遊ぶ"
+    },
+    "notice.storeDelay": {
+        "en": "Updates may take some time to appear on the App Store or Google Play. If the update is not available yet, please try again later.",
+        "ja": "App StoreまたはGoogle Playにアップデートが反映されるまで、時間がかかる場合があります。まだ更新できない場合は、しばらくしてからもう一度お試しください。"
+    },
+    "os.requirement": {
+        "en": "OS: {current} · Required: {required}",
+        "ja": "OS：{current}・必要バージョン：{required}"
+    }
+}

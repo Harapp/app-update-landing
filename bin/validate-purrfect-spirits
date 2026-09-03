@@ -4,6 +4,7 @@
 declare(strict_types=1);
 
 use App\Config\ThemeRepository;
+use App\Config\UiTextRepository;
 use App\Config\UpdatePageRepository;
 
 $root = dirname(__DIR__);
@@ -15,6 +16,7 @@ $expected = [
     'key' => 'purrfect-spirits',
     'updatePagesPath' => $root . '/games/purrfect-spirits/update-pages.json',
     'themePath' => $root . '/games/purrfect-spirits/theme.json',
+    'uiTextsPath' => $root . '/games/purrfect-spirits/ui-texts.json',
 ];
 
 foreach ($expected as $key => $value) {
@@ -36,5 +38,6 @@ if ($page === null) {
     exit(1);
 }
 (new ThemeRepository($game['themePath'], $allowedHosts))->load();
+(new UiTextRepository($game['uiTextsPath']))->load();
 
 fwrite(STDOUT, "PurrfectSpirits configuration and JSON Schema validation passed.\n");
