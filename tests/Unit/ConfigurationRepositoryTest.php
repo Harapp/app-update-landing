@@ -161,12 +161,30 @@ final class ConfigurationRepositoryTest extends TestCase
             'backgroundColor' => '#F1F8F3',
             'textColor' => '#20352A',
         ]];
+        yield 'orange' => ['orange', [
+            'primaryColor' => '#A4510C',
+            'accentColor' => '#A4510C',
+            'backgroundColor' => '#FFF7ED',
+            'textColor' => '#3B2615',
+        ]];
+        yield 'pink' => ['pink', [
+            'primaryColor' => '#A63D72',
+            'accentColor' => '#A63D72',
+            'backgroundColor' => '#FFF1F7',
+            'textColor' => '#3F2230',
+        ]];
+        yield 'gray' => ['gray', [
+            'primaryColor' => '#4B5563',
+            'accentColor' => '#4B5563',
+            'backgroundColor' => '#F3F4F6',
+            'textColor' => '#1F2937',
+        ]];
     }
 
     public function testThemeRejectsUnknownPresetOrMixedPresetAndCustomColors(): void
     {
         $unknown = [
-            'colorPreset' => 'orange',
+            'colorPreset' => 'teal',
             'logoUrl' => null,
             'maxContentWidth' => 640,
         ];
