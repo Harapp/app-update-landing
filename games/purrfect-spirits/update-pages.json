@@ -4,14 +4,14 @@
             "targetVersion": "0.1.0",
             "template": "event-update",
             "enabled": true,
-            "imageUrl": "https://neko.harapeco.okinawa/event-update/assets/purrfect-spirits-banner.webp",
+            "imageUrl": "https://neko.harapeco.okinawa/event-update/assets/banner.webp",
             "startAt": null,
             "endAt": null,
             "minimumOsVersions": {},
             "destinationUrls": {
-                "ios": "https://apps.apple.com/app/id000000000",
-                "android": "https://play.google.com/store/apps/details?id=com.example.purrfectspirits",
-                "pc": "https://neko.harapeco.okinawa/purrfect-spirits/download"
+                "ios": "https://itunes.apple.com/jp/app/id1269423920",
+                "android": "https://play.google.com/store/apps/details?id=okinawa.harapeco.catRestaurant",
+                "pc": "https://www.harapeco.okinawa/info/app/neko_boku.html"
             },
             "descriptions": {
                 "en": "PurrfectSpirits event update (provisional content)."

@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 final class PublicIndexTest extends TestCase
 {
-    public function testPublicResponseContainsSecurityHeadersAndConfiguredBanner(): void
+    public function testPublicResponseUsesPurrfectSpiritsConfigurationForEveryPlatform(): void
     {
         $port = $this->freePort();
         $process = proc_open(
@@ -25,13 +25,24 @@ final class PublicIndexTest extends TestCase
 
         try {
             $this->waitForServer($port);
-            $body = file_get_contents(
-                "http://127.0.0.1:$port/?appVersion=1.0.0&targetVersion=2.2.0&locale=en-US&platform=ios&osVersion=18.0"
-            );
+            $destinations = [
+                'ios' => 'https://itunes.apple.com/jp/app/id1269423920',
+                'android' => 'https://play.google.com/store/apps/details?id=okinawa.harapeco.catRestaurant',
+                'pc' => 'https://www.harapeco.okinawa/info/app/neko_boku.html',
+            ];
+            foreach ($destinations as $platform => $destination) {
+                $body = file_get_contents(
+                    "http://127.0.0.1:$port/?appVersion=0.0.0&targetVersion=0.1.0&locale=en-US&platform=$platform&osVersion=1"
+                );
 
-            self::assertIsString($body);
-            self::assertStringContainsString('https://neko.harapeco.okinawa/event-update/assets/banner.webp', $body);
-            self::assertStringContainsString('A new version is available.', $body);
+                self::assertIsString($body);
+                self::assertStringContainsString('https://neko.harapeco.okinawa/event-update/assets/banner.webp', $body);
+                self::assertStringContainsString('PurrfectSpirits event update', $body);
+                self::assertStringContainsString(
+                    'href="' . htmlspecialchars($destination, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '"',
+                    $body
+                );
+            }
             self::assertContainsHeader('Content-Security-Policy:', $http_response_header ?? []);
             self::assertContainsHeader('X-Content-Type-Options: nosniff', $http_response_header ?? []);
             self::assertContainsHeader('Referrer-Policy: no-referrer', $http_response_header ?? []);

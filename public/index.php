@@ -24,13 +24,15 @@ $statusCode = 503;
 
 try {
     $request = (new RequestValidator())->validate($_GET);
+    /** @var array{key: string, updatePagesPath: string, themePath: string, allowedHosts: list<string>} $gameConfig */
+    $gameConfig = require dirname(__DIR__) . '/config/game.php';
     $repository = new UpdatePageRepository(
-        dirname(__DIR__) . '/games/default/update-pages.json',
-        ['cdn.example.com', 'neko.harapeco.okinawa', 'apps.apple.com', 'play.google.com', 'example.com']
+        $gameConfig['updatePagesPath'],
+        $gameConfig['allowedHosts']
     );
     $theme = (new ThemeRepository(
-        dirname(__DIR__) . '/games/default/theme.json',
-        ['cdn.example.com', 'neko.harapeco.okinawa', 'apps.apple.com', 'play.google.com', 'example.com']
+        $gameConfig['themePath'],
+        $gameConfig['allowedHosts']
     ))->load();
     $viewModel = (new UpdatePageEvaluator($repository, new App\SystemClock(), new LocaleResolver(), $theme))->evaluate($request);
     $statusCode = $viewModel->state === 'unavailable' ? 404 : 200;

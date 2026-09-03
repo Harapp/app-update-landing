@@ -65,6 +65,15 @@ final class ConfigurationRepositoryTest extends TestCase
         (new UpdatePageRepository($this->writeJson(['pages' => [$page]]), ['cdn.example.com']))->findByTargetVersion('2.0.0');
     }
 
+    public function testSchemaRejectsNonWebpImageUrl(): void
+    {
+        $page = $this->basePage();
+        $page['imageUrl'] = 'https://cdn.example.com/banner.png';
+
+        $this->expectException(ConfigException::class);
+        (new UpdatePageRepository($this->writeJson(['pages' => [$page]]), ['cdn.example.com']))->findByTargetVersion('2.0.0');
+    }
+
     public function testAdditionalValidationRejectsDuplicateVersions(): void
     {
         $first = $this->basePage();
@@ -123,6 +132,37 @@ final class ConfigurationRepositoryTest extends TestCase
 
         $this->expectException(ConfigException::class);
         (new ThemeRepository($this->writeJson($theme), ['cdn.example.com']))->load();
+    }
+
+    public function testThemeSchemaRejectsNonWebpLogoUrl(): void
+    {
+        $theme = [
+            'primaryColor' => '#123456',
+            'accentColor' => '#abcdef',
+            'backgroundColor' => '#f4f5f7',
+            'textColor' => '#202124',
+            'logoUrl' => 'https://cdn.example.com/logo.png',
+            'maxContentWidth' => 640,
+        ];
+
+        $this->expectException(ConfigException::class);
+        (new ThemeRepository($this->writeJson($theme), ['cdn.example.com']))->load();
+    }
+
+    public function testPurrfectSpiritsConfigurationPassesSchemaAndUsesFixedDestinations(): void
+    {
+        $root = dirname(__DIR__, 2);
+        $hosts = ['neko.harapeco.okinawa', 'itunes.apple.com', 'play.google.com', 'www.harapeco.okinawa'];
+        $page = (new UpdatePageRepository($root . '/games/purrfect-spirits/update-pages.json', $hosts))
+            ->findByTargetVersion('0.1.0');
+        $theme = (new ThemeRepository($root . '/games/purrfect-spirits/theme.json', $hosts))->load();
+
+        self::assertNotNull($page);
+        self::assertSame('https://neko.harapeco.okinawa/event-update/assets/banner.webp', $page['imageUrl']);
+        self::assertSame('https://itunes.apple.com/jp/app/id1269423920', $page['destinationUrls']['ios']);
+        self::assertSame('https://play.google.com/store/apps/details?id=okinawa.harapeco.catRestaurant', $page['destinationUrls']['android']);
+        self::assertSame('https://www.harapeco.okinawa/info/app/neko_boku.html', $page['destinationUrls']['pc']);
+        self::assertSame('https://neko.harapeco.okinawa/event-update/assets/purrfect-spirits-logo.webp', $theme['logoUrl']);
     }
 
     /** @return array<string, mixed> */
