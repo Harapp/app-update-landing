@@ -32,11 +32,12 @@ final class PublicIndexTest extends TestCase
             ];
             foreach ($destinations as $platform => $destination) {
                 $body = file_get_contents(
-                    "http://127.0.0.1:$port/?appVersion=0.0.0&targetVersion=0.1.0&locale=en-US&platform=$platform&osVersion=1"
+                    "http://127.0.0.1:$port/?appVersion=0.0.0&targetVersion=2.9.0&locale=en-US&platform=$platform&osVersion=1"
                 );
 
                 self::assertIsString($body);
                 self::assertStringContainsString('https://neko.harapeco.okinawa/event-update/assets/banner.webp', $body);
+                self::assertStringNotContainsString('alt="App logo"', $body);
                 self::assertStringContainsString('PurrfectSpirits event update', $body);
                 self::assertStringContainsString(
                     'href="' . htmlspecialchars($destination, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '"',

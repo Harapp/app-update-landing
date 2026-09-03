@@ -19,6 +19,16 @@ scripts/release-purrfect-spirits
 
 リリーススクリプトは低レベルの`scripts/deploy-purrfect-spirits`を呼び出します。Deployerの最初のタスクとして、ローカルで`composer test`、`composer validate:config`、`composer smoke`を実行します。配布元は実行時のGitアーカイブで、`bin`、Composer定義、固定ゲーム設定、公開コード、アプリケーションコード、テンプレートだけを許可リストで選択します。`.claude`、ドキュメント、テスト、既定ゲーム設定など、本番実行に不要なファイルはアーカイブへ含めず、サーバーへ転送しません。
 
+ゲーム画像は`games/purrfect-spirits/assets/`へPNGまたはJPEGで保存します。デプロイ時にローカルの`cwebp`で品質82のWebPへ変換し、生成物を`public/assets/`としてリリースへ追加してからサーバーへ転送します。サーバー側に画像変換ツールは不要です。`banner.png`、`banner.jpg`、`banner.jpeg`はいずれも`/assets/banner.webp`になりますが、同じ出力名になる元画像を複数置くことはできません。
+
+ローカルで生成結果を確認する場合は次を実行します。生成物は`build/purrfect-spirits/public/assets/`へ出力され、Git管理しません。
+
+```bash
+composer assets:build
+```
+
+リリース実行環境には`cwebp`が必要です。macOSではHomebrewの`webp` formulaなどで用意します。元画像がない場合や`banner.webp`を生成できない場合、デプロイは公開リンクを切り替える前に失敗します。
+
 転送後はまだ`current`を切り替えず、候補release上でComposerのplatform要件、PHP構文、JSON Schemaと固定ゲーム設定、iOS・Android・PCの更新先とHTML生成を検証します。すべて成功した場合だけ`current`と公開リンクを切り替え、その後に公開URLのHTTPS health checkを実行します。
 
 Deployerのリリース領域は公開ディレクトリ外に置きます。
@@ -148,6 +158,8 @@ vendor/bin/dep rollback coreserver
 PHP test
   ↓
 JSON Schema validation
+  ↓
+ゲーム画像をWebPへ変換
   ↓
 対象ゲームだけを含む配布物を準備
   ↓

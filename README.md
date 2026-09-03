@@ -70,6 +70,8 @@ app-update-landing/
 │   └── schema/
 ├── games/
 │   └── {game-key}/
+│       ├── assets/
+│       │   └── banner.png
 │       ├── update-pages.json
 │       └── theme.json
 ├── public/
@@ -82,6 +84,8 @@ app-update-landing/
 ├── deploy.php
 └── composer.json
 ```
+
+`games/{game-key}/assets/`にはPNGまたはJPEGの元画像を置きます。リリース時に同じ相対パスとファイル名でWebPへ変換され、`public/assets/`から配信されます。たとえば`games/purrfect-spirits/assets/banner.png`は`/assets/banner.webp`になります。元画像は直接公開しません。
 
 この構成は実装時に確定します。
 

@@ -6,6 +6,30 @@ namespace Deployer;
 
 require 'recipe/composer.php';
 
+function removeLocalReleaseDirectory(string $path): void
+{
+    $expectedPrefix = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR)
+        . DIRECTORY_SEPARATOR
+        . 'purrfect-spirits-release-';
+    if (!str_starts_with($path, $expectedPrefix) || !is_dir($path)) {
+        return;
+    }
+
+    $iterator = new \RecursiveIteratorIterator(
+        new \RecursiveDirectoryIterator($path, \RecursiveDirectoryIterator::SKIP_DOTS),
+        \RecursiveIteratorIterator::CHILD_FIRST,
+    );
+    foreach ($iterator as $item) {
+        if ($item->isDir() && !$item->isLink()) {
+            rmdir($item->getPathname());
+            continue;
+        }
+
+        unlink($item->getPathname());
+    }
+    rmdir($path);
+}
+
 // The SSH config entry is intentionally the source of connection credentials.
 // Keep the alias as `coreserver` so Deployer uses `ssh coreserver`.
 host('coreserver')
@@ -52,12 +76,35 @@ task('deploy:update_code', function (): void {
         throw new \RuntimeException('Unable to prepare the deployment archive.');
     }
 
+    $stagingPath = sys_get_temp_dir() . '/purrfect-spirits-release-' . bin2hex(random_bytes(12));
+    if (!mkdir($stagingPath, 0700)) {
+        unlink($archivePath);
+        throw new \RuntimeException('Unable to prepare the local release staging directory.');
+    }
+
     try {
         $quotedPaths = array_map(static fn (string $path): string => quote($path), $sourcePaths);
         runLocally(
             'git -C ' . quote($gitRoot)
             . ' archive --format=tar --output=' . quote($archivePath)
             . ' ' . quote($target) . ' -- ' . implode(' ', $quotedPaths)
+        );
+
+        runLocally('tar -xf ' . quote($archivePath) . ' -C ' . quote($stagingPath));
+        runLocally(
+            quote(PHP_BINARY)
+            . ' ' . quote($stagingPath . '/bin/build-game-assets')
+            . ' purrfect-spirits ' . quote($stagingPath . '/public/assets')
+        );
+        if (!is_file($stagingPath . '/public/assets/banner.webp')) {
+            throw new \RuntimeException(
+                'The release banner is missing. Add games/purrfect-spirits/assets/banner.png, .jpg, or .jpeg.'
+            );
+        }
+        runLocally(
+            'tar -rf ' . quote($archivePath)
+            . ' -C ' . quote($stagingPath)
+            . ' public/assets'
         );
 
         $archiveEntries = preg_split('/\R/', trim(runLocally('tar -tf ' . quote($archivePath))));
@@ -83,6 +130,7 @@ task('deploy:update_code', function (): void {
         if (is_file($archivePath)) {
             unlink($archivePath);
         }
+        removeLocalReleaseDirectory($stagingPath);
     }
 
     $revision = quote(runLocally('git -C ' . quote($gitRoot) . ' rev-list -1 ' . quote($target)));
@@ -111,6 +159,7 @@ task('deploy:verify_payload', function (): void {
 
 desc('Validate the release candidate on the server before switching current.');
 task('deploy:candidate_validate', function (): void {
+    run('test -s {{release_path}}/public/assets/banner.webp');
     run('cd {{release_path}} && {{bin/composer}} check-platform-reqs --no-dev');
     run("find {{release_path}}/config {{release_path}}/public {{release_path}}/src {{release_path}}/templates "
         . "-type f -name '*.php' -print0 | xargs -0 -n 1 {{bin/php}} -l >/dev/null");
@@ -146,7 +195,9 @@ desc('Verify the published PurrfectSpirits page over HTTPS.');
 task('deploy:health', function (): void {
     try {
         run("curl --fail --silent --show-error --location --max-time 15 "
-            . "'https://neko.harapeco.okinawa/event-update/?appVersion=0.0.0&targetVersion=0.1.0&locale=en&platform=pc&osVersion=1' "
+            . "--output /dev/null 'https://neko.harapeco.okinawa/event-update/assets/banner.webp'");
+        run("curl --fail --silent --show-error --location --max-time 15 "
+            . "'https://neko.harapeco.okinawa/event-update/?appVersion=0.0.0&targetVersion=2.9.0&locale=en&platform=pc&osVersion=1' "
             . "| grep -F 'PurrfectSpirits'");
     } catch (\Throwable $exception) {
         warning('Health check failed; restoring the previous release.');

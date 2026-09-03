@@ -1,7 +1,7 @@
 {
     "pages": [
         {
-            "targetVersion": "0.1.0",
+            "targetVersion": "2.9.0",
             "template": "event-update",
             "enabled": true,
             "imageUrl": "https://neko.harapeco.okinawa/event-update/assets/banner.webp",

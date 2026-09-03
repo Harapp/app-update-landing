@@ -1,0 +1,58 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+use App\Asset\GameAssetBuilder;
+
+require dirname(__DIR__) . '/src/Asset/GameAssetBuilder.php';
+
+$usage = static function (): void {
+    fwrite(STDERR, "Usage: bin/build-game-assets <game-key> [output-directory]\n");
+};
+
+if ($argc < 2 || $argc > 3 || in_array($argv[1], ['--help', '-h'], true)) {
+    $usage();
+    exit(in_array($argv[1] ?? '', ['--help', '-h'], true) ? 0 : 2);
+}
+
+$gameKey = $argv[1];
+if (preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $gameKey) !== 1) {
+    fwrite(STDERR, "Game key is invalid.\n");
+    exit(2);
+}
+
+$root = dirname(__DIR__);
+$sourceDirectory = $root . '/games/' . $gameKey . '/assets';
+$outputDirectory = $argv[2] ?? $root . '/build/' . $gameKey . '/public/assets';
+
+$cwebp = getenv('CWEBP_BINARY');
+if (!is_string($cwebp) || $cwebp === '') {
+    $cwebp = null;
+    foreach (explode(PATH_SEPARATOR, getenv('PATH') ?: '') as $directory) {
+        $candidate = rtrim($directory, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'cwebp';
+        if (is_file($candidate) && is_executable($candidate)) {
+            $cwebp = $candidate;
+            break;
+        }
+    }
+}
+
+if ($cwebp === null) {
+    fwrite(STDERR, "cwebp is unavailable. Install the WebP command-line tools first.\n");
+    exit(1);
+}
+
+try {
+    $count = (new GameAssetBuilder($cwebp))->build($sourceDirectory, $outputDirectory);
+} catch (Throwable $exception) {
+    fwrite(STDERR, $exception->getMessage() . "\n");
+    exit(1);
+}
+
+if ($count === 0) {
+    fwrite(STDOUT, "No source images found for {$gameKey}.\n");
+    exit(0);
+}
+
+fwrite(STDOUT, "Generated {$count} WebP asset(s) for {$gameKey}.\n");

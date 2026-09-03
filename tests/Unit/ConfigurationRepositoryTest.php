@@ -265,7 +265,7 @@ final class ConfigurationRepositoryTest extends TestCase
         $root = dirname(__DIR__, 2);
         $hosts = ['neko.harapeco.okinawa', 'itunes.apple.com', 'play.google.com', 'www.harapeco.okinawa'];
         $page = (new UpdatePageRepository($root . '/games/purrfect-spirits/update-pages.json', $hosts))
-            ->findByTargetVersion('0.1.0');
+            ->findByTargetVersion('2.9.0');
         $theme = (new ThemeRepository($root . '/games/purrfect-spirits/theme.json', $hosts))->load();
 
         self::assertNotNull($page);
@@ -277,7 +277,7 @@ final class ConfigurationRepositoryTest extends TestCase
         self::assertSame('#C92F3C', $theme['accentColor']);
         self::assertSame('#FFF0EA', $theme['backgroundColor']);
         self::assertSame('#3B1F22', $theme['textColor']);
-        self::assertSame('https://neko.harapeco.okinawa/event-update/assets/purrfect-spirits-logo.webp', $theme['logoUrl']);
+        self::assertNull($theme['logoUrl']);
     }
 
     /** @return array<string, mixed> */

@@ -254,6 +254,12 @@ $templates = [
 
 独自配色が必要な場合は、従来どおり`primaryColor`、`accentColor`、`backgroundColor`、`textColor`の4項目をすべて指定します。プリセットと独自配色は同時に指定できません。
 
+`logoUrl`は任意表示です。PurrfectSpiritsの初期リリースではIconを表示しないため`null`とします。
+
+## ゲーム画像の生成
+
+バナーなどの元画像は`games/{game-key}/assets/`へPNGまたはJPEGで保存します。リリース処理がローカルでWebPへ変換し、同じ相対パスで`public/assets/`へ配置します。生成済みWebPはGit管理せず、コード、設定、生成画像を同じリリースとして配布・ロールバックします。
+
 ## HTTPとセキュリティ
 
 - HTTPSを必須とする

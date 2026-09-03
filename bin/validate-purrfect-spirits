@@ -30,7 +30,11 @@ if (!is_array($allowedHosts)) {
     exit(1);
 }
 
-(new UpdatePageRepository($game['updatePagesPath'], $allowedHosts))->findByTargetVersion('0.1.0');
+$page = (new UpdatePageRepository($game['updatePagesPath'], $allowedHosts))->findByTargetVersion('2.9.0');
+if ($page === null) {
+    fwrite(STDERR, "Fixed game configuration validation failed.\n");
+    exit(1);
+}
 (new ThemeRepository($game['themePath'], $allowedHosts))->load();
 
 fwrite(STDOUT, "PurrfectSpirits configuration and JSON Schema validation passed.\n");
