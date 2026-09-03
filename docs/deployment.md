@@ -6,6 +6,42 @@ Deployerを使用し、ゲームごとに任意のSSH接続可能なサーバー
 
 共通コードは1つのリポジトリで管理し、デプロイ対象ゲームに対応するJSONとテーマだけを選択して配置します。
 
+## PurrfectSpirits本番デプロイ
+
+Issue #8では、coreserverのSSH configに登録された`coreserver` aliasだけを使用します。接続ユーザー、秘密鍵、パスワードはリポジトリへ保存しません。
+
+```bash
+composer install
+vendor/bin/dep deploy coreserver
+```
+
+デプロイ前にローカルで`composer test`と`composer validate:config`を実行します。配布元は実行時のGitアーカイブで、リリースには`games/purrfect-spirits`だけを残します。`games/default`、テスト、ドキュメントは本番リリースへ転送後に除外します。
+
+Deployerのリリース領域は公開ディレクトリ外に置きます。
+
+```text
+/home/harapeco/domains/neko.harapeco.okinawa/.deploy/event-update/
+├── releases/<release>/
+└── current -> releases/<release>
+```
+
+公開URLのパスは`current/public`へのシンボリックリンクとして接続します。
+
+```text
+/home/harapeco/domains/neko.harapeco.okinawa/public_html/event-update
+  -> /home/harapeco/domains/neko.harapeco.okinawa/.deploy/event-update/current/public
+```
+
+事前確認では、coreserverのPHP 8.3.20、Composer、Git、rsync、配置先の書込み権限、シンボリックリンク利用可を確認済みです。既存の公開パスが空の通常ディレクトリであれば初回デプロイ時にリンクへ置換します。内容のある通常ディレクトリは削除せず、デプロイを失敗させて公開中の状態を維持します。
+
+公開リンク切替後にHTTPS health checkを行い、失敗時は直前リリースへ`rollback`して公開リンクを同期します。手動ロールバックは次のコマンドです。
+
+```bash
+vendor/bin/dep rollback coreserver
+```
+
+本番デプロイ対象は`coreserver`のみで、staging hostは定義していません。
+
 ## デプロイ単位
 
 1つのデプロイ先は1つのゲームと1つの環境に対応します。
@@ -88,14 +124,13 @@ game-b.update.example.com
 
 秘密鍵、パスワード、tokenはリポジトリへ保存しません。SSH接続情報は可能な限り実行環境のSSH configまたはCIのsecretで管理します。
 
-## 想定コマンド
+## 運用コマンド
 
-実際のコマンドとselectorは実装時に確定します。
+coreserver本番だけを対象にし、selectorを省略せず明示します。
 
 ```bash
-dep deploy game-a-staging
-dep deploy game-a-production
-dep rollback game-a-production
+vendor/bin/dep deploy coreserver
+vendor/bin/dep rollback coreserver
 ```
 
 複数対象への一括デプロイは可能ですが、初期運用では誤配布を防ぐためゲームと環境を明示して実行します。
