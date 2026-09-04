@@ -1,0 +1,14 @@
+{
+  "name": "Harapeco.AppUpdateLanding",
+  "rootNamespace": "Harapeco.AppUpdateLanding",
+  "references": [],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

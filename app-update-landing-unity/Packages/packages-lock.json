@@ -1,5 +1,13 @@
 {
   "dependencies": {
+    "com.harapeco.app.update.landing": {
+      "version": "file:com.harapeco.app.update.landing",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.unity.modules.unitywebrequest": "1.0.0"
+      }
+    },
     "com.unity.2d.animation": {
       "version": "10.2.3",
       "depth": 1,
@@ -409,6 +417,12 @@
         "com.unity.modules.jsonserialize": "1.0.0",
         "com.unity.modules.hierarchycore": "1.0.0"
       }
+    },
+    "com.unity.modules.unitywebrequest": {
+      "version": "1.0.0",
+      "depth": 1,
+      "source": "builtin",
+      "dependencies": {}
     }
   }
 }

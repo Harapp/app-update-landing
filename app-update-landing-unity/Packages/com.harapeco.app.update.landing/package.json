@@ -1,0 +1,13 @@
+{
+  "name": "com.harapeco.app.update.landing",
+  "version": "0.1.0",
+  "displayName": "App Update Landing",
+  "description": "Unity runtime client for loading app event update status and opening the App Update Landing page.",
+  "unity": "6000.0",
+  "dependencies": {
+    "com.unity.modules.unitywebrequest": "1.0.0"
+  },
+  "author": {
+    "name": "HARAPECORPORATION Inc."
+  }
+}
