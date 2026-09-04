@@ -70,7 +70,7 @@ foreach ($destinations as $platform => $destination) {
         || $viewModel->destinationUrl !== $destination
         || !str_contains($html, 'PurrfectSpirits')
         || str_contains($html, 'A new version is available.')
-        || str_contains($html, 'Event period:')
+        || !str_contains($html, 'Event period:')
         || str_contains($html, 'Current: V')
         || ($isReleased && !str_contains($html, 'Update and play the event'))
         || ($isReleased && !str_contains($html, htmlspecialchars($destination, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')))

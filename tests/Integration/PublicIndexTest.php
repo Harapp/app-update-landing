@@ -129,6 +129,7 @@ final class PublicIndexTest extends TestCase
             self::assertContainsHeader('Content-Security-Policy:', $http_response_header ?? []);
             self::assertContainsHeader('X-Content-Type-Options: nosniff', $http_response_header ?? []);
             self::assertContainsHeader('Referrer-Policy: no-referrer', $http_response_header ?? []);
+            self::assertContainsHeader('X-Robots-Tag: noindex, nofollow, noarchive', $http_response_header ?? []);
 
             $iosBodyFromSharedAndroidUrl = file_get_contents(
                 "http://127.0.0.1:$port/?appVersion=0.0.0&targetVersion=2.9.0&locale=en-US&platform=android&osVersion=1",

@@ -10,6 +10,7 @@ $pageTitle = $viewModel->socialCardTitle;
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex,nofollow,noarchive">
     <title><?= $escape($pageTitle) ?></title>
     <meta name="description" content="<?= $escape($viewModel->socialCardDescription) ?>">
     <meta property="og:type" content="website">

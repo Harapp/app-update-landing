@@ -234,7 +234,7 @@ startAt <= now <= endAt
 
 - バナー画像
 - イベント説明
-- 開始前は`Sep 10–30 (starts in 7 days)` / `9月10日〜30日（7日後に開始）`形式の期間と開始までの日数
+- 開始前は`Event period: Sep 10–30 (starts in 7 days)` / `イベント期間：9月10日〜30日（7日後に開始）`形式の期間と開始までの日数
 - 通常ボタンと同じ位置・サイズで、`Coming Soon` / `近日開始`の無効ボタンを表示する
 - 無効ボタンから更新先へは遷移せず、その下にストア反映の注意書きを表示する
 
@@ -242,7 +242,7 @@ startAt <= now <= endAt
 
 - バナー画像
 - イベント説明
-- `Ended.` / `終了しました。`
+- `Event period: Ended.` / `イベント期間：終了しました。`
 - 更新ボタンは表示しない
 
 ### OS非対応
@@ -322,6 +322,7 @@ Updates may take some time to appear on the App Store or Google Play. If the upd
 - Content Security Policyを設定し、画像・script・遷移先を必要なoriginへ限定する
 - 個人識別子、通知トークン、credentialを受け取らず、ログにも記録しない
 - query parameterだけで権限や限定コンテンツの閲覧可否を決めない
+- 検索結果への掲載とキャッシュを避けるため`noindex, nofollow, noarchive`を返すが、SNSカード用クローラーを含むbotのアクセス自体は一律遮断しない
 
 ## UI・アクセシビリティ
 

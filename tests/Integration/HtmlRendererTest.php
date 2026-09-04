@@ -46,6 +46,7 @@ final class HtmlRendererTest extends TestCase
 
         self::assertStringNotContainsString('A new version is available.', $html);
         self::assertStringContainsString('<p class="period" dir="auto">Sep 3–4 (1 day remaining)</p>', $html);
+        self::assertStringContainsString('<meta name="robots" content="noindex,nofollow,noarchive">', $html);
         self::assertStringNotContainsString('Current: V', $html);
         self::assertStringContainsString('<span><bdi dir="ltr">V2.0.0</bdi></span>', $html);
         self::assertStringContainsString('<small dir="auto">更新してイベントを遊ぶ</small>', $html);

@@ -235,6 +235,10 @@ JSON Schemaでは少なくとも次を検証します。
     "en": "Update and get ready for the event",
     "ja": "更新してイベントに備える"
   },
+  "period.label": {
+    "en": "Event period: {period}",
+    "ja": "イベント期間：{period}"
+  },
   "notice.storeDelay": {
     "en": "Updates may take some time to appear...",
     "ja": "アップデートが反映されるまで、時間がかかる場合があります..."
@@ -323,6 +327,7 @@ $templates = [
 - HTTPSを必須とする
 - 更新先URLと画像URLへhost allowlistを適用する
 - query parameterから遷移先URLを受け取らない
+- HTTPの`X-Robots-Tag`とHTMLのrobots metaで`noindex, nofollow, noarchive`を指定し、SNSカード取得を妨げるUser-Agent単位のbot遮断は行わない
 - Content Security Policyを設定する
 - `X-Content-Type-Options: nosniff`を設定する
 - 適切な`Referrer-Policy`を設定する

@@ -28,6 +28,7 @@ final class UpdatePageEvaluator
         'button.prepareAriaLabel' => ['en' => 'Update to version {version} and get ready for the event'],
         'button.comingSoon' => ['en' => 'Coming Soon'],
         'notice.storeDelay' => ['en' => 'Updates may take some time to appear on the App Store or Google Play. If the update is not available yet, please try again later.'],
+        'period.label' => ['en' => 'Event period: {period}'],
         'period.range' => ['en' => '{start}–{end}'],
         'period.remaining.one' => ['en' => '{range} (1 day remaining)'],
         'period.remaining.two' => ['en' => '{range} (2 days remaining)'],
@@ -161,12 +162,7 @@ final class UpdatePageEvaluator
             $showStoreNotice && in_array($state, ['available', 'unreleased'], true),
             $common['template'],
             $this->theme ?? UpdatePageViewModel::DEFAULT_THEME,
-            $this->formatEventPeriod(
-                $common['startAt'],
-                $common['endAt'],
-                $common['now'],
-                $common['locale'],
-            ),
+            $this->labeledEventPeriod($common),
             $common['updateButtonLabel'],
             $common['updateButtonAriaLabel'],
             $common['storeNotice'],
@@ -177,6 +173,21 @@ final class UpdatePageEvaluator
             $common['title'],
             $common['textDirection'],
         );
+    }
+
+    /** @param array<string, mixed> $common */
+    private function labeledEventPeriod(array $common): ?string
+    {
+        $period = $this->formatEventPeriod(
+            $common['startAt'],
+            $common['endAt'],
+            $common['now'],
+            $common['locale'],
+        );
+
+        return $period === null
+            ? null
+            : $this->text('period.label', $common['locale'], ['{period}' => $period]);
     }
 
     /** @param array<string, string> $replacements */

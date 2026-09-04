@@ -83,6 +83,12 @@
         "he": "ייתכן שיחלוף זמן עד שהעדכון יופיע ב-App Store או ב-Google Play.",
         "ja": "App StoreまたはGoogle Playにアップデートが反映されるまで、時間がかかる場合があります。"
     },
+    "period.label": {
+        "en": "Event period: {period}",
+        "ar": "فترة الفعالية: {period}",
+        "he": "תקופת האירוע: {period}",
+        "ja": "イベント期間：{period}"
+    },
     "period.range": {
         "en": "{start}–{end}",
         "ar": "من {start} إلى {end}",

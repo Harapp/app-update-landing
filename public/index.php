@@ -19,6 +19,7 @@ header('Content-Type: text/html; charset=UTF-8');
 header("Content-Security-Policy: default-src 'none'; img-src https:; style-src 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'");
 header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: no-referrer');
+header('X-Robots-Tag: noindex, nofollow, noarchive');
 header('Cache-Control: no-store');
 
 $viewModel = UpdatePageViewModel::unavailable();
