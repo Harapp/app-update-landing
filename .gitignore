@@ -35,6 +35,29 @@ tmp/
 coverage/
 .nyc_output/
 
+# Unity generated files
+app-update-landing-unity/**/[Ll]ibrary/
+app-update-landing-unity/**/[Tt]emp/
+app-update-landing-unity/**/[Oo]bj/
+app-update-landing-unity/**/[Bb]uild/
+app-update-landing-unity/**/[Bb]uilds/
+app-update-landing-unity/**/[Ll]ogs/
+app-update-landing-unity/**/[Uu]ser[Ss]ettings/
+app-update-landing-unity/**/[Mm]emoryCaptures/
+app-update-landing-unity/**/[Rr]ecordings/
+app-update-landing-unity/**/*.csproj
+app-update-landing-unity/**/*.sln
+app-update-landing-unity/**/*.suo
+app-update-landing-unity/**/*.user
+app-update-landing-unity/**/*.userprefs
+app-update-landing-unity/**/*.pidb
+app-update-landing-unity/**/*.booproj
+app-update-landing-unity/**/*.svd
+app-update-landing-unity/**/*.pdb
+app-update-landing-unity/**/*.mdb
+app-update-landing-unity/**/*.opendb
+app-update-landing-unity/**/*.VC.db
+
 # Logs and local runtime files
 *.log
 npm-debug.log*

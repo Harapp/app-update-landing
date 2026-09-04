@@ -13,7 +13,8 @@ if [[ ! "$port" =~ ^[0-9]+$ ]] || (( port < 1 || port > 65535 )); then
 fi
 
 script_dir="$(cd "$(dirname "$0")" && pwd)"
-project_root="$(cd "$script_dir/.." && pwd)"
+repository_root="$(cd "$script_dir/.." && pwd)"
+server_root="$repository_root/app-update-landing-server"
 
 printf 'Event Update Preview: http://127.0.0.1:%s/\n' "$port"
-exec env EVENT_UPDATE_PREVIEW=1 php -S "127.0.0.1:$port" -t "$project_root/dev" "$project_root/dev/router.php"
+exec env EVENT_UPDATE_PREVIEW=1 php -S "127.0.0.1:$port" -t "$server_root/dev" "$server_root/dev/router.php"

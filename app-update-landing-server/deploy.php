@@ -86,6 +86,8 @@ task('deploy:update_code', function (): void {
     $gitRoot = runLocally('git rev-parse --show-toplevel');
     $gameKey = (string) get('game_key');
     $target = get('target');
+    $revision = trim(runLocally('git -C ' . quote($gitRoot) . ' rev-list -1 ' . quote($target)));
+    $serverTree = $revision . ':' . basename(__DIR__);
     $sourcePaths = get('deploy_source_paths');
     if (!is_array($sourcePaths) || $sourcePaths === []) {
         throw new \RuntimeException('Deployment source paths are unavailable.');
@@ -107,7 +109,7 @@ task('deploy:update_code', function (): void {
         runLocally(
             'git -C ' . quote($gitRoot)
             . ' archive --format=tar --output=' . quote($archivePath)
-            . ' ' . quote($target) . ' -- ' . implode(' ', $quotedPaths)
+            . ' ' . quote($serverTree) . ' -- ' . implode(' ', $quotedPaths)
         );
 
         runLocally('tar -xf ' . quote($archivePath) . ' -C ' . quote($stagingPath));
@@ -153,8 +155,7 @@ task('deploy:update_code', function (): void {
         removeLocalReleaseDirectory($stagingPath);
     }
 
-    $revision = quote(runLocally('git -C ' . quote($gitRoot) . ' rev-list -1 ' . quote($target)));
-    run("echo $revision > {{release_path}}/REVISION");
+    run('echo ' . quote($revision) . ' > {{release_path}}/REVISION');
 });
 
 desc('Verify that the uploaded release contains only approved top-level paths.');

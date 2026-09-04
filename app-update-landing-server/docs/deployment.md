@@ -9,9 +9,10 @@ Deployerを使用し、ゲームごとに任意のSSH接続可能なサーバー
 ## PurrfectSpirits本番デプロイ
 
 Issue #8では、coreserverのSSH configに登録された`coreserver` aliasだけを使用します。接続ユーザー、秘密鍵、パスワードはリポジトリへ保存しません。
+以下のコマンドはリポジトリルートで実行します。
 
 ```bash
-composer install
+composer --working-dir=app-update-landing-server install
 scripts/release-purrfect-spirits
 ```
 
@@ -24,7 +25,7 @@ scripts/release-purrfect-spirits
 ローカルで生成結果を確認する場合は次を実行します。生成物は`build/purrfect-spirits/public/assets/`へ出力され、Git管理しません。
 
 ```bash
-composer assets:build
+composer --working-dir=app-update-landing-server assets:build
 ```
 
 リリース実行環境には`cwebp`が必要です。macOSではHomebrewの`webp` formulaなどで用意します。元画像がない場合や`banner.webp`を生成できない場合、デプロイは公開リンクを切り替える前に失敗します。
@@ -51,6 +52,7 @@ Deployerのリリース領域は公開ディレクトリ外に置きます。
 公開リンク切替後にHTTPS health checkを行い、失敗時は直前リリースへ`rollback`して公開リンクを同期します。候補release上の検証に失敗した場合は`current`を切り替えません。手動ロールバックは次のコマンドです。
 
 ```bash
+cd app-update-landing-server
 vendor/bin/dep rollback coreserver
 ```
 
@@ -147,7 +149,7 @@ scripts/release-purrfect-spirits
 scripts/deploy-purrfect-spirits --plan
 scripts/release-event-update purrfect-spirits coreserver
 scripts/deploy-event-update purrfect-spirits coreserver --plan
-vendor/bin/dep rollback coreserver
+cd app-update-landing-server && vendor/bin/dep rollback coreserver
 ```
 
 ゲーム名付きスクリプトにはゲーム固有のkeyとhostだけを置き、引数検証、clean worktree確認、Deployer起動などの共通処理は`release-event-update`と`deploy-event-update`へ集約します。

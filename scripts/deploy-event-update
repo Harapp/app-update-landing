@@ -3,8 +3,9 @@
 set -euo pipefail
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-project_root="$(cd -- "$script_dir/.." && pwd)"
-cd "$project_root"
+repository_root="$(cd -- "$script_dir/.." && pwd)"
+server_root="$repository_root/app-update-landing-server"
+cd "$server_root"
 
 usage() {
     printf 'Usage: %s <game-key> <deployer-host> [--plan]\n' "$0"
@@ -32,7 +33,7 @@ if [[ ! "$game_key" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]] \
 fi
 
 if [[ ! -x vendor/bin/dep ]]; then
-    printf 'Deployer is unavailable. Run composer install first.\n' >&2
+    printf 'Deployer is unavailable. Run composer install in app-update-landing-server first.\n' >&2
     exit 1
 fi
 
