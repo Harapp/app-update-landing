@@ -2,11 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "required": [
-    "status.available",
     "status.disabled",
     "status.upToDate",
-    "status.unreleased",
-    "status.ended",
     "status.unsupportedOs",
     "status.missingDestination",
     "status.unavailable",
@@ -33,11 +30,8 @@
   ],
   "additionalProperties": false,
   "properties": {
-    "status.available": {"type": "object", "required": ["en"], "additionalProperties": false, "properties": {"en": {"type": "string", "minLength": 1, "maxLength": 500}}, "patternProperties": {"^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$": {"type": "string", "minLength": 1, "maxLength": 500}}},
     "status.disabled": {"type": "object", "required": ["en"], "additionalProperties": false, "properties": {"en": {"type": "string", "minLength": 1, "maxLength": 500}}, "patternProperties": {"^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$": {"type": "string", "minLength": 1, "maxLength": 500}}},
     "status.upToDate": {"type": "object", "required": ["en"], "additionalProperties": false, "properties": {"en": {"type": "string", "minLength": 1, "maxLength": 500}}, "patternProperties": {"^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$": {"type": "string", "minLength": 1, "maxLength": 500}}},
-    "status.unreleased": {"type": "object", "required": ["en"], "additionalProperties": false, "properties": {"en": {"type": "string", "minLength": 1, "maxLength": 500}}, "patternProperties": {"^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$": {"type": "string", "minLength": 1, "maxLength": 500}}},
-    "status.ended": {"type": "object", "required": ["en"], "additionalProperties": false, "properties": {"en": {"type": "string", "minLength": 1, "maxLength": 500}}, "patternProperties": {"^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$": {"type": "string", "minLength": 1, "maxLength": 500}}},
     "status.unsupportedOs": {"type": "object", "required": ["en"], "additionalProperties": false, "properties": {"en": {"type": "string", "minLength": 1, "maxLength": 500}}, "patternProperties": {"^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$": {"type": "string", "minLength": 1, "maxLength": 500}}},
     "status.missingDestination": {"type": "object", "required": ["en"], "additionalProperties": false, "properties": {"en": {"type": "string", "minLength": 1, "maxLength": 500}}, "patternProperties": {"^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$": {"type": "string", "minLength": 1, "maxLength": 500}}},
     "status.unavailable": {"type": "object", "required": ["en"], "additionalProperties": false, "properties": {"en": {"type": "string", "minLength": 1, "maxLength": 500}}, "patternProperties": {"^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$": {"type": "string", "minLength": 1, "maxLength": 500}}},

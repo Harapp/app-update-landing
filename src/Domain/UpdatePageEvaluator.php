@@ -14,11 +14,8 @@ final class UpdatePageEvaluator
 {
     /** @var array<string, array<string, string>> */
     private const DEFAULT_UI_TEXTS = [
-        'status.available' => ['en' => 'A new version is available.'],
         'status.disabled' => ['en' => 'This update is currently unavailable.'],
         'status.upToDate' => ['en' => "You're using the latest version."],
-        'status.unreleased' => ['en' => 'This update has not been released yet.'],
-        'status.ended' => ['en' => 'This update period has ended.'],
         'status.unsupportedOs' => ['en' => 'This update requires a newer OS version.'],
         'status.missingDestination' => ['en' => 'This update is temporarily unavailable.'],
         'status.unavailable' => ['en' => 'This update page is currently unavailable.'],
@@ -104,7 +101,7 @@ final class UpdatePageEvaluator
             return $this->view($common, 'up-to-date', 'status.upToDate');
         }
         if ($page['endAt'] !== null && $now > $page['endAt']) {
-            return $this->view($common, 'ended', 'status.ended');
+            return $this->view($common, 'ended');
         }
 
         $minimumOsVersion = $page['minimumOsVersions'][$request->platform] ?? null;
@@ -123,19 +120,21 @@ final class UpdatePageEvaluator
             return $this->view(
                 $common,
                 'unreleased',
-                'status.unreleased',
-                null,
-                null,
-                $destinationUrl,
-                $request->platform !== 'pc',
+                destinationUrl: $destinationUrl,
+                showStoreNotice: $request->platform !== 'pc',
             );
         }
 
-        return $this->view($common, 'available', 'status.available', null, null, $destinationUrl, $request->platform !== 'pc');
+        return $this->view(
+            $common,
+            'available',
+            destinationUrl: $destinationUrl,
+            showStoreNotice: $request->platform !== 'pc',
+        );
     }
 
     /** @param array<string, mixed> $common */
-    private function view(array $common, string $state, string $statusKey, ?string $osVersion = null, ?string $minimumOsVersion = null, ?string $destinationUrl = null, bool $showStoreNotice = false): UpdatePageViewModel
+    private function view(array $common, string $state, ?string $statusKey = null, ?string $osVersion = null, ?string $minimumOsVersion = null, ?string $destinationUrl = null, bool $showStoreNotice = false): UpdatePageViewModel
     {
         $osRequirementMessage = $osVersion !== null && $minimumOsVersion !== null
             ? $this->text('os.requirement', $common['locale'], [
@@ -150,7 +149,7 @@ final class UpdatePageEvaluator
             $common['imageUrl'],
             $common['imageAlt'],
             $common['description'],
-            $this->text($statusKey, $common['locale']),
+            $statusKey === null ? '' : $this->text($statusKey, $common['locale']),
             $common['currentVersion'],
             $common['targetVersion'],
             $osVersion,

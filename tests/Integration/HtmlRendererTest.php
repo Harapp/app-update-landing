@@ -15,7 +15,7 @@ final class HtmlRendererTest extends TestCase
     {
         $view = new UpdatePageViewModel(
             'available', 'en', 'https://cdn.example.com/banner.webp', '<alt>', '<script>alert(1)</script>',
-            'A new version is available.', '1.0.0', '2.0.0', null, null, null, null,
+            '', '1.0.0', '2.0.0', null, null, null, null,
             'https://example.com/download?a=1&b=2', true, false, 'event-update'
         );
         $html = (new HtmlRenderer(new TemplateRegistry(dirname(__DIR__, 2) . '/templates')))->render($view);
@@ -32,7 +32,7 @@ final class HtmlRendererTest extends TestCase
     public function testAvailablePageOmitsSupportingLinesAndUsesLocalizedCallToAction(): void
     {
         $view = new UpdatePageViewModel(
-            'available', 'en', null, null, 'Event description', 'A new version is available.',
+            'available', 'en', null, null, 'Event description', '',
             '1.0.0', '2.0.0', null, null, null, null, 'https://example.com/download', true, false,
             'event-update', UpdatePageViewModel::DEFAULT_THEME,
             'Sep 3–4 (1 day remaining)',
@@ -44,7 +44,7 @@ final class HtmlRendererTest extends TestCase
         );
         $html = (new HtmlRenderer(new TemplateRegistry(dirname(__DIR__, 2) . '/templates')))->render($view);
 
-        self::assertStringNotContainsString('A new version is available.', $html);
+        self::assertStringNotContainsString('<p class="status"', $html);
         self::assertStringContainsString('<p class="period" dir="auto">Sep 3–4 (1 day remaining)</p>', $html);
         self::assertStringContainsString('<meta name="robots" content="noindex,nofollow,noarchive">', $html);
         self::assertStringNotContainsString('Current: V', $html);

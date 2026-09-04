@@ -39,7 +39,7 @@ final class EventUpdateResponseTest extends TestCase
         string $clock,
         array $request,
         array $changes,
-        string $expectedMessage,
+        ?string $expectedMessage,
         bool $hasUpdateButton,
         bool $updateButtonIsDisabled,
         bool $hasStoreNotice,
@@ -60,10 +60,13 @@ final class EventUpdateResponseTest extends TestCase
         ))->evaluate((new RequestValidator())->validate($request));
         $html = (new HtmlRenderer(new TemplateRegistry(dirname(__DIR__, 2) . '/templates')))->render($view);
 
-        self::assertSame(
-            $showsStatusMessage,
-            str_contains($html, htmlspecialchars($expectedMessage, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')),
-        );
+        self::assertSame($showsStatusMessage, strpos($html, '<p class="status"') !== false);
+        if ($expectedMessage !== null) {
+            self::assertStringContainsString(
+                htmlspecialchars($expectedMessage, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+                $html,
+            );
+        }
         self::assertSame($hasUpdateButton, strpos($html, '<div class="update-action">') !== false);
         self::assertSame($updateButtonIsDisabled, strpos($html, '<button class="update-link update-link--disabled"') !== false);
         if ($updateButtonIsDisabled) {
@@ -79,7 +82,7 @@ final class EventUpdateResponseTest extends TestCase
     }
 
     /**
-     * @return array<string, array{string, array<string, string>, array<string, mixed>, string, bool, bool, bool, bool, ?string}>
+     * @return array<string, array{string, array<string, string>, array<string, mixed>, ?string, bool, bool, bool, bool, ?string}>
      */
     public static function stateCases(): array
     {
@@ -92,11 +95,11 @@ final class EventUpdateResponseTest extends TestCase
         ];
 
         return [
-            'available' => ['2026-09-03T12:00:00Z', $baseRequest, [], 'A new version is available.', true, false, true, false, 'Event period: Sep 3–4 (1 day remaining)'],
+            'available' => ['2026-09-03T12:00:00Z', $baseRequest, [], null, true, false, true, false, 'Event period: Sep 3–4 (1 day remaining)'],
             'up-to-date' => ['2026-09-03T12:00:00Z', [...$baseRequest, 'appVersion' => '2.0.0'], [], "You're using the latest version.", false, false, false, true, 'Event period: Sep 3–4 (1 day remaining)'],
             'disabled' => ['2026-09-03T12:00:00Z', $baseRequest, ['enabled' => false], 'This update is currently unavailable.', false, false, false, true, 'Event period: Sep 3–4 (1 day remaining)'],
-            'unreleased-before-event' => ['2026-09-03T12:00:00Z', $baseRequest, ['startAt' => '2026-09-03T13:00:00Z', 'released' => ['ios' => false, 'android' => true, 'pc' => true]], 'This update has not been released yet.', true, true, true, false, 'Event period: Sep 3–4 (starts in 1 day)'],
-            'ended' => ['2026-09-03T12:00:00Z', $baseRequest, ['endAt' => '2026-09-03T11:00:00Z'], 'This update period has ended.', false, false, false, false, 'Event period: Ended.'],
+            'unreleased-before-event' => ['2026-09-03T12:00:00Z', $baseRequest, ['startAt' => '2026-09-03T13:00:00Z', 'released' => ['ios' => false, 'android' => true, 'pc' => true]], null, true, true, true, false, 'Event period: Sep 3–4 (starts in 1 day)'],
+            'ended' => ['2026-09-03T12:00:00Z', $baseRequest, ['endAt' => '2026-09-03T11:00:00Z'], null, false, false, false, false, 'Event period: Ended.'],
             'unsupported-os' => ['2026-09-03T12:00:00Z', [...$baseRequest, 'osVersion' => '17.0'], [], 'This update requires a newer OS version.', false, false, false, true, 'Event period: Sep 3–4 (1 day remaining)'],
             'missing-destination' => ['2026-09-03T12:00:00Z', [...$baseRequest, 'platform' => 'android', 'osVersion' => '14'], ['destinationUrls' => ['ios' => 'https://apps.apple.com/app/id1']], 'This update is temporarily unavailable.', false, false, false, true, 'Event period: Sep 3–4 (1 day remaining)'],
         ];

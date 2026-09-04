@@ -24,6 +24,7 @@
     },
     "scripts": {
         "test": "phpunit --testdox",
+        "preview": "scripts/preview-event-update",
         "assets:build": "@php bin/build-game-assets purrfect-spirits",
         "validate:config": "@php bin/validate-purrfect-spirits",
         "smoke": "@php bin/smoke-test-purrfect-spirits"

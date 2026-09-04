@@ -58,7 +58,7 @@ $pageTitle = $viewModel->socialCardTitle;
         <?php if ($viewModel->description !== ''): ?>
             <p class="description" dir="auto"><?= $escape($viewModel->description) ?></p>
         <?php endif; ?>
-        <?php if (!in_array($viewModel->state, ['available', 'unreleased', 'ended'], true)): ?>
+        <?php if ($viewModel->statusMessage !== ''): ?>
             <p class="status" dir="auto"><?= $escape($viewModel->statusMessage) ?></p>
         <?php endif; ?>
         <?php if ($viewModel->eventPeriod !== null && $viewModel->eventPeriod !== ''): ?>

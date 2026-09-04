@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $# -gt 1 ]]; then
+    printf 'Usage: %s [port]\n' "$0" >&2
+    exit 64
+fi
+
+port="${1:-8080}"
+if [[ ! "$port" =~ ^[0-9]+$ ]] || (( port < 1 || port > 65535 )); then
+    printf 'Port must be an integer from 1 to 65535.\n' >&2
+    exit 64
+fi
+
+script_dir="$(cd "$(dirname "$0")" && pwd)"
+project_root="$(cd "$script_dir/.." && pwd)"
+
+printf 'Event Update Preview: http://127.0.0.1:%s/\n' "$port"
+exec env EVENT_UPDATE_PREVIEW=1 php -S "127.0.0.1:$port" -t "$project_root/dev" "$project_root/dev/router.php"

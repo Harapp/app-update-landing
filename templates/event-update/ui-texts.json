@@ -1,10 +1,4 @@
 {
-    "status.available": {
-        "en": "A new version is available.",
-        "ar": "يتوفر إصدار جديد.",
-        "he": "זמינה גרסה חדשה.",
-        "ja": "新しいバージョンを利用できます。"
-    },
     "status.disabled": {
         "en": "This update is currently unavailable.",
         "ar": "هذا التحديث غير متاح حاليًا.",
@@ -16,18 +10,6 @@
         "ar": "أنت تستخدم أحدث إصدار.",
         "he": "הגרסה העדכנית ביותר כבר מותקנת.",
         "ja": "最新バージョンをご利用中です。"
-    },
-    "status.unreleased": {
-        "en": "This update has not been released yet.",
-        "ar": "لم يتم إصدار هذا التحديث بعد.",
-        "he": "עדכון זה עדיין לא פורסם.",
-        "ja": "このアップデートはまだ配信されていません。"
-    },
-    "status.ended": {
-        "en": "This update period has ended.",
-        "ar": "انتهت فترة هذا التحديث.",
-        "he": "תקופת העדכון הסתיימה.",
-        "ja": "このアップデート期間は終了しました。"
     },
     "status.unsupportedOs": {
         "en": "This update requires a newer OS version.",
