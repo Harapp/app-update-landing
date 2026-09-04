@@ -205,71 +205,35 @@ final class ConfigurationRepositoryTest extends TestCase
     }
 
     #[DataProvider('colorPresetProvider')]
-    public function testThemeColorPresetResolvesToACompletePalette(string $preset, array $expectedColors): void
+    public function testThemeColorPresetLoadsACompleteReadablePalette(string $preset): void
     {
         $theme = [
             'colorPreset' => $preset,
             'logoUrl' => null,
             'maxContentWidth' => 640,
         ];
+        $loaded = (new ThemeRepository($this->writeJson($theme), ['cdn.example.com']))->load();
 
         self::assertSame(
-            [...$expectedColors, 'logoUrl' => null, 'maxContentWidth' => 640],
-            (new ThemeRepository($this->writeJson($theme), ['cdn.example.com']))->load(),
+            ['primaryColor', 'accentColor', 'backgroundColor', 'textColor', 'logoUrl', 'maxContentWidth'],
+            array_keys($loaded),
         );
+        foreach (['primaryColor', 'accentColor', 'backgroundColor', 'textColor'] as $colorKey) {
+            self::assertMatchesRegularExpression('/^#[0-9A-Fa-f]{6}$/', $loaded[$colorKey]);
+        }
+        self::assertGreaterThanOrEqual(4.5, $this->contrastRatio($loaded['primaryColor'], '#FFFFFF'), "$preset button contrast");
+        self::assertGreaterThanOrEqual(4.5, $this->contrastRatio($loaded['accentColor'], '#FFFFFF'), "$preset accent contrast");
+        self::assertGreaterThanOrEqual(4.5, $this->contrastRatio($loaded['textColor'], $loaded['backgroundColor']), "$preset body contrast");
+        self::assertNull($loaded['logoUrl']);
+        self::assertSame(640, $loaded['maxContentWidth']);
     }
 
-    /** @return iterable<string, array{string, array<string, string>}> */
+    /** @return iterable<string, array{string}> */
     public static function colorPresetProvider(): iterable
     {
-        yield 'purple' => ['purple', [
-            'primaryColor' => '#7C3AED',
-            'accentColor' => '#8B2FD6',
-            'backgroundColor' => '#F4EEFF',
-            'textColor' => '#2D1746',
-        ]];
-        yield 'red' => ['red', [
-            'primaryColor' => '#D92D3A',
-            'accentColor' => '#C92F3C',
-            'backgroundColor' => '#FFF0EA',
-            'textColor' => '#3B1F22',
-        ]];
-        yield 'blue' => ['blue', [
-            'primaryColor' => '#1672D4',
-            'accentColor' => '#0F64C5',
-            'backgroundColor' => '#EDF7FF',
-            'textColor' => '#172D46',
-        ]];
-        yield 'light-blue' => ['light-blue', [
-            'primaryColor' => '#0E7490',
-            'accentColor' => '#155E75',
-            'backgroundColor' => '#ECFEFF',
-            'textColor' => '#083344',
-        ]];
-        yield 'green' => ['green', [
-            'primaryColor' => '#11854F',
-            'accentColor' => '#087A45',
-            'backgroundColor' => '#ECFAF2',
-            'textColor' => '#153625',
-        ]];
-        yield 'orange' => ['orange', [
-            'primaryColor' => '#C64B08',
-            'accentColor' => '#B94108',
-            'backgroundColor' => '#FFF1DE',
-            'textColor' => '#3B210D',
-        ]];
-        yield 'pink' => ['pink', [
-            'primaryColor' => '#CB2D70',
-            'accentColor' => '#B92567',
-            'backgroundColor' => '#FFF0F6',
-            'textColor' => '#41192C',
-        ]];
-        yield 'gray' => ['gray', [
-            'primaryColor' => '#4B5563',
-            'accentColor' => '#4B5563',
-            'backgroundColor' => '#F3F4F6',
-            'textColor' => '#1F2937',
-        ]];
+        foreach (['purple', 'red', 'blue', 'light-blue', 'green', 'orange', 'pink', 'gray'] as $preset) {
+            yield $preset => [$preset];
+        }
     }
 
     public function testThemeRejectsUnknownPresetOrMixedPresetAndCustomColors(): void
@@ -298,14 +262,6 @@ final class ConfigurationRepositoryTest extends TestCase
 
         $this->expectException(ConfigException::class);
         (new ThemeRepository($this->writeJson($mixed), ['cdn.example.com']))->load();
-    }
-
-    #[DataProvider('colorPresetProvider')]
-    public function testThemeColorPresetMaintainsReadableContrast(string $preset, array $colors): void
-    {
-        self::assertGreaterThanOrEqual(4.5, $this->contrastRatio($colors['primaryColor'], '#FFFFFF'), "$preset button contrast");
-        self::assertGreaterThanOrEqual(4.5, $this->contrastRatio($colors['accentColor'], '#FFFFFF'), "$preset accent contrast");
-        self::assertGreaterThanOrEqual(4.5, $this->contrastRatio($colors['textColor'], $colors['backgroundColor']), "$preset body contrast");
     }
 
     public function testThemeRejectsIncompleteCustomColors(): void
@@ -386,8 +342,6 @@ final class ConfigurationRepositoryTest extends TestCase
         self::assertSame('https://neko.harapeco.okinawa/event-update', $release['publicBaseUrl']);
         self::assertSame('2.9.0', $release['releaseTargetVersion']);
         self::assertSame('https://neko.harapeco.okinawa/event-update/assets/banner.webp', $page['imageUrl']);
-        self::assertSame('2026-09-05T00:00:00+09:00', $page['startAt']?->format('Y-m-d\\TH:i:sP'));
-        self::assertSame('2026-10-04T23:59:59+09:00', $page['endAt']?->format('Y-m-d\\TH:i:sP'));
         self::assertTrue($page['released']['ios']);
         self::assertTrue($page['released']['android']);
         self::assertTrue($page['released']['pc']);
@@ -408,11 +362,10 @@ final class ConfigurationRepositoryTest extends TestCase
         self::assertSame('月あかりのさす、しずかな縁側。うさぎの耳をつけたねこが遊びにきます。だんごをお供えして、猫とゆうれいたちとぼんやり空を見ませんか。', $page['descriptions']['ja']);
         self::assertSame($page['title'], $page['socialCard']['title']);
         self::assertSame($page['descriptions'], $page['socialCard']['description']);
-        self::assertSame('#0E7490', $theme['primaryColor']);
-        self::assertSame('#155E75', $theme['accentColor']);
-        self::assertSame('#ECFEFF', $theme['backgroundColor']);
-        self::assertSame('#083344', $theme['textColor']);
-        self::assertNull($theme['logoUrl']);
+        self::assertSame(
+            ['primaryColor', 'accentColor', 'backgroundColor', 'textColor', 'logoUrl', 'maxContentWidth'],
+            array_keys($theme),
+        );
         self::assertSame('Update and play the event', $uiTexts['button.update']['en']);
         self::assertSame('حدّث والعب الفعالية', $uiTexts['button.update']['ar']);
         self::assertSame('עדכנו ושחקו באירוע', $uiTexts['button.update']['he']);

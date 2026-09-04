@@ -14,21 +14,32 @@ use PHPUnit\Framework\TestCase;
 final class PublicReleaseStatusTest extends TestCase
 {
     #[DataProvider('eventPhases')]
-    public function testOnlyPublicReleaseFieldsAreReturned(string $now, string $expectedPhase): void
+    public function testOnlyPublicReleaseFieldsAreReturned(string $expectedPhase): void
     {
         $root = dirname(__DIR__, 2);
         $repository = new UpdatePageRepository(
             $root . '/games/purrfect-spirits/update-pages.json',
             ['neko.harapeco.okinawa', 'itunes.apple.com', 'play.google.com', 'www.harapeco.okinawa'],
         );
+        $release = $repository->releaseConfig();
+        $page = $repository->findByTargetVersion($release['releaseTargetVersion']);
+        self::assertNotNull($page);
+        self::assertInstanceOf(DateTimeImmutable::class, $page['startAt']);
+        self::assertInstanceOf(DateTimeImmutable::class, $page['endAt']);
+
+        $now = match ($expectedPhase) {
+            'upcoming' => $page['startAt']->modify('-1 second'),
+            'active' => $page['startAt'],
+            'ended' => $page['endAt']->modify('+1 second'),
+        };
         $clock = new class($now) implements Clock {
-            public function __construct(private readonly string $now)
+            public function __construct(private readonly DateTimeImmutable $now)
             {
             }
 
             public function now(): DateTimeImmutable
             {
-                return new DateTimeImmutable($this->now);
+                return $this->now;
             }
         };
 
@@ -40,8 +51,8 @@ final class PublicReleaseStatusTest extends TestCase
         self::assertSame('https://neko.harapeco.okinawa/event-update/', $status['pageUrl']);
         self::assertTrue($status['enabled']);
         self::assertSame([
-            'startAt' => '2026-09-05T00:00:00+09:00',
-            'endAt' => '2026-10-04T23:59:59+09:00',
+            'startAt' => $page['startAt']->format('Y-m-d\\TH:i:sP'),
+            'endAt' => $page['endAt']->format('Y-m-d\\TH:i:sP'),
             'phase' => $expectedPhase,
         ], $status['eventPeriod']);
         self::assertSame([
@@ -55,13 +66,13 @@ final class PublicReleaseStatusTest extends TestCase
         ], $status['platforms']['pc']);
     }
 
-    /** @return array<string, array{string, string}> */
+    /** @return array<string, array{string}> */
     public static function eventPhases(): array
     {
         return [
-            'upcoming' => ['2026-09-04T00:00:00+09:00', 'upcoming'],
-            'active' => ['2026-09-05T00:00:00+09:00', 'active'],
-            'ended' => ['2026-10-05T00:00:00+09:00', 'ended'],
+            'upcoming' => ['upcoming'],
+            'active' => ['active'],
+            'ended' => ['ended'],
         ];
     }
 }

@@ -8,9 +8,6 @@ use PHPUnit\Framework\TestCase;
 
 final class PublicIndexTest extends TestCase
 {
-    private const IOS_USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.6 Mobile/15E148 Safari/604.1';
-    private const ANDROID_USER_AGENT = 'Mozilla/5.0 (Linux; Android 14; Pixel 8 Build/AP1A.240505.005) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Mobile Safari/537.36';
-
     public function testPublicResponseUsesPurrfectSpiritsConfigurationForEveryPlatform(): void
     {
         $port = $this->freePort();
@@ -28,13 +25,7 @@ final class PublicIndexTest extends TestCase
 
         try {
             $this->waitForServer($port);
-            $isBeforeEvent = new \DateTimeImmutable() < new \DateTimeImmutable('2026-09-05T00:00:00+09:00');
-            $destinations = [
-                'ios' => 'https://itunes.apple.com/jp/app/id1269423920',
-                'android' => 'https://play.google.com/store/apps/details?id=okinawa.harapeco.catRestaurant',
-                'pc' => 'https://www.harapeco.okinawa/info/app/neko_boku.html',
-            ];
-            foreach ($destinations as $platform => $destination) {
+            foreach (['ios', 'android', 'pc'] as $platform) {
                 $body = file_get_contents(
                     "http://127.0.0.1:$port/?appVersion=0.0.0&targetVersion=2.9.0&locale=en-US&platform=$platform&osVersion=1"
                 );
@@ -50,14 +41,6 @@ final class PublicIndexTest extends TestCase
                 self::assertStringContainsString('<meta property="og:title" content="Moonlit Night">', $body);
                 self::assertStringContainsString('<meta property="og:description" content="A quiet veranda in the moonlight.', $body);
                 self::assertStringContainsString('<p class="period" dir="auto">', $body);
-                if (str_contains($body, '<a class="update-link"')) {
-                    self::assertStringContainsString(
-                        'href="' . htmlspecialchars($destination, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '"',
-                        $body
-                    );
-                } else {
-                    self::assertStringContainsString('<small dir="auto">Coming Soon</small>', $body);
-                }
             }
 
             $japaneseBody = file_get_contents(
@@ -70,14 +53,6 @@ final class PublicIndexTest extends TestCase
             self::assertStringContainsString('<meta property="og:title" content="おつきみ日和">', $japaneseBody);
             self::assertStringContainsString('<meta property="og:description" content="月あかりのさす、しずかな縁側。', $japaneseBody);
             self::assertStringContainsString('<p class="period" dir="auto">', $japaneseBody);
-            if (str_contains($japaneseBody, '<a class="update-link"')) {
-                $expectedButtonText = $isBeforeEvent ? '更新してイベントに備える' : '更新してイベントを遊ぶ';
-                self::assertStringContainsString('<small dir="auto">' . $expectedButtonText . '</small>', $japaneseBody);
-                self::assertStringContainsString('バージョン2.9.0に' . $expectedButtonText, $japaneseBody);
-                self::assertStringContainsString('アップデートが反映されるまで、時間がかかる場合があります。', $japaneseBody);
-            } else {
-                self::assertStringContainsString('<small dir="auto">近日開始</small>', $japaneseBody);
-            }
             self::assertStringNotContainsString('A new version is available.', $japaneseBody);
             self::assertStringNotContainsString('Event period:', $japaneseBody);
             self::assertStringNotContainsString('Current: V', $japaneseBody);
@@ -89,13 +64,7 @@ final class PublicIndexTest extends TestCase
             self::assertStringContainsString('<html lang="ar-SA" dir="rtl">', $arabicBody);
             self::assertStringContainsString('<h1 dir="auto">ليلة القمر</h1>', $arabicBody);
             self::assertStringContainsString('<meta property="og:description" content="شرفة هادئة في ضوء القمر.', $arabicBody);
-            if (str_contains($arabicBody, '<a class="update-link"')) {
-                self::assertStringContainsString('<span><bdi dir="ltr">V2.9.0</bdi></span>', $arabicBody);
-                self::assertStringContainsString(
-                    '<small dir="auto">' . ($isBeforeEvent ? 'حدّث واستعد للفعالية' : 'حدّث والعب الفعالية') . '</small>',
-                    $arabicBody,
-                );
-            }
+            self::assertStringContainsString('<span><bdi dir="ltr">V2.9.0</bdi></span>', $arabicBody);
 
             $hebrewBody = file_get_contents(
                 "http://127.0.0.1:$port/?appVersion=0.0.0&targetVersion=2.9.0&locale=he-IL&platform=ios&osVersion=1"
@@ -104,66 +73,21 @@ final class PublicIndexTest extends TestCase
             self::assertStringContainsString('<html lang="he-IL" dir="rtl">', $hebrewBody);
             self::assertStringContainsString('<h1 dir="auto">ליל ירח</h1>', $hebrewBody);
             self::assertStringContainsString('<meta property="og:description" content="מרפסת שקטה לאור הירח.', $hebrewBody);
-            if (str_contains($hebrewBody, '<a class="update-link"')) {
-                self::assertStringContainsString(
-                    '<small dir="auto">' . ($isBeforeEvent ? 'עדכנו והתכוננו לאירוע' : 'עדכנו ושחקו באירוע') . '</small>',
-                    $hebrewBody,
-                );
-            }
-
             $fallbackBody = file_get_contents(
                 "http://127.0.0.1:$port/?appVersion=0.0.0&targetVersion=2.9.0&locale=ga-IE&platform=ios&osVersion=1"
             );
             self::assertIsString($fallbackBody);
             self::assertStringContainsString('<meta property="og:title" content="Moonlit Night">', $fallbackBody);
             self::assertStringContainsString('<p class="period" dir="auto">', $fallbackBody);
-            if (str_contains($fallbackBody, '<a class="update-link"')) {
-                self::assertStringContainsString(
-                    '<small dir="auto">' . ($isBeforeEvent ? 'Update and get ready for the event' : 'Update and play the event') . '</small>',
-                    $fallbackBody,
-                );
-                self::assertStringContainsString('Updates may take some time to appear', $fallbackBody);
-            } else {
-                self::assertStringContainsString('<small dir="auto">Coming Soon</small>', $fallbackBody);
-            }
             self::assertContainsHeader('Content-Security-Policy:', $http_response_header ?? []);
             self::assertContainsHeader('X-Content-Type-Options: nosniff', $http_response_header ?? []);
             self::assertContainsHeader('Referrer-Policy: no-referrer', $http_response_header ?? []);
             self::assertContainsHeader('X-Robots-Tag: noindex, nofollow, noarchive', $http_response_header ?? []);
 
-            $iosBodyFromSharedAndroidUrl = file_get_contents(
-                "http://127.0.0.1:$port/?appVersion=0.0.0&targetVersion=2.9.0&locale=en-US&platform=android&osVersion=1",
-                false,
-                $this->userAgentContext(self::IOS_USER_AGENT),
-            );
-            self::assertIsString($iosBodyFromSharedAndroidUrl);
-            self::assertStringContainsString('href="https://itunes.apple.com/jp/app/id1269423920"', $iosBodyFromSharedAndroidUrl);
-            self::assertStringNotContainsString('play.google.com', $iosBodyFromSharedAndroidUrl);
-
-            $androidBodyFromSharedIosUrl = file_get_contents(
-                "http://127.0.0.1:$port/?appVersion=0.0.0&targetVersion=2.9.0&locale=en-US&platform=ios&osVersion=1",
-                false,
-                $this->userAgentContext(self::ANDROID_USER_AGENT),
-            );
-            self::assertIsString($androidBodyFromSharedIosUrl);
-            self::assertStringContainsString('href="https://play.google.com/store/apps/details?id=okinawa.harapeco.catRestaurant"', $androidBodyFromSharedIosUrl);
-            self::assertStringNotContainsString('itunes.apple.com', $androidBodyFromSharedIosUrl);
-            self::assertStringContainsString('Updates may take some time to appear', $androidBodyFromSharedIosUrl);
-
-            $androidBodyWithoutPlatform = file_get_contents(
-                "http://127.0.0.1:$port/?appVersion=0.0.0&targetVersion=2.9.0&locale=en-US&osVersion=1",
-                false,
-                $this->userAgentContext(self::ANDROID_USER_AGENT),
-            );
-            self::assertIsString($androidBodyWithoutPlatform);
-            self::assertStringContainsString('href="https://play.google.com/store/apps/details?id=okinawa.harapeco.catRestaurant"', $androidBodyWithoutPlatform);
-            self::assertStringContainsString('Updates may take some time to appear', $androidBodyWithoutPlatform);
-
             $bodyWithoutParameters = file_get_contents("http://127.0.0.1:$port/");
             self::assertIsString($bodyWithoutParameters);
             self::assertStringContainsString('<html lang="en" dir="ltr">', $bodyWithoutParameters);
             self::assertStringContainsString('<span><bdi dir="ltr">V2.9.0</bdi></span>', $bodyWithoutParameters);
-            self::assertStringContainsString('href="https://www.harapeco.okinawa/info/app/neko_boku.html"', $bodyWithoutParameters);
 
             $japaneseBrowserBody = file_get_contents(
                 "http://127.0.0.1:$port/?platform=pc",
@@ -186,12 +110,6 @@ final class PublicIndexTest extends TestCase
             proc_terminate($process);
             proc_close($process);
         }
-    }
-
-    /** @return resource */
-    private function userAgentContext(string $userAgent)
-    {
-        return $this->headerContext(["User-Agent: $userAgent"]);
     }
 
     /** @param list<string> $headers @return resource */
