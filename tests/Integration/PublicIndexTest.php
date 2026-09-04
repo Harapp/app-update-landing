@@ -43,8 +43,10 @@ final class PublicIndexTest extends TestCase
                 self::assertStringNotContainsString('content="assets/banner.webp"', $body);
                 self::assertStringNotContainsString('alt="App logo"', $body);
                 self::assertStringContainsString('PurrfectSpirits event update', $body);
-                self::assertStringContainsString('<meta property="og:title" content="PurrfectSpirits Event Update">', $body);
-                self::assertStringContainsString('<meta property="og:description" content="Update to V2.9.0 and play the event from Sep 10–30.">', $body);
+                self::assertStringContainsString('<h1>Pampas grass, dumplings and a moonlit sky come to the room.</h1>', $body);
+                self::assertStringContainsString('<p class="description">While the event runs, your room becomes a veranda', $body);
+                self::assertStringContainsString('<meta property="og:title" content="Pampas grass, dumplings and a moonlit sky come to the room.">', $body);
+                self::assertStringContainsString('<meta property="og:description" content="Update to V2.9.0 and play the event from Sep 5–Oct 4.">', $body);
                 self::assertStringContainsString('<p class="period">', $body);
                 if (str_contains($body, '<a class="update-link"')) {
                     self::assertStringContainsString(
@@ -60,9 +62,10 @@ final class PublicIndexTest extends TestCase
                 "http://127.0.0.1:$port/?appVersion=0.0.0&targetVersion=2.9.0&locale=ja-JP&platform=ios&osVersion=1"
             );
             self::assertIsString($japaneseBody);
-            self::assertStringContainsString('PurrfectSpirits イベントアップデート（仮コンテンツ）', $japaneseBody);
-            self::assertStringContainsString('<meta property="og:title" content="PurrfectSpirits イベントアップデート">', $japaneseBody);
-            self::assertStringContainsString('<meta property="og:description" content="V2.9.0へ更新して、9月10日〜30日のイベントを遊ぼう。">', $japaneseBody);
+            self::assertStringContainsString('<h1>すすきとだんごと月あかりの空が、お部屋にやってきます。</h1>', $japaneseBody);
+            self::assertStringContainsString('<p class="description">イベント期間中、お部屋は月あかりの縁側になります。', $japaneseBody);
+            self::assertStringContainsString('<meta property="og:title" content="すすきとだんごと月あかりの空が、お部屋にやってきます。">', $japaneseBody);
+            self::assertStringContainsString('<meta property="og:description" content="V2.9.0へ更新して、9月5日〜10月4日のイベントを遊ぼう。">', $japaneseBody);
             self::assertStringContainsString('<p class="period">', $japaneseBody);
             if (str_contains($japaneseBody, '<a class="update-link"')) {
                 self::assertStringContainsString('<small>更新してイベントを遊ぶ</small>', $japaneseBody);
@@ -79,7 +82,7 @@ final class PublicIndexTest extends TestCase
                 "http://127.0.0.1:$port/?appVersion=0.0.0&targetVersion=2.9.0&locale=fr-FR&platform=ios&osVersion=1"
             );
             self::assertIsString($fallbackBody);
-            self::assertStringContainsString('<meta property="og:title" content="PurrfectSpirits Event Update">', $fallbackBody);
+            self::assertStringContainsString('<meta property="og:title" content="Pampas grass, dumplings and a moonlit sky come to the room.">', $fallbackBody);
             self::assertStringContainsString('<p class="period">', $fallbackBody);
             if (str_contains($fallbackBody, '<a class="update-link"')) {
                 self::assertStringContainsString('<small>Update and play the event</small>', $fallbackBody);

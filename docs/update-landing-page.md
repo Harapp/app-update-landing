@@ -67,6 +67,8 @@ platformはUser-Agentによる内部判定を優先します。iOSまたはAndro
 
 ## 言語
 
+対応言語、ロケールキー、対象外言語、AI向け翻訳依頼プロンプトは[翻訳ガイド](translations.md)を正とします。
+
 - 既定言語は `en` 固定とする
 - 初期リリースでは英語文言を必須とする
 - `en` は削除や別言語への変更を不可とする
@@ -79,6 +81,9 @@ platformはUser-Agentによる内部判定を優先します。iOSまたはAndro
 
 ```json
 {
+  "title": {
+    "en": "The latest event is here."
+  },
   "descriptions": {
     "en": "A new version is available for the latest event."
   },
@@ -126,6 +131,9 @@ platformはUser-Agentによる内部判定を優先します。iOSまたはAndro
         "android": "https://play.google.com/store/apps/details?id=com.example.app",
         "pc": "https://example.com/download"
       },
+      "title": {
+        "en": "The latest event is here."
+      },
       "descriptions": {
         "en": "A new version is available for the latest event."
       },
@@ -152,6 +160,7 @@ platformはUser-Agentによる内部判定を優先します。iOSまたはAndro
 
 `minimumOsVersions`もplatformごとに任意とし、PCを含め、値がないplatformには最低OS制限を適用しません。
 `released`はiOS・Android・PCそれぞれの配信状態を必須booleanで保持します。PCはサイトなどの遷移先が利用可能になった時点でtrueにします。
+`title`はページ内の見出し、`descriptions`は見出しに続く説明文として表示します。どちらも`en`を必須とします。
 `socialCard.title`と`socialCard.description`はSNSカード専用文言です。どちらも`en`を必須とし、ページ本文の`descriptions`とは分けて管理します。
 
 ## テンプレート

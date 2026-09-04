@@ -121,6 +121,15 @@ final class ConfigurationRepositoryTest extends TestCase
         (new UpdatePageRepository($this->writeJson($this->document([$page])), ['cdn.example.com']))->findByTargetVersion('2.0.0');
     }
 
+    public function testPageTitleRequiresEnglishAsTheFallback(): void
+    {
+        $page = $this->basePage();
+        unset($page['title']['en']);
+
+        $this->expectException(ConfigException::class);
+        (new UpdatePageRepository($this->writeJson($this->document([$page])), ['cdn.example.com']))->findByTargetVersion('2.0.0');
+    }
+
     public function testSchemaRejectsNonHttpsImageUrl(): void
     {
         $page = $this->basePage();
@@ -377,16 +386,18 @@ final class ConfigurationRepositoryTest extends TestCase
         self::assertSame('https://neko.harapeco.okinawa/event-update', $release['publicBaseUrl']);
         self::assertSame('2.9.0', $release['releaseTargetVersion']);
         self::assertSame('https://neko.harapeco.okinawa/event-update/assets/banner.webp', $page['imageUrl']);
-        self::assertSame('2026-09-10T00:00:00+09:00', $page['startAt']?->format('Y-m-d\\TH:i:sP'));
-        self::assertSame('2026-09-30T23:59:59+09:00', $page['endAt']?->format('Y-m-d\\TH:i:sP'));
+        self::assertSame('2026-09-05T00:00:00+09:00', $page['startAt']?->format('Y-m-d\\TH:i:sP'));
+        self::assertSame('2026-10-04T23:59:59+09:00', $page['endAt']?->format('Y-m-d\\TH:i:sP'));
         self::assertTrue($page['released']['ios']);
         self::assertTrue($page['released']['android']);
         self::assertTrue($page['released']['pc']);
         self::assertSame('https://itunes.apple.com/jp/app/id1269423920', $page['destinationUrls']['ios']);
         self::assertSame('https://play.google.com/store/apps/details?id=okinawa.harapeco.catRestaurant', $page['destinationUrls']['android']);
         self::assertSame('https://www.harapeco.okinawa/info/app/neko_boku.html', $page['destinationUrls']['pc']);
-        self::assertSame('PurrfectSpirits Event Update', $page['socialCard']['title']['en']);
-        self::assertSame('PurrfectSpirits イベントアップデート', $page['socialCard']['title']['ja']);
+        self::assertSame('Pampas grass, dumplings and a moonlit sky come to the room.', $page['title']['en']);
+        self::assertSame('すすきとだんごと月あかりの空が、お部屋にやってきます。', $page['title']['ja']);
+        self::assertSame('Pampas grass, dumplings and a moonlit sky come to the room.', $page['socialCard']['title']['en']);
+        self::assertSame('すすきとだんごと月あかりの空が、お部屋にやってきます。', $page['socialCard']['title']['ja']);
         self::assertSame('#0E7490', $theme['primaryColor']);
         self::assertSame('#155E75', $theme['accentColor']);
         self::assertSame('#ECFEFF', $theme['backgroundColor']);
@@ -409,6 +420,7 @@ final class ConfigurationRepositoryTest extends TestCase
             'released' => ['ios' => true, 'android' => true, 'pc' => true],
             'minimumOsVersions' => ['ios' => '18.0'],
             'destinationUrls' => ['ios' => 'https://apps.apple.com/app/id1'],
+            'title' => ['en' => 'Event title'],
             'descriptions' => ['en' => 'English'],
             'socialCard' => [
                 'title' => ['en' => 'Event update'],

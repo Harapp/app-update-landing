@@ -12,7 +12,7 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["targetVersion", "enabled", "imageUrl", "released", "descriptions", "socialCard", "imageAltTexts"],
+        "required": ["targetVersion", "enabled", "imageUrl", "released", "title", "descriptions", "socialCard", "imageAltTexts"],
         "properties": {
           "targetVersion": {"type": "string", "pattern": "^\\d{1,9}(?:\\.\\d{1,9}){1,3}$"},
           "template": {"type": "string", "enum": ["event-update"]},
@@ -46,6 +46,13 @@
             "type": "object",
             "additionalProperties": false,
             "patternProperties": {"^(ios|android|pc)$": {"type": "string", "pattern": "^https://[^\\s]+$", "maxLength": 2048}}
+          },
+          "title": {
+            "type": "object",
+            "required": ["en"],
+            "additionalProperties": false,
+            "properties": {"en": {"type": "string", "minLength": 1, "maxLength": 500}},
+            "patternProperties": {"^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$": {"type": "string", "minLength": 1, "maxLength": 500}}
           },
           "descriptions": {
             "type": "object",

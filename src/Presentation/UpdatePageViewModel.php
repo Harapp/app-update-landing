@@ -16,6 +16,7 @@ final readonly class UpdatePageViewModel
     public string $comingSoonButtonLabel;
     public string $socialCardTitle;
     public string $socialCardDescription;
+    public string $title;
 
     /** @var array{primaryColor: string, accentColor: string, backgroundColor: string, textColor: string, logoUrl: ?string, maxContentWidth: int} */
     public const DEFAULT_THEME = [
@@ -54,6 +55,7 @@ final readonly class UpdatePageViewModel
         ?string $comingSoonButtonLabel = null,
         ?string $socialCardTitle = null,
         ?string $socialCardDescription = null,
+        ?string $title = null,
     ) {
         $this->eventPeriod = $eventPeriod;
         $this->updateButtonLabel = $updateButtonLabel ?? 'Update and play the event';
@@ -65,6 +67,7 @@ final readonly class UpdatePageViewModel
         $this->comingSoonButtonLabel = $comingSoonButtonLabel ?? 'Coming Soon';
         $this->socialCardTitle = $socialCardTitle ?? ($description !== '' ? $description : 'App update');
         $this->socialCardDescription = $socialCardDescription ?? $description;
+        $this->title = $title ?? $description;
     }
 
     public static function unavailable(

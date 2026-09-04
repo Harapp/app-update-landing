@@ -90,13 +90,13 @@ final class UpdatePageRepository
     {
         $allowedFields = [
             'targetVersion', 'template', 'enabled', 'imageUrl', 'startAt', 'endAt',
-            'released', 'minimumOsVersions', 'destinationUrls', 'descriptions', 'socialCard', 'imageAltTexts',
+            'released', 'minimumOsVersions', 'destinationUrls', 'title', 'descriptions', 'socialCard', 'imageAltTexts',
         ];
         if (array_diff(array_keys($page), $allowedFields) !== []) {
             throw new ConfigException('Configuration is invalid.');
         }
 
-        foreach (['targetVersion', 'enabled', 'imageUrl', 'released', 'descriptions', 'socialCard', 'imageAltTexts'] as $required) {
+        foreach (['targetVersion', 'enabled', 'imageUrl', 'released', 'title', 'descriptions', 'socialCard', 'imageAltTexts'] as $required) {
             if (!array_key_exists($required, $page)) {
                 throw new ConfigException('Configuration is invalid.');
             }
@@ -135,10 +135,11 @@ final class UpdatePageRepository
             throw new ConfigException('Configuration is invalid.');
         }
 
+        $title = $this->validateTranslations($page['title'], 500);
         $descriptions = $this->validateTranslations($page['descriptions'], 2000);
         $socialCard = $this->validateSocialCard($page['socialCard']);
         $imageAltTexts = $this->validateTranslations($page['imageAltTexts'], 300);
-        if (!isset($descriptions['en'], $imageAltTexts['en'])) {
+        if (!isset($title['en'], $descriptions['en'], $imageAltTexts['en'])) {
             throw new ConfigException('Configuration is invalid.');
         }
 
@@ -156,6 +157,7 @@ final class UpdatePageRepository
             'released' => $released,
             'minimumOsVersions' => $minimumOsVersions,
             'destinationUrls' => $destinationUrls,
+            'title' => $title,
             'descriptions' => $descriptions,
             'socialCard' => $socialCard,
             'imageAltTexts' => $imageAltTexts,

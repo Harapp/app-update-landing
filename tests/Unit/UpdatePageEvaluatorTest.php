@@ -34,6 +34,7 @@ final class UpdatePageEvaluatorTest extends TestCase
                     'released' => ['ios' => true, 'android' => true, 'pc' => true],
                     'minimumOsVersions' => ['ios' => '18.0'],
                     'destinationUrls' => ['ios' => 'https://apps.apple.com/app/id1'],
+                    'title' => ['en' => 'Event title', 'ja' => 'イベントタイトル'],
                     'descriptions' => ['en' => 'English', 'ja' => '日本語'],
                     'socialCard' => [
                         'title' => ['en' => 'Event update', 'ja' => 'イベントアップデート'],
@@ -70,6 +71,7 @@ final class UpdatePageEvaluatorTest extends TestCase
         $view = $evaluator->evaluate($request);
 
         self::assertSame('available', $view->state);
+        self::assertSame('イベントタイトル', $view->title);
         self::assertSame('日本語', $view->description);
         self::assertSame('イベントアップデート', $view->socialCardTitle);
         self::assertSame('アプリを更新してください。', $view->socialCardDescription);

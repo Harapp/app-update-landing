@@ -7,8 +7,8 @@
             "template": "event-update",
             "enabled": true,
             "imageUrl": "assets/banner.webp",
-            "startAt": "2026-09-10T00:00:00+09:00",
-            "endAt": "2026-09-30T23:59:59+09:00",
+            "startAt": "2026-09-05T00:00:00+09:00",
+            "endAt": "2026-10-04T23:59:59+09:00",
             "released": {
                 "ios": true,
                 "android": true,
@@ -20,23 +20,27 @@
                 "android": "https://play.google.com/store/apps/details?id=okinawa.harapeco.catRestaurant",
                 "pc": "https://www.harapeco.okinawa/info/app/neko_boku.html"
             },
+            "title": {
+                "en": "Pampas grass, dumplings and a moonlit sky come to the room.",
+                "ja": "すすきとだんごと月あかりの空が、お部屋にやってきます。"
+            },
             "descriptions": {
-                "en": "PurrfectSpirits event update (provisional content).",
-                "ja": "PurrfectSpirits イベントアップデート（仮コンテンツ）"
+                "en": "While the event runs, your room becomes a veranda under the harvest moon. Pampas grass sways in a vase, dumplings sit on a little wooden stand, and the ghosts drift up to watch the sky. Three costumed cats come to visit: one in a rabbit-ear hood, one balancing dumplings on its head, and one that has settled inside a bamboo tube. Collect all three, decorate your room, and spend a quiet night doing absolutely nothing.",
+                "ja": "イベント期間中、お部屋は月あかりの縁側になります。壺のすすきがゆれ、三方にはおだんご。ゆうれいたちはふわふわ浮かんで空をながめています。遊びにくるのはコスプレねこ3びき。うさぎの耳をつけた子、頭にだんごをのせた子、竹の筒から出られなくなった子。3びきぜんぶ集めて、お部屋をかざって、なにもしない夜をすごしませんか。"
             },
             "socialCard": {
                 "title": {
-                    "en": "PurrfectSpirits Event Update",
-                    "ja": "PurrfectSpirits イベントアップデート"
+                    "en": "Pampas grass, dumplings and a moonlit sky come to the room.",
+                    "ja": "すすきとだんごと月あかりの空が、お部屋にやってきます。"
                 },
                 "description": {
-                    "en": "Update to V2.9.0 and play the event from Sep 10–30.",
-                    "ja": "V2.9.0へ更新して、9月10日〜30日のイベントを遊ぼう。"
+                    "en": "Update to V2.9.0 and play the event from Sep 5–Oct 4.",
+                    "ja": "V2.9.0へ更新して、9月5日〜10月4日のイベントを遊ぼう。"
                 }
             },
             "imageAltTexts": {
-                "en": "PurrfectSpirits provisional event update banner",
-                "ja": "PurrfectSpirits イベントアップデートの仮バナー"
+                "en": "PurrfectSpirits event update banner",
+                "ja": "PurrfectSpirits イベントアップデートバナー"
             }
         }
     ]

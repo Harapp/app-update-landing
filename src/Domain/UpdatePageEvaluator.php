@@ -61,6 +61,7 @@ final class UpdatePageEvaluator
             'locale' => $request->locale,
             'imageUrl' => $page['imageUrl'],
             'imageAlt' => $this->localeResolver->resolve($page['imageAltTexts'], $request->locale),
+            'title' => $this->localeResolver->resolve($page['title'], $request->locale),
             'description' => $this->localeResolver->resolve($page['descriptions'], $request->locale),
             'socialCardTitle' => $this->localeResolver->resolve($page['socialCard']['title'], $request->locale),
             'socialCardDescription' => $this->localeResolver->resolve($page['socialCard']['description'], $request->locale),
@@ -158,6 +159,7 @@ final class UpdatePageEvaluator
             $common['comingSoonButtonLabel'],
             $common['socialCardTitle'],
             $common['socialCardDescription'],
+            $common['title'],
         );
     }
 

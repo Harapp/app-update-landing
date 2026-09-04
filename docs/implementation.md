@@ -165,6 +165,10 @@ templates/
         "android": "https://play.google.com/store/apps/details?id=com.example.app",
         "pc": "https://example.com/download"
       },
+      "title": {
+        "en": "The latest event is here.",
+        "ja": "最新イベントがやってきます。"
+      },
       "descriptions": {
         "en": "A new version is available for the latest event.",
         "ja": "最新イベント向けの新しいバージョンがあります。"
@@ -210,7 +214,7 @@ JSON Schemaでは少なくとも次を検証します。
 - `enabled`がbooleanであること
 - `startAt`と`endAt`がタイムゾーン付きISO 8601形式であること
 - `released`にiOS・Android・PCすべてのbooleanがあること
-- `en`の説明、SNSカードタイトル・説明、画像altが存在すること
+- `en`のページタイトル・説明、SNSカードタイトル・説明、画像altが存在すること
 - platformが`ios`、`android`、`pc`のいずれかであること
 - 画像が安全な相対WebPパス、または許可された絶対HTTPS URLであること
 - 外部遷移URLが絶対HTTPS URLであること
@@ -218,7 +222,9 @@ JSON Schemaでは少なくとも次を検証します。
 
 ### UI翻訳
 
-状態文、ボタン、注意書きなどの共通UI翻訳は、テンプレートごとの`templates/{template}/ui-texts.json`で管理します。AIや翻訳担当者が文脈を把握しやすいよう、意味を表すキーごとに言語を並べます。イベント説明、SNSカード、画像altはゲーム固有のため、`update-pages.json`に保持します。
+対応言語とAI向け翻訳依頼プロンプトは[翻訳ガイド](translations.md)を参照してください。
+
+状態文、ボタン、注意書きなどの共通UI翻訳は、テンプレートごとの`templates/{template}/ui-texts.json`で管理します。AIや翻訳担当者が文脈を把握しやすいよう、意味を表すキーごとに言語を並べます。イベントのタイトル・説明、SNSカード、画像altはゲーム固有のため、`update-pages.json`に保持します。
 
 ```json
 {
@@ -267,6 +273,7 @@ $templates = [
 
 - 解決済みの言語
 - バナー画像とalt
+- イベントタイトル
 - イベント説明
 - 状態メッセージ
 - 表示可能な場合だけローカライズ済みのUpdateボタン

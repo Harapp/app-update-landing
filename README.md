@@ -61,6 +61,7 @@ game-b.update.example.com
 - [Updateランディングページ要件](docs/update-landing-page.md)
 - [実装方針](docs/implementation.md)
 - [デプロイ方針](docs/deployment.md)
+- [翻訳ガイド・AI翻訳依頼プロンプト](docs/translations.md)
 
 ## 想定ディレクトリ
 

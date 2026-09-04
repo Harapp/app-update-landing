@@ -30,9 +30,10 @@ $pageTitle = $viewModel->socialCardTitle;
         main { box-sizing: border-box; width: min(100% - 2rem, <?= $viewModel->theme['maxContentWidth'] ?>px); margin: 2rem auto; overflow: hidden; border-radius: 1rem; background: #fff; box-shadow: 0 0.5rem 2rem #2021241f; }
         .content { padding: 1.5rem; }
         .banner { display: block; width: 100%; height: auto; }
-        h1 { margin: 0 0 1rem; font-size: 1.25rem; }
-        .status { margin: 0 0 1rem; font-weight: 600; }
-        .period { margin: 0; color: #4b5563; font-weight: 600; text-align: center; }
+        h1 { margin: 0; font-size: 1.35rem; line-height: 1.45; overflow-wrap: anywhere; }
+        .description { margin: .75rem 0 0; line-height: 1.75; overflow-wrap: anywhere; }
+        .status { margin: 1rem 0 0; font-weight: 600; }
+        .period { margin: 1.25rem 0 0; color: #4b5563; font-weight: 600; text-align: center; }
         .os-version { margin: .5rem 0; color: #4b5563; }
         .update-action { display: flex; justify-content: center; margin-top: 1.25rem; }
         .update-link { box-sizing: border-box; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; min-width: 12rem; padding: .8rem 1.25rem; border: 0; border-radius: .6rem; background: <?= $escape($viewModel->theme['primaryColor']) ?>; color: #fff; font: inherit; font-weight: 700; line-height: 1.25; text-align: center; text-decoration: none; }
@@ -50,8 +51,11 @@ $pageTitle = $viewModel->socialCardTitle;
         <img class="banner" src="<?= $escape($viewModel->imageUrl) ?>" alt="<?= $escape($viewModel->imageAlt ?? '') ?>">
     <?php endif; ?>
     <div class="content">
+        <?php if ($viewModel->title !== ''): ?>
+            <h1><?= $escape($viewModel->title) ?></h1>
+        <?php endif; ?>
         <?php if ($viewModel->description !== ''): ?>
-            <h1><?= $escape($viewModel->description) ?></h1>
+            <p class="description"><?= $escape($viewModel->description) ?></p>
         <?php endif; ?>
         <?php if (!in_array($viewModel->state, ['available', 'unreleased', 'ended'], true)): ?>
             <p class="status"><?= $escape($viewModel->statusMessage) ?></p>

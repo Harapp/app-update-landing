@@ -23,6 +23,9 @@
                 "android": "https://play.google.com/store/apps/details?id=com.example.app",
                 "pc": "https://example.com/download"
             },
+            "title": {
+                "en": "The latest event is here."
+            },
             "descriptions": {
                 "en": "A new version is available for the latest event."
             },

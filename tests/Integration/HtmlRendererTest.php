@@ -40,6 +40,7 @@ final class HtmlRendererTest extends TestCase
             'バージョン2.0.0に更新してイベントを遊ぶ',
             socialCardTitle: 'Event update title',
             socialCardDescription: 'Event update card description',
+            title: 'Event heading',
         );
         $html = (new HtmlRenderer(new TemplateRegistry(dirname(__DIR__, 2) . '/templates')))->render($view);
 
@@ -55,6 +56,8 @@ final class HtmlRendererTest extends TestCase
         self::assertStringContainsString('<meta property="og:description" content="Event update card description">', $html);
         self::assertStringContainsString('<meta name="twitter:title" content="Event update title">', $html);
         self::assertStringContainsString('<meta name="twitter:description" content="Event update card description">', $html);
+        self::assertStringContainsString('<h1>Event heading</h1>', $html);
+        self::assertStringContainsString('<p class="description">Event description</p>', $html);
         self::assertStringNotContainsString('<meta property="og:image"', $html);
         self::assertLessThan(strpos($html, '<a class="update-link"'), strpos($html, '<p class="period">'));
     }

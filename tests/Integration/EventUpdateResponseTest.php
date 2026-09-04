@@ -126,6 +126,7 @@ final class EventUpdateResponseTest extends TestCase
             'released' => ['ios' => true, 'android' => true, 'pc' => true],
             'minimumOsVersions' => ['ios' => '18.0'],
             'destinationUrls' => ['ios' => 'https://apps.apple.com/app/id1'],
+            'title' => ['en' => 'Event title'],
             'descriptions' => ['en' => 'English'],
             'socialCard' => [
                 'title' => ['en' => 'Event update'],

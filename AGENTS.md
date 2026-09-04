@@ -65,6 +65,10 @@ AIエージェントは、プロジェクトルートの `genie-playbook` シン
 - UI、Webページ、資料、画像、ブランド表現など、見た目や体験に関わる作業を行う場合は [genie-playbook/docs/design/design-workflow.md](genie-playbook/docs/design/design-workflow.md) を参照してください。
 - ブランドの印象を大きく変える変更、公開物の大きなデザイン変更、利用許諾が不明な素材の利用は事前に確認してください。
 
+## 翻訳
+
+対応言語、ロケールキー、対象外言語、翻訳ルール、AI向け翻訳依頼プロンプトは[翻訳ガイド](docs/translations.md)を参照してください。
+
 ## プロジェクト固有メモ
 
 - 目的:
