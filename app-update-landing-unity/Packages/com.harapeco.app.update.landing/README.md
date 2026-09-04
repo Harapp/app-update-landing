@@ -18,25 +18,31 @@ using System.Threading;
 using Harapeco.AppUpdateLanding;
 
 // Window > App Update Landing > SettingsでAPI URLと再取得間隔を設定しておきます。
-var client = new AppUpdateLandingClient();
+var service = AppUpdateLandingService.Instance;
 
-client.StatusUpdated += status =>
+service.StatusUpdated += status =>
 {
     var display = AppUpdateLandingJapaneseFormatter.Default.Format(status);
     statusLabel.text = display.Text;
 };
 
-await client.RefreshAsync(CancellationToken.None);
+await service.RefreshAsync(CancellationToken.None);
 
-// 同じAPI URLとplatformを使うClientは取得結果と取得サイクルを共有します。
+// キャッシュやバックオフを無視して即時取得する場合
+await service.ForceRefreshAsync(CancellationToken.None);
+
+// Serviceはアプリ起動時に自動生成され、Scene遷移後も生存します。
 // イベントが終了するまでは、時刻に応じた状態更新だけが行われ、APIを再取得しません。
 
 // 行全体のタップなどから詳細ページを直接開く場合
-client.OpenCurrentPage();
+service.Client.OpenCurrentPage();
 
 // Hostアプリのダイアログを挟む場合
-await client.PresentDetailsAsync(dialogPresenter, CancellationToken.None);
+await service.Client.PresentDetailsAsync(dialogPresenter, CancellationToken.None);
 ```
+
+テストや一時的な接続先では、常駐スケジューラを使わず従来どおり
+`new AppUpdateLandingClient("https://...")`でAPI URLを直接指定できます。
 
 Settings Windowを初めて開くと、次のアセットが作成されます。
 
@@ -47,8 +53,6 @@ Assets/Resources/AppUpdateLandingSettings.asset
 Unity Editorでは、Settingsの`Test State`でAPI取得後の表示を`イベント無し`、`イベント前`、`アップデート待ち`、`イベント中`、`イベント後`へ差し替えられます。Player Buildではこの設定を無視し、常にAPIレスポンスを使用します。
 
 このリポジトリの開発用Unityプロジェクトでは、動作確認用Sceneを`Assets/Samples/AppUpdateLanding/AppUpdateLandingSample.unity`に用意しています。`イベント前`と`イベント中`では、APIから取得したWebページを開くボタンも表示します。
-
-テストや一時的な接続先では、従来どおり`new AppUpdateLandingClient("https://...")`でAPI URLを直接指定できます。
 
 `IAppUpdateLandingDialogPresenter`はRuntimeパッケージ側でUIを固定しないための境界です。Hostアプリ側で既存のダイアログに接続してください。ダイアログが`OpenPage`を返すと、クライアントが詳細ページを開きます。
 

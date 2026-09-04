@@ -36,7 +36,7 @@ namespace Harapeco.AppUpdateLandingSample
         private Button webButton;
 
         private CancellationTokenSource cancellation;
-        private AppUpdateLandingClient client;
+        private AppUpdateLandingService service;
         private AppUpdateLandingStatus status;
         private bool isLoading;
 
@@ -53,6 +53,17 @@ namespace Harapeco.AppUpdateLandingSample
 
             refreshButton.onClick.AddListener(Refresh);
             webButton.onClick.AddListener(OpenWebPage);
+            service = AppUpdateLandingService.Instance;
+            if (service == null)
+            {
+                Debug.LogError(
+                    "[App Update Landing Sample] AppUpdateLandingService is unavailable.",
+                    this);
+                enabled = false;
+                return;
+            }
+
+            service.StatusUpdated += HandleStatusUpdated;
             cancellation = new CancellationTokenSource();
             Render();
             Refresh();
@@ -68,6 +79,11 @@ namespace Harapeco.AppUpdateLandingSample
             if (webButton != null)
             {
                 webButton.onClick.RemoveListener(OpenWebPage);
+            }
+
+            if (service != null)
+            {
+                service.StatusUpdated -= HandleStatusUpdated;
             }
 
             if (cancellation == null)
@@ -94,8 +110,7 @@ namespace Harapeco.AppUpdateLandingSample
 
             try
             {
-                client = new AppUpdateLandingClient();
-                status = await client.RefreshAsync(cancellation.Token);
+                status = await service.RefreshAsync(cancellation.Token);
             }
             catch (OperationCanceledException)
             {
@@ -156,18 +171,27 @@ namespace Harapeco.AppUpdateLandingSample
 
         private void OpenWebPage()
         {
-            if (!CanOpenWebPage(status) || client == null)
+            if (!CanOpenWebPage(status) || service == null)
             {
                 return;
             }
 
             try
             {
-                client.OpenCurrentPage();
+                service.Client.OpenCurrentPage();
             }
             catch (Exception exception)
             {
                 errorText.text = exception.Message;
+            }
+        }
+
+        private void HandleStatusUpdated(AppUpdateLandingStatus updatedStatus)
+        {
+            status = updatedStatus;
+            if (!isLoading)
+            {
+                Render();
             }
         }
 

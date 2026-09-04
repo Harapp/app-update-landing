@@ -96,8 +96,21 @@ namespace Harapeco.AppUpdateLanding
 
         public AppUpdateLandingStatus CurrentStatus { get; private set; }
 
-        public async Task<AppUpdateLandingStatus> RefreshAsync(
+        public Task<AppUpdateLandingStatus> RefreshAsync(
             CancellationToken cancellationToken = default)
+        {
+            return RefreshInternalAsync(false, cancellationToken);
+        }
+
+        public Task<AppUpdateLandingStatus> ForceRefreshAsync(
+            CancellationToken cancellationToken = default)
+        {
+            return RefreshInternalAsync(true, cancellationToken);
+        }
+
+        private async Task<AppUpdateLandingStatus> RefreshInternalAsync(
+            bool force,
+            CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var now = DateTimeOffset.UtcNow;
@@ -106,7 +119,8 @@ namespace Harapeco.AppUpdateLanding
             lock (sharedState.SyncRoot)
             {
                 EnsureLoaded(sharedState);
-                if (sharedState.Status != null
+                if (!force
+                    && sharedState.Status != null
                     && !ShouldFetch(sharedState, sharedState.Status, now))
                 {
                     cachedStatus = sharedState.Status;
@@ -125,9 +139,7 @@ namespace Harapeco.AppUpdateLanding
 
             if (cachedStatus != null)
             {
-#if UNITY_EDITOR
-                cachedStatus = AppUpdateLandingTestStatus.Apply(cachedStatus, testState, now);
-#endif
+                cachedStatus = ApplyTestState(cachedStatus, now);
                 CurrentStatus = cachedStatus;
                 StatusUpdated?.Invoke(CurrentStatus);
                 return CurrentStatus;
@@ -136,12 +148,7 @@ namespace Harapeco.AppUpdateLanding
             try
             {
                 var status = await refreshTask;
-#if UNITY_EDITOR
-                status = AppUpdateLandingTestStatus.Apply(
-                    status,
-                    testState,
-                    DateTimeOffset.UtcNow);
-#endif
+                status = ApplyTestState(status, DateTimeOffset.UtcNow);
                 CurrentStatus = status;
                 StatusUpdated?.Invoke(status);
                 return status;
@@ -156,6 +163,52 @@ namespace Harapeco.AppUpdateLanding
                     }
                 }
             }
+        }
+
+        internal DateTimeOffset? GetNextProcessAt(DateTimeOffset now)
+        {
+            lock (sharedState.SyncRoot)
+            {
+                EnsureLoaded(sharedState);
+                if (sharedState.Status == null)
+                {
+                    return now;
+                }
+
+                var status = ApplyTestState(sharedState.Status, now);
+                switch (status.GetState(now))
+                {
+                    case AppUpdateLandingEventState.Upcoming:
+                        return status.StartAt ?? now;
+                    case AppUpdateLandingEventState.WaitingForRelease:
+                    case AppUpdateLandingEventState.Active:
+                        return status.EndAt.HasValue
+                            ? status.EndAt.Value.AddMilliseconds(1)
+                            : null;
+                    case AppUpdateLandingEventState.Disabled:
+                    case AppUpdateLandingEventState.Ended:
+                        if (!sharedState.HasLastFetchedAt)
+                        {
+                            return now;
+                        }
+
+                        return sharedState.LastFetchedAt.AddDays(
+                            GetBackoffDays(sharedState.BackoffAttempt));
+                    default:
+                        return now;
+                }
+            }
+        }
+
+        private AppUpdateLandingStatus ApplyTestState(
+            AppUpdateLandingStatus status,
+            DateTimeOffset now)
+        {
+#if UNITY_EDITOR
+            return AppUpdateLandingTestStatus.Apply(status, testState, now);
+#else
+            return status;
+#endif
         }
 
         public string BuildCurrentPageUrl()
