@@ -14,6 +14,8 @@ final readonly class UpdatePageViewModel
     public string $storeNotice;
     public ?string $osRequirementMessage;
     public string $comingSoonButtonLabel;
+    public string $socialCardTitle;
+    public string $socialCardDescription;
 
     /** @var array{primaryColor: string, accentColor: string, backgroundColor: string, textColor: string, logoUrl: ?string, maxContentWidth: int} */
     public const DEFAULT_THEME = [
@@ -50,6 +52,8 @@ final readonly class UpdatePageViewModel
         ?string $storeNotice = null,
         ?string $osRequirementMessage = null,
         ?string $comingSoonButtonLabel = null,
+        ?string $socialCardTitle = null,
+        ?string $socialCardDescription = null,
     ) {
         $this->eventPeriod = $eventPeriod;
         $this->updateButtonLabel = $updateButtonLabel ?? 'Update and play the event';
@@ -59,6 +63,8 @@ final readonly class UpdatePageViewModel
             ?? 'Updates may take some time to appear on the App Store or Google Play. If the update is not available yet, please try again later.';
         $this->osRequirementMessage = $osRequirementMessage;
         $this->comingSoonButtonLabel = $comingSoonButtonLabel ?? 'Coming Soon';
+        $this->socialCardTitle = $socialCardTitle ?? ($description !== '' ? $description : 'App update');
+        $this->socialCardDescription = $socialCardDescription ?? $description;
     }
 
     public static function unavailable(

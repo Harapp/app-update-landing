@@ -35,6 +35,10 @@ final class UpdatePageEvaluatorTest extends TestCase
                     'minimumOsVersions' => ['ios' => '18.0'],
                     'destinationUrls' => ['ios' => 'https://apps.apple.com/app/id1'],
                     'descriptions' => ['en' => 'English', 'ja' => '日本語'],
+                    'socialCard' => [
+                        'title' => ['en' => 'Event update', 'ja' => 'イベントアップデート'],
+                        'description' => ['en' => 'Update the app.', 'ja' => 'アプリを更新してください。'],
+                    ],
                     'imageAltTexts' => ['en' => 'Banner', 'ja' => 'バナー'],
                 ],
             ],
@@ -67,6 +71,8 @@ final class UpdatePageEvaluatorTest extends TestCase
 
         self::assertSame('available', $view->state);
         self::assertSame('日本語', $view->description);
+        self::assertSame('イベントアップデート', $view->socialCardTitle);
+        self::assertSame('アプリを更新してください。', $view->socialCardDescription);
         self::assertTrue($view->showUpdate);
         self::assertTrue($view->showStoreNotice);
         self::assertSame('更新してイベントを遊ぶ', $view->updateButtonLabel);
@@ -150,6 +156,8 @@ final class UpdatePageEvaluatorTest extends TestCase
         self::assertTrue($unreleased->showUpdate);
         self::assertTrue($unreleased->showStoreNotice);
         self::assertSame('https://apps.apple.com/app/id1', $unreleased->destinationUrl);
+        self::assertSame('Event update', $unreleased->socialCardTitle);
+        self::assertSame('Update the app.', $unreleased->socialCardDescription);
     }
 
     public function testUpdateEndsAfterTheEndBoundary(): void

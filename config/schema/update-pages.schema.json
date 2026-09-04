@@ -12,7 +12,7 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["targetVersion", "enabled", "imageUrl", "released", "descriptions", "imageAltTexts"],
+        "required": ["targetVersion", "enabled", "imageUrl", "released", "descriptions", "socialCard", "imageAltTexts"],
         "properties": {
           "targetVersion": {"type": "string", "pattern": "^\\d{1,9}(?:\\.\\d{1,9}){1,3}$"},
           "template": {"type": "string", "enum": ["event-update"]},
@@ -53,6 +53,27 @@
             "additionalProperties": false,
             "properties": {"en": {"type": "string", "minLength": 1, "maxLength": 2000}},
             "patternProperties": {"^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$": {"type": "string", "minLength": 1, "maxLength": 2000}}
+          },
+          "socialCard": {
+            "type": "object",
+            "required": ["title", "description"],
+            "additionalProperties": false,
+            "properties": {
+              "title": {
+                "type": "object",
+                "required": ["en"],
+                "additionalProperties": false,
+                "properties": {"en": {"type": "string", "minLength": 1, "maxLength": 300}},
+                "patternProperties": {"^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$": {"type": "string", "minLength": 1, "maxLength": 300}}
+              },
+              "description": {
+                "type": "object",
+                "required": ["en"],
+                "additionalProperties": false,
+                "properties": {"en": {"type": "string", "minLength": 1, "maxLength": 500}},
+                "patternProperties": {"^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$": {"type": "string", "minLength": 1, "maxLength": 500}}
+              }
+            }
           },
           "imageAltTexts": {
             "type": "object",

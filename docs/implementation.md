@@ -169,6 +169,16 @@ templates/
         "en": "A new version is available for the latest event.",
         "ja": "最新イベント向けの新しいバージョンがあります。"
       },
+      "socialCard": {
+        "title": {
+          "en": "Latest Event Update",
+          "ja": "最新イベントアップデート"
+        },
+        "description": {
+          "en": "Update the app and play the latest event.",
+          "ja": "アプリを更新して最新イベントを遊ぼう。"
+        }
+      },
       "imageAltTexts": {
         "en": "Latest event update",
         "ja": "最新イベントのアップデート"
@@ -200,7 +210,7 @@ JSON Schemaでは少なくとも次を検証します。
 - `enabled`がbooleanであること
 - `startAt`と`endAt`がタイムゾーン付きISO 8601形式であること
 - `released`にiOS・Android・PCすべてのbooleanがあること
-- `en`の説明と画像altが存在すること
+- `en`の説明、SNSカードタイトル・説明、画像altが存在すること
 - platformが`ios`、`android`、`pc`のいずれかであること
 - 画像が安全な相対WebPパス、または許可された絶対HTTPS URLであること
 - 外部遷移URLが絶対HTTPS URLであること
@@ -208,7 +218,7 @@ JSON Schemaでは少なくとも次を検証します。
 
 ### UI翻訳
 
-状態文、ボタン、注意書きなどの共通UI翻訳は、テンプレートごとの`templates/{template}/ui-texts.json`で管理します。AIや翻訳担当者が文脈を把握しやすいよう、意味を表すキーごとに言語を並べます。イベント説明と画像altだけはゲーム固有のため、`update-pages.json`に保持します。
+状態文、ボタン、注意書きなどの共通UI翻訳は、テンプレートごとの`templates/{template}/ui-texts.json`で管理します。AIや翻訳担当者が文脈を把握しやすいよう、意味を表すキーごとに言語を並べます。イベント説明、SNSカード、画像altはゲーム固有のため、`update-pages.json`に保持します。
 
 ```json
 {

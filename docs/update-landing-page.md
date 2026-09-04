@@ -72,7 +72,7 @@ platformはUser-Agentによる内部判定を優先します。iOSまたはAndro
 - `en` は削除や別言語への変更を不可とする
 - `locale` に一致する翻訳が将来追加された場合は、その翻訳を優先する
 - 完全一致する翻訳がない場合は言語部分を確認し、最終的に必ず `en` へフォールバックする
-- イベント説明、画像alt、状態メッセージ、ボタン文言は同じ言語解決規則を使う
+- イベント説明、SNSカード、画像alt、状態メッセージ、ボタン文言は同じ言語解決規則を使う
 - 状態メッセージ、ボタン文言、注意書きは`templates/event-update/ui-texts.json`へ、意味を表すキー単位で保存する
 
 初期状態のイベント固有文言は次の形です。
@@ -81,6 +81,14 @@ platformはUser-Agentによる内部判定を優先します。iOSまたはAndro
 {
   "descriptions": {
     "en": "A new version is available for the latest event."
+  },
+  "socialCard": {
+    "title": {
+      "en": "Latest Event Update"
+    },
+    "description": {
+      "en": "Update the app and play the latest event."
+    }
   },
   "imageAltTexts": {
     "en": "Latest event update"
@@ -121,6 +129,14 @@ platformはUser-Agentによる内部判定を優先します。iOSまたはAndro
       "descriptions": {
         "en": "A new version is available for the latest event."
       },
+      "socialCard": {
+        "title": {
+          "en": "Latest Event Update"
+        },
+        "description": {
+          "en": "Update the app and play the latest event."
+        }
+      },
       "imageAltTexts": {
         "en": "Latest event update"
       }
@@ -136,6 +152,7 @@ platformはUser-Agentによる内部判定を優先します。iOSまたはAndro
 
 `minimumOsVersions`もplatformごとに任意とし、PCを含め、値がないplatformには最低OS制限を適用しません。
 `released`はiOS・Android・PCそれぞれの配信状態を必須booleanで保持します。PCはサイトなどの遷移先が利用可能になった時点でtrueにします。
+`socialCard.title`と`socialCard.description`はSNSカード専用文言です。どちらも`en`を必須とし、ページ本文の`descriptions`とは分けて管理します。
 
 ## テンプレート
 
@@ -306,6 +323,7 @@ Updates may take some time to appear on the App Store or Google Play. If the upd
 - Open GraphとX（Twitter）のLarge Image Cardに対応する
 - カード画像にはページ内のバナー画像と同じ絶対HTTPS URLを使う
 - カードのタイトルと説明、画像altは、ページで解決された言語の文言を使う
+- カードタイトルと説明は`socialCard`で明示し、ページ本文の説明を流用しない
 
 ## テスト要件
 

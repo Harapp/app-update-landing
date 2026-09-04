@@ -35,6 +35,7 @@ final class ConfigurationRepositoryTest extends TestCase
         self::assertNotNull($loaded);
         self::assertSame('event-update', $loaded['template']);
         self::assertSame('https://cdn.example.com/banner.webp', $loaded['imageUrl']);
+        self::assertSame('Event update', $loaded['socialCard']['title']['en']);
     }
 
     public function testRelativeImagePathIsResolvedAgainstPublicBaseUrl(): void
@@ -106,6 +107,15 @@ final class ConfigurationRepositoryTest extends TestCase
         $page = $this->basePage();
         $page['unexpected'] = true;
         unset($page['descriptions']['en']);
+
+        $this->expectException(ConfigException::class);
+        (new UpdatePageRepository($this->writeJson($this->document([$page])), ['cdn.example.com']))->findByTargetVersion('2.0.0');
+    }
+
+    public function testSocialCardRequiresEnglishTitleAndDescription(): void
+    {
+        $page = $this->basePage();
+        unset($page['socialCard']['description']['en']);
 
         $this->expectException(ConfigException::class);
         (new UpdatePageRepository($this->writeJson($this->document([$page])), ['cdn.example.com']))->findByTargetVersion('2.0.0');
@@ -375,6 +385,8 @@ final class ConfigurationRepositoryTest extends TestCase
         self::assertSame('https://itunes.apple.com/jp/app/id1269423920', $page['destinationUrls']['ios']);
         self::assertSame('https://play.google.com/store/apps/details?id=okinawa.harapeco.catRestaurant', $page['destinationUrls']['android']);
         self::assertSame('https://www.harapeco.okinawa/info/app/neko_boku.html', $page['destinationUrls']['pc']);
+        self::assertSame('PurrfectSpirits Event Update', $page['socialCard']['title']['en']);
+        self::assertSame('PurrfectSpirits イベントアップデート', $page['socialCard']['title']['ja']);
         self::assertSame('#0E7490', $theme['primaryColor']);
         self::assertSame('#155E75', $theme['accentColor']);
         self::assertSame('#ECFEFF', $theme['backgroundColor']);
@@ -398,6 +410,10 @@ final class ConfigurationRepositoryTest extends TestCase
             'minimumOsVersions' => ['ios' => '18.0'],
             'destinationUrls' => ['ios' => 'https://apps.apple.com/app/id1'],
             'descriptions' => ['en' => 'English'],
+            'socialCard' => [
+                'title' => ['en' => 'Event update'],
+                'description' => ['en' => 'Update the app and play the event.'],
+            ],
             'imageAltTexts' => ['en' => 'Banner'],
         ];
     }

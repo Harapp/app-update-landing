@@ -62,6 +62,8 @@ final class UpdatePageEvaluator
             'imageUrl' => $page['imageUrl'],
             'imageAlt' => $this->localeResolver->resolve($page['imageAltTexts'], $request->locale),
             'description' => $this->localeResolver->resolve($page['descriptions'], $request->locale),
+            'socialCardTitle' => $this->localeResolver->resolve($page['socialCard']['title'], $request->locale),
+            'socialCardDescription' => $this->localeResolver->resolve($page['socialCard']['description'], $request->locale),
             'currentVersion' => $request->appVersion,
             'targetVersion' => $page['targetVersion'],
             'startAt' => $page['startAt'],
@@ -154,6 +156,8 @@ final class UpdatePageEvaluator
             $common['storeNotice'],
             $osRequirementMessage,
             $common['comingSoonButtonLabel'],
+            $common['socialCardTitle'],
+            $common['socialCardDescription'],
         );
     }
 

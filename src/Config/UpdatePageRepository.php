@@ -90,13 +90,13 @@ final class UpdatePageRepository
     {
         $allowedFields = [
             'targetVersion', 'template', 'enabled', 'imageUrl', 'startAt', 'endAt',
-            'released', 'minimumOsVersions', 'destinationUrls', 'descriptions', 'imageAltTexts',
+            'released', 'minimumOsVersions', 'destinationUrls', 'descriptions', 'socialCard', 'imageAltTexts',
         ];
         if (array_diff(array_keys($page), $allowedFields) !== []) {
             throw new ConfigException('Configuration is invalid.');
         }
 
-        foreach (['targetVersion', 'enabled', 'imageUrl', 'released', 'descriptions', 'imageAltTexts'] as $required) {
+        foreach (['targetVersion', 'enabled', 'imageUrl', 'released', 'descriptions', 'socialCard', 'imageAltTexts'] as $required) {
             if (!array_key_exists($required, $page)) {
                 throw new ConfigException('Configuration is invalid.');
             }
@@ -136,6 +136,7 @@ final class UpdatePageRepository
         }
 
         $descriptions = $this->validateTranslations($page['descriptions'], 2000);
+        $socialCard = $this->validateSocialCard($page['socialCard']);
         $imageAltTexts = $this->validateTranslations($page['imageAltTexts'], 300);
         if (!isset($descriptions['en'], $imageAltTexts['en'])) {
             throw new ConfigException('Configuration is invalid.');
@@ -156,6 +157,7 @@ final class UpdatePageRepository
             'minimumOsVersions' => $minimumOsVersions,
             'destinationUrls' => $destinationUrls,
             'descriptions' => $descriptions,
+            'socialCard' => $socialCard,
             'imageAltTexts' => $imageAltTexts,
         ];
     }
@@ -263,6 +265,28 @@ final class UpdatePageRepository
             $result[$locale] = $text;
         }
         return $result;
+    }
+
+    /** @param mixed $socialCard @return array{title: array<string, string>, description: array<string, string>} */
+    private function validateSocialCard(mixed $socialCard): array
+    {
+        if (
+            !is_array($socialCard)
+            || array_is_list($socialCard)
+            || count($socialCard) !== 2
+            || !array_key_exists('title', $socialCard)
+            || !array_key_exists('description', $socialCard)
+        ) {
+            throw new ConfigException('Configuration is invalid.');
+        }
+
+        $title = $this->validateTranslations($socialCard['title'], 300);
+        $description = $this->validateTranslations($socialCard['description'], 500);
+        if (!isset($title['en'], $description['en'])) {
+            throw new ConfigException('Configuration is invalid.');
+        }
+
+        return ['title' => $title, 'description' => $description];
     }
 
     /** @param mixed $versions @return array<string, Version> */

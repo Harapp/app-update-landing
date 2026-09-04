@@ -9,6 +9,11 @@
             "imageUrl": "assets/banner.webp",
             "startAt": null,
             "endAt": null,
+            "released": {
+                "ios": true,
+                "android": true,
+                "pc": true
+            },
             "minimumOsVersions": {
                 "ios": "18.0",
                 "android": "14"
@@ -20,6 +25,14 @@
             },
             "descriptions": {
                 "en": "A new version is available for the latest event."
+            },
+            "socialCard": {
+                "title": {
+                    "en": "Latest Event Update"
+                },
+                "description": {
+                    "en": "Update the app and play the latest event."
+                }
             },
             "imageAltTexts": {
                 "en": "Latest event update"

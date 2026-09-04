@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 /** @var \App\Presentation\UpdatePageViewModel $viewModel */
 $escape = static fn (string $value): string => htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-$pageTitle = $viewModel->description !== '' ? $viewModel->description : 'App update';
+$pageTitle = $viewModel->socialCardTitle;
 ?><!doctype html>
 <html lang="<?= $escape($viewModel->locale) ?>">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= $escape($pageTitle) ?></title>
-    <meta name="description" content="<?= $escape($viewModel->description) ?>">
+    <meta name="description" content="<?= $escape($viewModel->socialCardDescription) ?>">
     <meta property="og:type" content="website">
     <meta property="og:title" content="<?= $escape($pageTitle) ?>">
-    <meta property="og:description" content="<?= $escape($viewModel->description) ?>">
+    <meta property="og:description" content="<?= $escape($viewModel->socialCardDescription) ?>">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="<?= $escape($pageTitle) ?>">
-    <meta name="twitter:description" content="<?= $escape($viewModel->description) ?>">
+    <meta name="twitter:description" content="<?= $escape($viewModel->socialCardDescription) ?>">
     <?php if ($viewModel->imageUrl !== null): ?>
         <meta property="og:image" content="<?= $escape($viewModel->imageUrl) ?>">
         <meta property="og:image:alt" content="<?= $escape($viewModel->imageAlt ?? '') ?>">
