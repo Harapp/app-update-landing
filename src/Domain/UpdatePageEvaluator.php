@@ -24,6 +24,8 @@ final class UpdatePageEvaluator
         'status.unavailable' => ['en' => 'This update page is currently unavailable.'],
         'button.update' => ['en' => 'Update and play the event'],
         'button.updateAriaLabel' => ['en' => 'Update to version {version} and play the event'],
+        'button.prepare' => ['en' => 'Update and get ready for the event'],
+        'button.prepareAriaLabel' => ['en' => 'Update to version {version} and get ready for the event'],
         'button.comingSoon' => ['en' => 'Coming Soon'],
         'notice.storeDelay' => ['en' => 'Updates may take some time to appear on the App Store or Google Play. If the update is not available yet, please try again later.'],
         'period.range' => ['en' => '{start}–{end}'],
@@ -54,7 +56,8 @@ final class UpdatePageEvaluator
 
     public function evaluate(UpdatePageRequest $request): UpdatePageViewModel
     {
-        $page = $this->repository->findByTargetVersion($request->targetVersion);
+        $targetVersion = $this->repository->releaseConfig()['releaseTargetVersion'];
+        $page = $this->repository->findByTargetVersion($targetVersion);
         if ($page === null) {
             return UpdatePageViewModel::unavailable(
                 $request->locale,
@@ -63,6 +66,9 @@ final class UpdatePageEvaluator
         }
 
         $now = $this->clock->now()->setTimezone(new \DateTimeZone('UTC'));
+        $isBeforeEvent = $page['startAt'] !== null && $now < $page['startAt'];
+        $updateButtonKey = $isBeforeEvent ? 'button.prepare' : 'button.update';
+        $updateButtonAriaLabelKey = $isBeforeEvent ? 'button.prepareAriaLabel' : 'button.updateAriaLabel';
         $common = [
             'locale' => $request->locale,
             'textDirection' => $this->localeResolver->textDirection($request->locale),
@@ -78,9 +84,9 @@ final class UpdatePageEvaluator
             'endAt' => $page['endAt'],
             'now' => $now,
             'template' => $page['template'],
-            'updateButtonLabel' => $this->text('button.update', $request->locale),
+            'updateButtonLabel' => $this->text($updateButtonKey, $request->locale),
             'updateButtonAriaLabel' => $this->text(
-                'button.updateAriaLabel',
+                $updateButtonAriaLabelKey,
                 $request->locale,
                 ['{version}' => $page['targetVersion']],
             ),
@@ -88,13 +94,12 @@ final class UpdatePageEvaluator
             'storeNotice' => $this->text('notice.storeDelay', $request->locale),
         ];
 
-        $appVersion = Version::fromString($request->appVersion);
-        $targetVersion = Version::fromString($request->targetVersion);
-
         if (!$page['enabled']) {
             return $this->view($common, 'disabled', 'status.disabled');
         }
-        if ($appVersion->compare($targetVersion) >= 0) {
+        if ($request->appVersion !== null
+            && Version::fromString($request->appVersion)->compare(Version::fromString($page['targetVersion'])) >= 0
+        ) {
             return $this->view($common, 'up-to-date', 'status.upToDate');
         }
         if ($page['endAt'] !== null && $now > $page['endAt']) {
@@ -102,7 +107,10 @@ final class UpdatePageEvaluator
         }
 
         $minimumOsVersion = $page['minimumOsVersions'][$request->platform] ?? null;
-        if ($minimumOsVersion instanceof Version && Version::fromString($request->osVersion, true)->isLessThan($minimumOsVersion)) {
+        if ($request->osVersion !== null
+            && $minimumOsVersion instanceof Version
+            && Version::fromString($request->osVersion, true)->isLessThan($minimumOsVersion)
+        ) {
             return $this->view($common, 'unsupported-os', 'status.unsupportedOs', $request->osVersion, (string) $minimumOsVersion);
         }
 

@@ -7,11 +7,10 @@ namespace App\Http;
 final readonly class UpdatePageRequest
 {
     public function __construct(
-        public string $appVersion,
-        public string $targetVersion,
+        public ?string $appVersion,
         public string $locale,
         public string $platform,
-        public string $osVersion,
+        public ?string $osVersion,
     ) {
     }
 }

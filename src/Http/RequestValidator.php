@@ -8,14 +8,6 @@ use InvalidArgumentException;
 
 final class RequestValidator
 {
-    private const REQUIRED_PARAMETERS = [
-        'appVersion',
-        'targetVersion',
-        'locale',
-        'platform',
-        'osVersion',
-    ];
-
     private const FORBIDDEN_PARAMETERS = [
         'deviceId',
         'device_id',
@@ -37,19 +29,30 @@ final class RequestValidator
             }
         }
 
-        foreach (self::REQUIRED_PARAMETERS as $parameter) {
-            if (!array_key_exists($parameter, $query) || !is_string($query[$parameter])) {
-                throw new InvalidArgumentException('Invalid request.');
-            }
-        }
+        $appVersion = $this->optionalString($query, 'appVersion');
+        $locale = $this->optionalString($query, 'locale');
+        $platform = $this->optionalString($query, 'platform');
+        $osVersion = $this->optionalString($query, 'osVersion');
 
         return new UpdatePageRequest(
-            $this->validateVersion($query['appVersion'], false),
-            $this->validateVersion($query['targetVersion'], false),
-            $this->validateLocale($query['locale']),
-            $this->validatePlatform($query['platform']),
-            $this->validateVersion($query['osVersion'], true),
+            $appVersion === null ? null : $this->validateVersion($appVersion, false),
+            $locale === null ? 'en' : $this->validateLocale($locale),
+            $platform === null ? 'pc' : $this->validatePlatform($platform),
+            $osVersion === null ? null : $this->validateVersion($osVersion, true),
         );
+    }
+
+    /** @param array<string, mixed> $query */
+    private function optionalString(array $query, string $parameter): ?string
+    {
+        if (!array_key_exists($parameter, $query)) {
+            return null;
+        }
+        if (!is_string($query[$parameter])) {
+            throw new InvalidArgumentException('Invalid request.');
+        }
+
+        return $query[$parameter];
     }
 
     private function validateVersion(string $value, bool $allowSingleSegment): string

@@ -59,6 +59,18 @@
         "he": "עדכנו לגרסה {version} ושחקו באירוע",
         "ja": "バージョン{version}に更新してイベントを遊ぶ"
     },
+    "button.prepare": {
+        "en": "Update and get ready for the event",
+        "ar": "حدّث واستعد للفعالية",
+        "he": "עדכנו והתכוננו לאירוע",
+        "ja": "更新してイベントに備える"
+    },
+    "button.prepareAriaLabel": {
+        "en": "Update to version {version} and get ready for the event",
+        "ar": "حدّث إلى الإصدار {version} واستعد للفعالية",
+        "he": "עדכנו לגרסה {version} והתכוננו לאירוע",
+        "ja": "バージョン{version}に更新してイベントに備える"
+    },
     "button.comingSoon": {
         "en": "Coming Soon",
         "ar": "قريبًا",

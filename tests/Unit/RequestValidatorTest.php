@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 
 final class RequestValidatorTest extends TestCase
 {
-    public function testRequiredParametersAreParsed(): void
+    public function testParametersAreParsed(): void
     {
         $request = (new RequestValidator())->validate([
             'appVersion' => '1.2',
@@ -20,11 +20,21 @@ final class RequestValidatorTest extends TestCase
             'osVersion' => '18.1',
         ]);
 
-        self::assertSame('2.0.0', $request->targetVersion);
+        self::assertSame('1.2', $request->appVersion);
         self::assertSame('ios', $request->platform);
     }
 
-    public function testMissingAndMalformedParametersAreRejected(): void
+    public function testMissingParametersUseSafeDefaults(): void
+    {
+        $request = (new RequestValidator())->validate([]);
+
+        self::assertNull($request->appVersion);
+        self::assertSame('en', $request->locale);
+        self::assertSame('pc', $request->platform);
+        self::assertNull($request->osVersion);
+    }
+
+    public function testMalformedParametersAreRejected(): void
     {
         $this->expectException(InvalidArgumentException::class);
 

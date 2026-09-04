@@ -409,6 +409,10 @@ final class ConfigurationRepositoryTest extends TestCase
         self::assertSame('حدّث والعب الفعالية', $uiTexts['button.update']['ar']);
         self::assertSame('עדכנו ושחקו באירוע', $uiTexts['button.update']['he']);
         self::assertSame('更新してイベントを遊ぶ', $uiTexts['button.update']['ja']);
+        self::assertSame('Update and get ready for the event', $uiTexts['button.prepare']['en']);
+        self::assertSame('حدّث واستعد للفعالية', $uiTexts['button.prepare']['ar']);
+        self::assertSame('עדכנו והתכוננו לאירוע', $uiTexts['button.prepare']['he']);
+        self::assertSame('更新してイベントに備える', $uiTexts['button.prepare']['ja']);
         self::assertArrayHasKey('en', $uiTexts['notice.storeDelay']);
     }
 

@@ -11,6 +11,7 @@ final class UiTextRepository
     /** @var array<string, list<string>> */
     private const REQUIRED_PLACEHOLDERS = [
         'button.updateAriaLabel' => ['{version}'],
+        'button.prepareAriaLabel' => ['{version}'],
         'period.range' => ['{start}', '{end}'],
         'period.remaining.one' => ['{range}'],
         'period.remaining.two' => ['{range}'],

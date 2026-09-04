@@ -7,7 +7,7 @@ NativeNotifydのUpdate通知をタップした利用者へ表示する、顧客�
 
 - 更新が必要な利用者をOSに対応した更新先へ案内する
 - 更新済み、期間外、OS非対応の場合も、何も表示されない状態にせず理由を伝える
-- Update URLを固定し、`targetVersion` に応じてバナー、説明文、期間、遷移先を切り替える
+- Update URLを固定し、JSONの`releaseTargetVersion`に対応する最新のバナー、説明文、期間、遷移先を表示する
 - Unity packageには更新可否の業務判断を持たせず、Webページ側へ集約する
 
 ## ページ構成
@@ -44,7 +44,6 @@ Unityは固定Update URLへ、タップ時点の情報をquery parameterとし�
 ```text
 https://updates.example.com/update
   ?appVersion=1.4.2
-  &targetVersion=2.0.0
   &locale=en-US
   &platform=ios
   &osVersion=18.1
@@ -52,14 +51,15 @@ https://updates.example.com/update
 
 | parameter | 必須 | 内容 |
 | --- | --- | --- |
-| `appVersion` | 必須 | タップ時点でインストールされているアプリバージョン |
-| `targetVersion` | 必須 | 通知が案内する対象アプリバージョン |
-| `locale` | 必須 | タップ時点の言語・ロケール |
+| `appVersion` | 任意 | タップ時点でインストールされているアプリバージョン。未指定時は更新済み判定を省略 |
+| `locale` | 任意 | タップ時点の言語・ロケール。未指定時は`en` |
 | `platform` | 任意 | `ios`、`android`、または`pc`。端末判定不能時のフォールバック |
-| `osVersion` | 必須 | タップ時点のOSバージョン |
+| `osVersion` | 任意 | タップ時点のOSバージョン。未指定時は最低OS判定を省略 |
 
 query parameterは表示判定の入力であり、認証・認可や秘密情報の受け渡しには使用しません。
 端末ID、通知トークン、認証情報はURLへ含めません。
+指定されたparameterだけを対応する判定に使用し、parameterが欠けていること自体はエラーにしません。指定値が不正な場合は推測で補正せず拒否します。
+旧URLに`targetVersion`が残っていても値は使用せず、常にJSONの`releaseTargetVersion`を表示します。
 
 platformはUser-Agentによる内部判定を優先します。iOSまたはAndroidを判定できた場合はquery parameterより内部判定を使用し、判定できない場合だけ有効な`platform`を使用します。どちらもない場合は`pc`とします。
 
@@ -195,12 +195,12 @@ startAt <= now <= endAt
 
 | 優先順 | 条件 | 表示状態 | ボタン |
 | --- | --- | --- | --- |
-| 1 | parameter不正、または`targetVersion`に対応する設定がない | ページを表示できない | 非表示 |
+| 1 | 指定されたparameterが不正、または`releaseTargetVersion`に対応する設定がない | ページを表示できない | 非表示 |
 | 2 | `enabled=false` | 現在利用できない | 非表示 |
-| 3 | `appVersion >= targetVersion` | 更新済み | 非表示 |
+| 3 | `appVersion`が指定され、`appVersion >= targetVersion` | 更新済み | 非表示 |
 | 4 | `endAt < now` | 期間終了 | 非表示 |
 | 5 | 未対応の`platform` | 更新不可 | 非表示 |
-| 6 | `osVersion`が最低対応バージョン未満 | OS非対応 | 非表示 |
+| 6 | `osVersion`が指定され、最低対応バージョン未満 | OS非対応 | 非表示 |
 | 7 | 対応する更新先URLがない | 一時的に更新不可 | 非表示 |
 | 8 | `released[platform]=false` | 未配信 | 「Coming Soon」を無効表示 |
 | 9 | 上記以外 | アップデート可能 | 表示 |
@@ -217,8 +217,8 @@ startAt <= now <= endAt
 
 - バナー画像
 - イベント説明
-- `Sep 10–30 (21 days remaining)` / `9月10日〜30日（残り21日）`形式の期間と残り日数
-- ボタンは1段目に`V2.9.0`、2段目に`Update and play the event`などのローカライズ済み行動文言を表示する
+- 開始前は開始までの日数、期間中は残り日数を表示する
+- ボタンは1段目に`V2.9.0`、2段目に開始前なら`Update and get ready for the event`、期間中なら`Update and play the event`などのローカライズ済み行動文言を表示する
 - 状態文、現在バージョンと対象バージョンの補助行は表示しない
 - ボタン押下時は`platform`に対応する`destinationUrls`を開く
 - iOS / Androidでは、ボタンの下にストア反映の遅延に関する小さな注意書きを表示する
@@ -276,8 +276,10 @@ startAt <= now <= endAt
 
 - ボタンはアップデート可能な場合だけ表示する
 - ボタンの表示は2段とし、1段目に`V{targetVersion}`、2段目にローカライズされた行動文言を表示する
-- 英語初期値は`Update and play the event`、日本語初期値は`更新してイベントを遊ぶ`とする
-- ボタンのアクセシブルな名前には対象バージョンを含める。英語初期値は`Update to version 2.9.0 and play the event`とする
+- 開始前の英語初期値は`Update and get ready for the event`、日本語初期値は`更新してイベントに備える`とする
+- 期間中の英語初期値は`Update and play the event`、日本語初期値は`更新してイベントを遊ぶ`とする
+- 期間終了後はボタンを表示しない
+- ボタンのアクセシブルな名前にも対象バージョンと期間状態に対応する行動文言を含める
 - ボタンはコンテンツ内で中央寄せとし、モバイルでも押しやすい幅と高さを確保する
 - 内部判定で解決したplatformが`ios`ならiOS用URL、`android`ならAndroid用URLを使用する
 - 解決したplatformが`pc`ならPC用の案内、ストア、またはダウンロードURLを使用する
@@ -303,7 +305,8 @@ Updates may take some time to appear on the App Store or Google Play. If the upd
 
 ## バージョン比較
 
-- `appVersion`、`targetVersion`、`osVersion`の許容形式を明示し、Server・Unity・Webで同じ規則を使う
+- `appVersion`、`osVersion`の許容形式を明示し、Server・Unity・Webで同じ規則を使う
+- バージョンparameterは任意とし、指定された値にだけ形式検証と対応する判定を適用する
 - 初期仕様では`1.2.3`のような数値をピリオドで区切った形式に限定する
 - 数値として各segmentを比較し、文字列の辞書順では比較しない
 - `1.2`と`1.2.0`の扱いを統一し、初期仕様では同一として扱う
@@ -347,14 +350,16 @@ Updates may take some time to appear on the App Store or Google Play. If the upd
 - バナー取得失敗時にも説明文と状態案内が表示されることを確認する
 - iOS、Android、PCで正しい更新先が選択されることを確認する
 - ボタンに`V{targetVersion}`とローカライズされた行動文言が2段で表示されることを確認する
+- 開始前は「イベントに備える」、期間中は「イベントを遊ぶ」、終了後はボタン非表示になることを確認する
 - 更新可能状態で状態文と現在・対象バージョンの補助行が表示されず、期間と残り日数が表示されることを確認する
 - 期間前は開始までの日数、未配信platformは無効な`Coming Soon`ボタン、期間終了後は終了文言が表示されることを確認する
 - `ja`と`ja-*`で日本語、未対応localeで`en`へフォールバックすることを確認する
 - `ar`と`he`でRTL表示、翻訳済み本文、ローカライズ済み日付、適切な複数形になることを確認する
 - iOS / Androidの配信済み・未配信状態で、ページ最下部にストア反映の注意書きが表示されることを確認する
-- 不正なquery parameter、存在しない`targetVersion`、無効な外部URLを安全に拒否する
+- 不正なquery parameter、`releaseTargetVersion`に対応する設定の欠落、無効な外部URLを安全に拒否する
+- query parameterを省略しても、既定言語、内部platform判定、`releaseTargetVersion`によりページを表示できることを確認する
 - 未指定のテンプレートが`event-update`へ解決され、未知のテンプレートが安全に拒否されることを確認する
-- Consoleから表示するテストリンクで、固定URLと指定`targetVersion`のページを確認できる
+- Consoleから表示するテストリンクで、固定URLと現在の`releaseTargetVersion`のページを確認できる
 
 ## 対象外
 

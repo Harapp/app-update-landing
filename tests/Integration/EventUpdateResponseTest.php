@@ -100,7 +100,6 @@ final class EventUpdateResponseTest extends TestCase
             'ended' => ['2026-09-03T12:00:00Z', $baseRequest, ['endAt' => '2026-09-03T11:00:00Z'], 'This update period has ended.', false, false, false, false, 'Ended.'],
             'unsupported-os' => ['2026-09-03T12:00:00Z', [...$baseRequest, 'osVersion' => '17.0'], [], 'This update requires a newer OS version.', false, false, false, true, 'Sep 3–4 (1 day remaining)'],
             'missing-destination' => ['2026-09-03T12:00:00Z', [...$baseRequest, 'platform' => 'android', 'osVersion' => '14'], ['destinationUrls' => ['ios' => 'https://apps.apple.com/app/id1']], 'This update is temporarily unavailable.', false, false, false, true, 'Sep 3–4 (1 day remaining)'],
-            'unavailable' => ['2026-09-03T12:00:00Z', [...$baseRequest, 'targetVersion' => '3.0.0'], [], 'This update page is currently unavailable.', false, false, false, true, null],
         ];
     }
 

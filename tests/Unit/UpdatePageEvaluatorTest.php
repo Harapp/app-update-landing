@@ -121,7 +121,27 @@ final class UpdatePageEvaluatorTest extends TestCase
         self::assertFalse($view->showUpdate);
     }
 
-    public function testUnknownTargetVersionMakesThePageUnavailable(): void
+    public function testReleasedUpdateBeforeEventUsesPreparationButtonText(): void
+    {
+        $request = (new RequestValidator())->validate([
+            'appVersion' => '1.0.0',
+            'locale' => 'ja-JP',
+            'platform' => 'ios',
+            'osVersion' => '18.0',
+        ]);
+
+        $view = (new UpdatePageEvaluator(
+            new UpdatePageRepository($this->configPath, ['cdn.example.com', 'apps.apple.com']),
+            new FixedClock('2026-09-03T09:00:00Z'),
+            uiTexts: (new UiTextRepository(dirname(__DIR__, 2) . '/templates/event-update/ui-texts.json'))->load(),
+        ))->evaluate($request);
+
+        self::assertSame('available', $view->state);
+        self::assertSame('更新してイベントに備える', $view->updateButtonLabel);
+        self::assertSame('バージョン2.0.0に更新してイベントに備える', $view->updateButtonAriaLabel);
+    }
+
+    public function testRequestedTargetVersionDoesNotOverrideReleaseTarget(): void
     {
         $request = (new RequestValidator())->validate([
             'appVersion' => '1.0.0',
@@ -136,8 +156,9 @@ final class UpdatePageEvaluatorTest extends TestCase
             new FixedClock('2026-09-03T12:00:00Z'),
         ))->evaluate($request);
 
-        self::assertSame('unavailable', $view->state);
-        self::assertFalse($view->showUpdate);
+        self::assertSame('available', $view->state);
+        self::assertSame('2.0.0', $view->targetVersion);
+        self::assertTrue($view->showUpdate);
     }
 
     public function testReleaseFlagControlsUpdateBeforeEventStarts(): void
@@ -301,6 +322,26 @@ final class UpdatePageEvaluatorTest extends TestCase
         self::assertSame('unsupported-os', $unsupported->state);
         self::assertSame('missing-destination', $missingDestination->state);
         self::assertFalse($missingDestination->showUpdate);
+    }
+
+    public function testMissingVersionsSkipDependentChecks(): void
+    {
+        $repository = new UpdatePageRepository($this->configPath, ['cdn.example.com', 'apps.apple.com']);
+        $request = (new RequestValidator())->validate([
+            'locale' => 'en',
+            'platform' => 'ios',
+        ]);
+
+        $view = (new UpdatePageEvaluator(
+            $repository,
+            new FixedClock('2026-09-03T12:00:00Z'),
+        ))->evaluate($request);
+
+        self::assertSame('available', $view->state);
+        self::assertNull($view->currentVersion);
+        self::assertSame('2.0.0', $view->targetVersion);
+        self::assertNull($view->osVersion);
+        self::assertSame('https://apps.apple.com/app/id1', $view->destinationUrl);
     }
 
     /** @param array<string, mixed> $changes */

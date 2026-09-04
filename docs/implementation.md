@@ -45,20 +45,19 @@ Escaped HTML response
 
 | parameter | 内容 |
 | --- | --- |
-| `appVersion` | インストール済みアプリバージョン |
-| `targetVersion` | 案内対象アプリバージョン |
-| `locale` | 端末のロケール |
+| `appVersion` | 任意。インストール済みアプリバージョン。未指定時は更新済み判定を省略 |
+| `locale` | 任意。端末のロケール。未指定時は`en` |
 | `platform` | 任意。`ios`、`android`、`pc`。内部判定不能時のフォールバック |
-| `osVersion` | 端末のOSバージョン |
+| `osVersion` | 任意。端末のOSバージョン。未指定時は最低OS判定を省略 |
 
 入力値は長さ、形式、許容値を検証します。端末ID、通知トークン、認証情報は受け取りません。
 User-AgentからiOSまたはAndroidを判定できた場合は内部判定を優先し、それ以外では有効な`platform`、未指定時は`pc`を使用します。
 
 ### 2. 設定取得
 
-デプロイ時に固定されたゲームの`update-pages.json`から、`targetVersion`に一致する設定を1件取得します。
+デプロイ時に固定されたゲームの`update-pages.json`から、JSON直下の`releaseTargetVersion`に一致する設定を1件取得します。URLに`targetVersion`が含まれていても表示対象の選択には使用せず、常に設定上のリリース対象版を表示します。
 
-初期仕様では、同じゲーム内の`targetVersion`を一意にします。一致する設定がない場合や複数存在する場合は、設定不正として扱います。
+同じゲーム内の`targetVersion`を一意にします。`releaseTargetVersion`に一致する設定がない場合や複数存在する場合は、設定不正として扱います。
 
 ### 3. 状態判定
 
@@ -232,6 +231,10 @@ JSON Schemaでは少なくとも次を検証します。
     "en": "Update and play the event",
     "ja": "更新してイベントを遊ぶ"
   },
+  "button.prepare": {
+    "en": "Update and get ready for the event",
+    "ja": "更新してイベントに備える"
+  },
   "notice.storeDelay": {
     "en": "Updates may take some time to appear...",
     "ja": "アップデートが反映されるまで、時間がかかる場合があります..."
@@ -335,7 +338,7 @@ $templates = [
 
 ## キャッシュ
 
-初期実装では、正しさを優先して過度なページキャッシュを行いません。レスポンスは`appVersion`、`targetVersion`、`locale`、解決済みplatform、`osVersion`、User-Agent、現在時刻に依存するためです。
+初期実装では、正しさを優先して過度なページキャッシュを行いません。レスポンスは`appVersion`、`locale`、解決済みplatform、`osVersion`、User-Agent、現在時刻、JSONの`releaseTargetVersion`に依存するためです。
 
 性能上必要になった場合は、生成HTMLではなく解析済みJSON設定を短時間キャッシュします。キャッシュを導入しても期間境界の判定はリクエストごとに行います。
 
