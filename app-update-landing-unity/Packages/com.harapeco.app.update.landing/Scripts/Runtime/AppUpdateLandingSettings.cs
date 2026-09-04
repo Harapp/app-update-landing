@@ -19,9 +19,47 @@ namespace Harapeco.AppUpdateLanding
         [Tooltip("App Update Landingの公開API URL。通常はHTTPSの/api/を指定します。")]
         private string apiUrl = string.Empty;
 
+        [SerializeField]
+        [Min(0)]
+        [Tooltip("イベントがない場合の1回目の再取得間隔（日）。未設定時は1日です。")]
+        private float firstBackoffDays = 1f;
+
+        [SerializeField]
+        [Min(0)]
+        [Tooltip("イベントがない場合の2回目の再取得間隔（日）。未設定時は2日です。")]
+        private float secondBackoffDays = 2f;
+
+        [SerializeField]
+        [Min(0)]
+        [Tooltip("イベントがない場合の3回目の再取得間隔（日）。未設定時は3日です。")]
+        private float thirdBackoffDays = 3f;
+
+        [SerializeField]
+        [Min(0)]
+        [Tooltip("再取得間隔の最大値（日）。未設定時は3日です。")]
+        private float maximumBackoffDays = 3f;
+
         private static AppUpdateLandingSettings instance;
 
         public string ApiUrl => NormalizeText(apiUrl);
+
+        public float FirstBackoffDays => NormalizeBackoffDays(firstBackoffDays, 1f);
+
+        public float SecondBackoffDays => NormalizeBackoffDays(secondBackoffDays, 2f);
+
+        public float ThirdBackoffDays => NormalizeBackoffDays(thirdBackoffDays, 3f);
+
+        public float MaximumBackoffDays => NormalizeBackoffDays(maximumBackoffDays, 3f);
+
+        internal float GetBackoffDays(int attempt)
+        {
+            var configuredDays = attempt <= 0
+                ? FirstBackoffDays
+                : attempt == 1
+                    ? SecondBackoffDays
+                    : attempt == 2 ? ThirdBackoffDays : MaximumBackoffDays;
+            return Math.Min(configuredDays, MaximumBackoffDays);
+        }
 
         public static AppUpdateLandingSettings Current
         {
@@ -90,6 +128,18 @@ namespace Harapeco.AppUpdateLanding
             apiUrl = value;
         }
 
+        internal void ConfigureBackoffForTesting(
+            float firstDays,
+            float secondDays,
+            float thirdDays,
+            float maximumDays)
+        {
+            firstBackoffDays = firstDays;
+            secondBackoffDays = secondDays;
+            thirdBackoffDays = thirdDays;
+            maximumBackoffDays = maximumDays;
+        }
+
         private static AppUpdateLandingSettings Create()
         {
 #if UNITY_EDITOR
@@ -113,6 +163,13 @@ namespace Harapeco.AppUpdateLanding
         private static string NormalizeText(string value)
         {
             return value == null ? string.Empty : value.Trim();
+        }
+
+        private static float NormalizeBackoffDays(float value, float fallback)
+        {
+            return value > 0f && !float.IsNaN(value) && !float.IsInfinity(value)
+                ? value
+                : fallback;
         }
     }
 

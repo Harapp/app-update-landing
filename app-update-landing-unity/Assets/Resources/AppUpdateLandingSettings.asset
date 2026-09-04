@@ -13,3 +13,7 @@ MonoBehaviour:
   m_Name: AppUpdateLandingSettings
   m_EditorClassIdentifier:
   apiUrl:
+  firstBackoffDays: 1
+  secondBackoffDays: 2
+  thirdBackoffDays: 3
+  maximumBackoffDays: 3
