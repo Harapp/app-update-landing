@@ -5,6 +5,7 @@
     "license": "proprietary",
     "require": {
         "php": ">=8.3",
+        "ext-intl": "*",
         "mobiledetect/mobiledetectlib": "^4.11"
     },
     "require-dev": {

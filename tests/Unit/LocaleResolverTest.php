@@ -39,4 +39,14 @@ final class LocaleResolverTest extends TestCase
             'ja' => '日本語',
         ], 'de-DE'));
     }
+
+    public function testArabicAndHebrewUseRightToLeftDirection(): void
+    {
+        $resolver = new LocaleResolver();
+
+        self::assertSame('rtl', $resolver->textDirection('ar-SA'));
+        self::assertSame('rtl', $resolver->textDirection('he-IL'));
+        self::assertSame('ltr', $resolver->textDirection('en-US'));
+        self::assertSame('ltr', $resolver->textDirection('ja-JP'));
+    }
 }

@@ -19,6 +19,7 @@
 ## 技術方針
 
 - PHP 8.3以上
+- PHP Intl拡張
 - LiteSpeedなどの一般的なPHP実行環境
 - フレームワークを使用しない軽量な構成
 - ComposerによるPSR-4オートロード

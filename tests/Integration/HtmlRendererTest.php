@@ -45,10 +45,10 @@ final class HtmlRendererTest extends TestCase
         $html = (new HtmlRenderer(new TemplateRegistry(dirname(__DIR__, 2) . '/templates')))->render($view);
 
         self::assertStringNotContainsString('A new version is available.', $html);
-        self::assertStringContainsString('<p class="period">Sep 3–4 (1 day remaining)</p>', $html);
+        self::assertStringContainsString('<p class="period" dir="auto">Sep 3–4 (1 day remaining)</p>', $html);
         self::assertStringNotContainsString('Current: V', $html);
-        self::assertStringContainsString('<span>V2.0.0</span>', $html);
-        self::assertStringContainsString('<small>更新してイベントを遊ぶ</small>', $html);
+        self::assertStringContainsString('<span><bdi dir="ltr">V2.0.0</bdi></span>', $html);
+        self::assertStringContainsString('<small dir="auto">更新してイベントを遊ぶ</small>', $html);
         self::assertStringContainsString('aria-label="バージョン2.0.0に更新してイベントを遊ぶ"', $html);
         self::assertStringContainsString('<title>Event update title</title>', $html);
         self::assertStringContainsString('<meta name="description" content="Event update card description">', $html);
@@ -56,9 +56,29 @@ final class HtmlRendererTest extends TestCase
         self::assertStringContainsString('<meta property="og:description" content="Event update card description">', $html);
         self::assertStringContainsString('<meta name="twitter:title" content="Event update title">', $html);
         self::assertStringContainsString('<meta name="twitter:description" content="Event update card description">', $html);
-        self::assertStringContainsString('<h1>Event heading</h1>', $html);
-        self::assertStringContainsString('<p class="description">Event description</p>', $html);
+        self::assertStringContainsString('<h1 dir="auto">Event heading</h1>', $html);
+        self::assertStringContainsString('<p class="description" dir="auto">Event description</p>', $html);
         self::assertStringNotContainsString('<meta property="og:image"', $html);
-        self::assertLessThan(strpos($html, '<a class="update-link"'), strpos($html, '<p class="period">'));
+        self::assertLessThan(strpos($html, '<a class="update-link"'), strpos($html, '<p class="period"'));
+    }
+
+    public function testArabicPageUsesRightToLeftDirectionAndIsolatesTheVersion(): void
+    {
+        $view = new UpdatePageViewModel(
+            'available', 'ar-SA', null, null, 'وصف الفعالية', 'يتوفر إصدار جديد.',
+            '1.0.0', '2.9.0', null, null, null, null, 'https://example.com/download', true, true,
+            'event-update', UpdatePageViewModel::DEFAULT_THEME,
+            'من 5 سبتمبر إلى 4 أكتوبر (متبقي ٣ أيام)',
+            'حدّث والعب الفعالية',
+            'حدّث إلى الإصدار 2.9.0 والعب الفعالية',
+            storeNotice: 'قد يستغرق ظهور التحديث بعض الوقت.',
+            title: 'عنوان الفعالية',
+        );
+        $html = (new HtmlRenderer(new TemplateRegistry(dirname(__DIR__, 2) . '/templates')))->render($view);
+
+        self::assertStringContainsString('<html lang="ar-SA" dir="rtl">', $html);
+        self::assertStringContainsString('<h1 dir="auto">عنوان الفعالية</h1>', $html);
+        self::assertStringContainsString('<span><bdi dir="ltr">V2.9.0</bdi></span>', $html);
+        self::assertStringContainsString('<small dir="auto">حدّث والعب الفعالية</small>', $html);
     }
 }

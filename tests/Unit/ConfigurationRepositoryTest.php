@@ -395,6 +395,8 @@ final class ConfigurationRepositoryTest extends TestCase
         self::assertSame('https://play.google.com/store/apps/details?id=okinawa.harapeco.catRestaurant', $page['destinationUrls']['android']);
         self::assertSame('https://www.harapeco.okinawa/info/app/neko_boku.html', $page['destinationUrls']['pc']);
         self::assertSame('Pampas grass, dumplings and a moonlit sky come to the room.', $page['title']['en']);
+        self::assertArrayHasKey('ar', $page['title']);
+        self::assertArrayHasKey('he', $page['title']);
         self::assertSame('すすきとだんごと月あかりの空が、お部屋にやってきます。', $page['title']['ja']);
         self::assertSame('Pampas grass, dumplings and a moonlit sky come to the room.', $page['socialCard']['title']['en']);
         self::assertSame('すすきとだんごと月あかりの空が、お部屋にやってきます。', $page['socialCard']['title']['ja']);
@@ -404,6 +406,8 @@ final class ConfigurationRepositoryTest extends TestCase
         self::assertSame('#083344', $theme['textColor']);
         self::assertNull($theme['logoUrl']);
         self::assertSame('Update and play the event', $uiTexts['button.update']['en']);
+        self::assertSame('حدّث والعب الفعالية', $uiTexts['button.update']['ar']);
+        self::assertSame('עדכנו ושחקו באירוע', $uiTexts['button.update']['he']);
         self::assertSame('更新してイベントを遊ぶ', $uiTexts['button.update']['ja']);
         self::assertArrayHasKey('en', $uiTexts['notice.storeDelay']);
     }

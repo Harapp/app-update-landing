@@ -67,7 +67,7 @@ platformはUser-Agentによる内部判定を優先します。iOSまたはAndro
 
 ## 言語
 
-対応言語、ロケールキー、対象外言語、AI向け翻訳依頼プロンプトは[翻訳ガイド](translations.md)を正とします。
+対応言語、ロケールキー、文字方向、AI向け翻訳依頼プロンプトは[翻訳ガイド](translations.md)を正とします。
 
 - 既定言語は `en` 固定とする
 - 初期リリースでは英語文言を必須とする
@@ -76,6 +76,8 @@ platformはUser-Agentによる内部判定を優先します。iOSまたはAndro
 - 完全一致する翻訳がない場合は言語部分を確認し、最終的に必ず `en` へフォールバックする
 - イベント説明、SNSカード、画像alt、状態メッセージ、ボタン文言は同じ言語解決規則を使う
 - 状態メッセージ、ボタン文言、注意書きは`templates/event-update/ui-texts.json`へ、意味を表すキー単位で保存する
+- ArabicとHebrewは`dir="rtl"`、それ以外は`dir="ltr"`で表示する
+- RTL文中のバージョン番号はLTRとして分離し、日付と複数形はlocaleに合わせる
 
 初期状態のイベント固有文言は次の形です。
 
@@ -348,6 +350,7 @@ Updates may take some time to appear on the App Store or Google Play. If the upd
 - 更新可能状態で状態文と現在・対象バージョンの補助行が表示されず、期間と残り日数が表示されることを確認する
 - 期間前は開始までの日数、未配信platformは無効な`Coming Soon`ボタン、期間終了後は終了文言が表示されることを確認する
 - `ja`と`ja-*`で日本語、未対応localeで`en`へフォールバックすることを確認する
+- `ar`と`he`でRTL表示、翻訳済み本文、ローカライズ済み日付、適切な複数形になることを確認する
 - iOS / Androidの配信済み・未配信状態で、ページ最下部にストア反映の注意書きが表示されることを確認する
 - 不正なquery parameter、存在しない`targetVersion`、無効な外部URLを安全に拒否する
 - 未指定のテンプレートが`event-update`へ解決され、未知のテンプレートが安全に拒否されることを確認する

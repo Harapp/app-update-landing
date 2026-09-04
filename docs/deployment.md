@@ -186,7 +186,7 @@ HTTP health check
 - デプロイユーザーが`deploy_path`へ書き込める
 - LiteSpeedから`current/public`を読み取れる
 - シンボリックリンクを利用できる
-- PHP 8.3以上を実行できる
+- PHP 8.3以上とIntl拡張を実行できる
 - 必要なPHP extensionが有効である
 - HTTPSを利用できる
 

@@ -43,18 +43,19 @@ final class PublicIndexTest extends TestCase
                 self::assertStringNotContainsString('content="assets/banner.webp"', $body);
                 self::assertStringNotContainsString('alt="App logo"', $body);
                 self::assertStringContainsString('PurrfectSpirits event update', $body);
-                self::assertStringContainsString('<h1>Pampas grass, dumplings and a moonlit sky come to the room.</h1>', $body);
-                self::assertStringContainsString('<p class="description">While the event runs, your room becomes a veranda', $body);
+                self::assertStringContainsString('<html lang="en-US" dir="ltr">', $body);
+                self::assertStringContainsString('<h1 dir="auto">Pampas grass, dumplings and a moonlit sky come to the room.</h1>', $body);
+                self::assertStringContainsString('<p class="description" dir="auto">While the event runs, your room becomes a veranda', $body);
                 self::assertStringContainsString('<meta property="og:title" content="Pampas grass, dumplings and a moonlit sky come to the room.">', $body);
                 self::assertStringContainsString('<meta property="og:description" content="Update to V2.9.0 and play the event from Sep 5–Oct 4.">', $body);
-                self::assertStringContainsString('<p class="period">', $body);
+                self::assertStringContainsString('<p class="period" dir="auto">', $body);
                 if (str_contains($body, '<a class="update-link"')) {
                     self::assertStringContainsString(
                         'href="' . htmlspecialchars($destination, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '"',
                         $body
                     );
                 } else {
-                    self::assertStringContainsString('<small>Coming Soon</small>', $body);
+                    self::assertStringContainsString('<small dir="auto">Coming Soon</small>', $body);
                 }
             }
 
@@ -62,33 +63,53 @@ final class PublicIndexTest extends TestCase
                 "http://127.0.0.1:$port/?appVersion=0.0.0&targetVersion=2.9.0&locale=ja-JP&platform=ios&osVersion=1"
             );
             self::assertIsString($japaneseBody);
-            self::assertStringContainsString('<h1>すすきとだんごと月あかりの空が、お部屋にやってきます。</h1>', $japaneseBody);
-            self::assertStringContainsString('<p class="description">イベント期間中、お部屋は月あかりの縁側になります。', $japaneseBody);
+            self::assertStringContainsString('<html lang="ja-JP" dir="ltr">', $japaneseBody);
+            self::assertStringContainsString('<h1 dir="auto">すすきとだんごと月あかりの空が、お部屋にやってきます。</h1>', $japaneseBody);
+            self::assertStringContainsString('<p class="description" dir="auto">イベント期間中、お部屋は月あかりの縁側になります。', $japaneseBody);
             self::assertStringContainsString('<meta property="og:title" content="すすきとだんごと月あかりの空が、お部屋にやってきます。">', $japaneseBody);
             self::assertStringContainsString('<meta property="og:description" content="V2.9.0へ更新して、9月5日〜10月4日のイベントを遊ぼう。">', $japaneseBody);
-            self::assertStringContainsString('<p class="period">', $japaneseBody);
+            self::assertStringContainsString('<p class="period" dir="auto">', $japaneseBody);
             if (str_contains($japaneseBody, '<a class="update-link"')) {
-                self::assertStringContainsString('<small>更新してイベントを遊ぶ</small>', $japaneseBody);
+                self::assertStringContainsString('<small dir="auto">更新してイベントを遊ぶ</small>', $japaneseBody);
                 self::assertStringContainsString('バージョン2.9.0に更新してイベントを遊ぶ', $japaneseBody);
                 self::assertStringContainsString('アップデートが反映されるまで、時間がかかる場合があります。', $japaneseBody);
             } else {
-                self::assertStringContainsString('<small>近日開始</small>', $japaneseBody);
+                self::assertStringContainsString('<small dir="auto">近日開始</small>', $japaneseBody);
             }
             self::assertStringNotContainsString('A new version is available.', $japaneseBody);
             self::assertStringNotContainsString('Event period:', $japaneseBody);
             self::assertStringNotContainsString('Current: V', $japaneseBody);
+
+            $arabicBody = file_get_contents(
+                "http://127.0.0.1:$port/?appVersion=0.0.0&targetVersion=2.9.0&locale=ar-SA&platform=ios&osVersion=1"
+            );
+            self::assertIsString($arabicBody);
+            self::assertStringContainsString('<html lang="ar-SA" dir="rtl">', $arabicBody);
+            self::assertStringContainsString('<h1 dir="auto">يأتي عشب البامباس وحلوى الدانغو وسماء يضيئها القمر إلى الغرفة.</h1>', $arabicBody);
+            self::assertStringContainsString('<meta property="og:description" content="حدّث إلى V2.9.0 والعب الفعالية من 5 سبتمبر إلى 4 أكتوبر.">', $arabicBody);
+            self::assertStringContainsString('<span><bdi dir="ltr">V2.9.0</bdi></span>', $arabicBody);
+            self::assertStringContainsString('<small dir="auto">حدّث والعب الفعالية</small>', $arabicBody);
+
+            $hebrewBody = file_get_contents(
+                "http://127.0.0.1:$port/?appVersion=0.0.0&targetVersion=2.9.0&locale=he-IL&platform=ios&osVersion=1"
+            );
+            self::assertIsString($hebrewBody);
+            self::assertStringContainsString('<html lang="he-IL" dir="rtl">', $hebrewBody);
+            self::assertStringContainsString('<h1 dir="auto">עשב פמפס, דנגו ושמיים באור ירח מגיעים אל החדר.</h1>', $hebrewBody);
+            self::assertStringContainsString('<meta property="og:description" content="עדכנו לגרסה V2.9.0 ושחקו באירוע מ־5 בספטמבר עד 4 באוקטובר.">', $hebrewBody);
+            self::assertStringContainsString('<small dir="auto">עדכנו ושחקו באירוע</small>', $hebrewBody);
 
             $fallbackBody = file_get_contents(
                 "http://127.0.0.1:$port/?appVersion=0.0.0&targetVersion=2.9.0&locale=fr-FR&platform=ios&osVersion=1"
             );
             self::assertIsString($fallbackBody);
             self::assertStringContainsString('<meta property="og:title" content="Pampas grass, dumplings and a moonlit sky come to the room.">', $fallbackBody);
-            self::assertStringContainsString('<p class="period">', $fallbackBody);
+            self::assertStringContainsString('<p class="period" dir="auto">', $fallbackBody);
             if (str_contains($fallbackBody, '<a class="update-link"')) {
-                self::assertStringContainsString('<small>Update and play the event</small>', $fallbackBody);
+                self::assertStringContainsString('<small dir="auto">Update and play the event</small>', $fallbackBody);
                 self::assertStringContainsString('Updates may take some time to appear', $fallbackBody);
             } else {
-                self::assertStringContainsString('<small>Coming Soon</small>', $fallbackBody);
+                self::assertStringContainsString('<small dir="auto">Coming Soon</small>', $fallbackBody);
             }
             self::assertContainsHeader('Content-Security-Policy:', $http_response_header ?? []);
             self::assertContainsHeader('X-Content-Type-Options: nosniff', $http_response_header ?? []);

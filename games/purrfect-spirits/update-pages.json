@@ -22,24 +22,34 @@
             },
             "title": {
                 "en": "Pampas grass, dumplings and a moonlit sky come to the room.",
+                "ar": "يأتي عشب البامباس وحلوى الدانغو وسماء يضيئها القمر إلى الغرفة.",
+                "he": "עשב פמפס, דנגו ושמיים באור ירח מגיעים אל החדר.",
                 "ja": "すすきとだんごと月あかりの空が、お部屋にやってきます。"
             },
             "descriptions": {
                 "en": "While the event runs, your room becomes a veranda under the harvest moon. Pampas grass sways in a vase, dumplings sit on a little wooden stand, and the ghosts drift up to watch the sky. Three costumed cats come to visit: one in a rabbit-ear hood, one balancing dumplings on its head, and one that has settled inside a bamboo tube. Collect all three, decorate your room, and spend a quiet night doing absolutely nothing.",
+                "ar": "خلال الفعالية، تتحول غرفتك إلى شرفة تحت قمر الحصاد. يتمايل عشب البامباس في مزهرية، وتستقر حلوى الدانغو على حامل خشبي صغير، وتطفو الأشباح لمشاهدة السماء. تزورك ثلاث قطط متنكرة: قطة ترتدي غطاء رأس بأذني أرنب، وأخرى توازن الدانغو فوق رأسها، وثالثة استقرت داخل أنبوب من الخيزران. اجمع القطط الثلاث، وزيّن غرفتك، واقضِ ليلة هادئة من دون أن تفعل شيئًا على الإطلاق.",
+                "he": "במהלך האירוע, החדר שלכם הופך למרפסת תחת ירח הקציר. עשב פמפס מתנודד באגרטל, כדורי דנגו מונחים על מעמד עץ קטן, ורוחות הרפאים מרחפות כדי להביט בשמיים. שלושה חתולים מחופשים באים לבקר: אחד עם ברדס בעל אוזני ארנב, אחד שמאזן דנגו על ראשו, ואחד שהתמקם בתוך קנה במבוק. אספו את שלושתם, קשטו את החדר ובלו לילה שקט בלי לעשות דבר.",
                 "ja": "イベント期間中、お部屋は月あかりの縁側になります。壺のすすきがゆれ、三方にはおだんご。ゆうれいたちはふわふわ浮かんで空をながめています。遊びにくるのはコスプレねこ3びき。うさぎの耳をつけた子、頭にだんごをのせた子、竹の筒から出られなくなった子。3びきぜんぶ集めて、お部屋をかざって、なにもしない夜をすごしませんか。"
             },
             "socialCard": {
                 "title": {
                     "en": "Pampas grass, dumplings and a moonlit sky come to the room.",
+                    "ar": "يأتي عشب البامباس وحلوى الدانغو وسماء يضيئها القمر إلى الغرفة.",
+                    "he": "עשב פמפס, דנגו ושמיים באור ירח מגיעים אל החדר.",
                     "ja": "すすきとだんごと月あかりの空が、お部屋にやってきます。"
                 },
                 "description": {
                     "en": "Update to V2.9.0 and play the event from Sep 5–Oct 4.",
+                    "ar": "حدّث إلى V2.9.0 والعب الفعالية من 5 سبتمبر إلى 4 أكتوبر.",
+                    "he": "עדכנו לגרסה V2.9.0 ושחקו באירוע מ־5 בספטמבר עד 4 באוקטובר.",
                     "ja": "V2.9.0へ更新して、9月5日〜10月4日のイベントを遊ぼう。"
                 }
             },
             "imageAltTexts": {
                 "en": "PurrfectSpirits event update banner",
+                "ar": "لافتة تحديث فعالية PurrfectSpirits",
+                "he": "באנר עדכון האירוע של PurrfectSpirits",
                 "ja": "PurrfectSpirits イベントアップデートバナー"
             }
         }

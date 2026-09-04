@@ -75,7 +75,7 @@ final class EventUpdateResponseTest extends TestCase
         if ($expectedPeriod === null) {
             self::assertStringNotContainsString('<p class="period">', $html);
         } else {
-            self::assertStringContainsString('<p class="period">' . $expectedPeriod . '</p>', $html);
+            self::assertStringContainsString('<p class="period" dir="auto">' . $expectedPeriod . '</p>', $html);
         }
     }
 

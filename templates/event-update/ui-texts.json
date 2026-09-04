@@ -1,78 +1,152 @@
 {
     "status.available": {
         "en": "A new version is available.",
+        "ar": "يتوفر إصدار جديد.",
+        "he": "זמינה גרסה חדשה.",
         "ja": "新しいバージョンを利用できます。"
     },
     "status.disabled": {
         "en": "This update is currently unavailable.",
+        "ar": "هذا التحديث غير متاح حاليًا.",
+        "he": "עדכון זה אינו זמין כעת.",
         "ja": "このアップデートは現在利用できません。"
     },
     "status.upToDate": {
         "en": "You're using the latest version.",
+        "ar": "أنت تستخدم أحدث إصدار.",
+        "he": "הגרסה העדכנית ביותר כבר מותקנת.",
         "ja": "最新バージョンをご利用中です。"
     },
     "status.unreleased": {
         "en": "This update has not been released yet.",
+        "ar": "لم يتم إصدار هذا التحديث بعد.",
+        "he": "עדכון זה עדיין לא פורסם.",
         "ja": "このアップデートはまだ配信されていません。"
     },
     "status.ended": {
         "en": "This update period has ended.",
+        "ar": "انتهت فترة هذا التحديث.",
+        "he": "תקופת העדכון הסתיימה.",
         "ja": "このアップデート期間は終了しました。"
     },
     "status.unsupportedOs": {
         "en": "This update requires a newer OS version.",
+        "ar": "يتطلب هذا التحديث إصدارًا أحدث من نظام التشغيل.",
+        "he": "עדכון זה דורש גרסה חדשה יותר של מערכת ההפעלה.",
         "ja": "このアップデートには新しいOSバージョンが必要です。"
     },
     "status.missingDestination": {
         "en": "This update is temporarily unavailable.",
+        "ar": "هذا التحديث غير متاح مؤقتًا.",
+        "he": "עדכון זה אינו זמין באופן זמני.",
         "ja": "このアップデートは一時的に利用できません。"
     },
     "status.unavailable": {
         "en": "This update page is currently unavailable.",
+        "ar": "صفحة التحديث هذه غير متاحة حاليًا.",
+        "he": "דף העדכון אינו זמין כעת.",
         "ja": "このアップデートページは現在利用できません。"
     },
     "button.update": {
         "en": "Update and play the event",
+        "ar": "حدّث والعب الفعالية",
+        "he": "עדכנו ושחקו באירוע",
         "ja": "更新してイベントを遊ぶ"
     },
     "button.updateAriaLabel": {
         "en": "Update to version {version} and play the event",
+        "ar": "حدّث إلى الإصدار {version} والعب الفعالية",
+        "he": "עדכנו לגרסה {version} ושחקו באירוע",
         "ja": "バージョン{version}に更新してイベントを遊ぶ"
     },
     "button.comingSoon": {
         "en": "Coming Soon",
+        "ar": "قريبًا",
+        "he": "בקרוב",
         "ja": "近日開始"
     },
     "notice.storeDelay": {
         "en": "Updates may take some time to appear on the App Store or Google Play.",
+        "ar": "قد يستغرق ظهور التحديث على App Store أو Google Play بعض الوقت.",
+        "he": "ייתכן שיחלוף זמן עד שהעדכון יופיע ב-App Store או ב-Google Play.",
         "ja": "App StoreまたはGoogle Playにアップデートが反映されるまで、時間がかかる場合があります。"
     },
     "period.range": {
         "en": "{start}–{end}",
+        "ar": "من {start} إلى {end}",
+        "he": "מ־{start} עד {end}",
         "ja": "{start}〜{end}"
     },
     "period.remaining.one": {
         "en": "{range} (1 day remaining)",
+        "ar": "{range} (متبقٍ يوم واحد)",
+        "he": "{range} (נותר יום אחד)",
         "ja": "{range}（残り1日）"
+    },
+    "period.remaining.two": {
+        "en": "{range} (2 days remaining)",
+        "ar": "{range} (متبقيان يومان)",
+        "he": "{range} (נותרו יומיים)",
+        "ja": "{range}（残り2日）"
+    },
+    "period.remaining.few": {
+        "en": "{range} ({days} days remaining)",
+        "ar": "{range} (متبقية {days} أيام)",
+        "he": "{range} (נותרו {days} ימים)",
+        "ja": "{range}（残り{days}日）"
+    },
+    "period.remaining.many": {
+        "en": "{range} ({days} days remaining)",
+        "ar": "{range} (متبقي {days} يومًا)",
+        "he": "{range} (נותרו {days} ימים)",
+        "ja": "{range}（残り{days}日）"
     },
     "period.remaining.other": {
         "en": "{range} ({days} days remaining)",
+        "ar": "{range} (متبقي {days} يوم)",
+        "he": "{range} (נותרו {days} ימים)",
         "ja": "{range}（残り{days}日）"
     },
     "period.startsIn.one": {
         "en": "{range} (starts in 1 day)",
+        "ar": "{range} (يبدأ خلال يوم واحد)",
+        "he": "{range} (מתחיל בעוד יום)",
         "ja": "{range}（1日後に開始）"
+    },
+    "period.startsIn.two": {
+        "en": "{range} (starts in 2 days)",
+        "ar": "{range} (يبدأ خلال يومين)",
+        "he": "{range} (מתחיל בעוד יומיים)",
+        "ja": "{range}（2日後に開始）"
+    },
+    "period.startsIn.few": {
+        "en": "{range} (starts in {days} days)",
+        "ar": "{range} (يبدأ خلال {days} أيام)",
+        "he": "{range} (מתחיל בעוד {days} ימים)",
+        "ja": "{range}（{days}日後に開始）"
+    },
+    "period.startsIn.many": {
+        "en": "{range} (starts in {days} days)",
+        "ar": "{range} (يبدأ خلال {days} يومًا)",
+        "he": "{range} (מתחיל בעוד {days} ימים)",
+        "ja": "{range}（{days}日後に開始）"
     },
     "period.startsIn.other": {
         "en": "{range} (starts in {days} days)",
+        "ar": "{range} (يبدأ خلال {days} يوم)",
+        "he": "{range} (מתחיל בעוד {days} ימים)",
         "ja": "{range}（{days}日後に開始）"
     },
     "period.ended": {
         "en": "Ended.",
+        "ar": "انتهى.",
+        "he": "הסתיים.",
         "ja": "終了しました。"
     },
     "os.requirement": {
         "en": "OS: {current} · Required: {required}",
+        "ar": "نظام التشغيل: {current} · الإصدار المطلوب: {required}",
+        "he": "מערכת הפעלה: {current} · גרסה נדרשת: {required}",
         "ja": "OS：{current}・必要バージョン：{required}"
     }
 }

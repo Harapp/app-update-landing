@@ -34,13 +34,13 @@ final class UpdatePageEvaluatorTest extends TestCase
                     'released' => ['ios' => true, 'android' => true, 'pc' => true],
                     'minimumOsVersions' => ['ios' => '18.0'],
                     'destinationUrls' => ['ios' => 'https://apps.apple.com/app/id1'],
-                    'title' => ['en' => 'Event title', 'ja' => 'イベントタイトル'],
-                    'descriptions' => ['en' => 'English', 'ja' => '日本語'],
+                    'title' => ['en' => 'Event title', 'ar' => 'عنوان الفعالية', 'he' => 'כותרת האירוע', 'ja' => 'イベントタイトル'],
+                    'descriptions' => ['en' => 'English', 'ar' => 'الوصف', 'he' => 'תיאור', 'ja' => '日本語'],
                     'socialCard' => [
-                        'title' => ['en' => 'Event update', 'ja' => 'イベントアップデート'],
-                        'description' => ['en' => 'Update the app.', 'ja' => 'アプリを更新してください。'],
+                        'title' => ['en' => 'Event update', 'ar' => 'تحديث الفعالية', 'he' => 'עדכון האירוע', 'ja' => 'イベントアップデート'],
+                        'description' => ['en' => 'Update the app.', 'ar' => 'حدّث التطبيق.', 'he' => 'עדכנו את האפליקציה.', 'ja' => 'アプリを更新してください。'],
                     ],
-                    'imageAltTexts' => ['en' => 'Banner', 'ja' => 'バナー'],
+                    'imageAltTexts' => ['en' => 'Banner', 'ar' => 'لافتة', 'he' => 'באנר', 'ja' => 'バナー'],
                 ],
             ],
         ], JSON_THROW_ON_ERROR));
@@ -229,6 +229,59 @@ final class UpdatePageEvaluatorTest extends TestCase
         self::assertSame('近日開始', $before->comingSoonButtonLabel);
         self::assertSame('9月10日〜30日（残り11日）', $active->eventPeriod);
         self::assertSame('終了しました。', $ended->eventPeriod);
+    }
+
+    public function testArabicAndHebrewEventPeriodsUseLocalizedDatesAndPluralForms(): void
+    {
+        $this->replacePage([
+            'startAt' => '2026-09-10T00:00:00+09:00',
+            'endAt' => '2026-09-30T23:59:59+09:00',
+        ]);
+        $repository = new UpdatePageRepository($this->configPath, ['cdn.example.com', 'apps.apple.com']);
+        $texts = (new UiTextRepository(dirname(__DIR__, 2) . '/templates/event-update/ui-texts.json'))->load();
+        $validator = new RequestValidator();
+        $request = [
+            'appVersion' => '1.0.0',
+            'targetVersion' => '2.0.0',
+            'platform' => 'ios',
+            'osVersion' => '18.0',
+        ];
+
+        $arabicTwo = (new UpdatePageEvaluator(
+            $repository,
+            new FixedClock('2026-09-08T00:00:00+09:00'),
+            uiTexts: $texts,
+        ))->evaluate($validator->validate([...$request, 'locale' => 'ar']));
+        $arabicFew = (new UpdatePageEvaluator(
+            $repository,
+            new FixedClock('2026-09-07T00:00:00+09:00'),
+            uiTexts: $texts,
+        ))->evaluate($validator->validate([...$request, 'locale' => 'ar']));
+        $arabicMany = (new UpdatePageEvaluator(
+            $repository,
+            new FixedClock('2026-08-30T00:00:00+09:00'),
+            uiTexts: $texts,
+        ))->evaluate($validator->validate([...$request, 'locale' => 'ar']));
+        $arabicRemaining = (new UpdatePageEvaluator(
+            $repository,
+            new FixedClock('2026-09-28T00:00:00+09:00'),
+            uiTexts: $texts,
+        ))->evaluate($validator->validate([...$request, 'locale' => 'ar']));
+        $hebrewTwo = (new UpdatePageEvaluator(
+            $repository,
+            new FixedClock('2026-09-08T00:00:00+09:00'),
+            uiTexts: $texts,
+        ))->evaluate($validator->validate([...$request, 'locale' => 'he-IL']));
+
+        self::assertSame('rtl', $arabicTwo->textDirection);
+        self::assertSame('عنوان الفعالية', $arabicTwo->title);
+        self::assertSame('من 10 سبتمبر إلى 30 سبتمبر (يبدأ خلال يومين)', $arabicTwo->eventPeriod);
+        self::assertSame('من 10 سبتمبر إلى 30 سبتمبر (يبدأ خلال 3 أيام)', $arabicFew->eventPeriod);
+        self::assertSame('من 10 سبتمبر إلى 30 سبتمبر (يبدأ خلال 11 يومًا)', $arabicMany->eventPeriod);
+        self::assertSame('من 10 سبتمبر إلى 30 سبتمبر (متبقية 3 أيام)', $arabicRemaining->eventPeriod);
+        self::assertSame('rtl', $hebrewTwo->textDirection);
+        self::assertSame('כותרת האירוע', $hebrewTwo->title);
+        self::assertSame('מ־10 בספטמבר עד 30 בספטמבר (מתחיל בעוד יומיים)', $hebrewTwo->eventPeriod);
     }
 
     public function testUnsupportedOsAndMissingDestinationAreSafeStates(): void

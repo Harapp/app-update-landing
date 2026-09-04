@@ -28,8 +28,14 @@ final class UpdatePageEvaluator
         'notice.storeDelay' => ['en' => 'Updates may take some time to appear on the App Store or Google Play. If the update is not available yet, please try again later.'],
         'period.range' => ['en' => '{start}–{end}'],
         'period.remaining.one' => ['en' => '{range} (1 day remaining)'],
+        'period.remaining.two' => ['en' => '{range} (2 days remaining)'],
+        'period.remaining.few' => ['en' => '{range} ({days} days remaining)'],
+        'period.remaining.many' => ['en' => '{range} ({days} days remaining)'],
         'period.remaining.other' => ['en' => '{range} ({days} days remaining)'],
         'period.startsIn.one' => ['en' => '{range} (starts in 1 day)'],
+        'period.startsIn.two' => ['en' => '{range} (starts in 2 days)'],
+        'period.startsIn.few' => ['en' => '{range} (starts in {days} days)'],
+        'period.startsIn.many' => ['en' => '{range} (starts in {days} days)'],
         'period.startsIn.other' => ['en' => '{range} (starts in {days} days)'],
         'period.ended' => ['en' => 'Ended.'],
         'os.requirement' => ['en' => 'OS: {current} · Required: {required}'],
@@ -59,6 +65,7 @@ final class UpdatePageEvaluator
         $now = $this->clock->now()->setTimezone(new \DateTimeZone('UTC'));
         $common = [
             'locale' => $request->locale,
+            'textDirection' => $this->localeResolver->textDirection($request->locale),
             'imageUrl' => $page['imageUrl'],
             'imageAlt' => $this->localeResolver->resolve($page['imageAltTexts'], $request->locale),
             'title' => $this->localeResolver->resolve($page['title'], $request->locale),
@@ -160,6 +167,7 @@ final class UpdatePageEvaluator
             $common['socialCardTitle'],
             $common['socialCardDescription'],
             $common['title'],
+            $common['textDirection'],
         );
     }
 
@@ -187,18 +195,20 @@ final class UpdatePageEvaluator
         $range = $this->formatDateRange($startAt, $endAt, $locale);
         if ($startAt !== null && $now < $startAt) {
             $days = $this->roundedUpDaysBetween($now, $startAt);
-            return $this->text(
-                $days === 1 ? 'period.startsIn.one' : 'period.startsIn.other',
+            return $this->pluralText(
+                'period.startsIn',
                 $locale,
-                ['{range}' => $range, '{days}' => (string) $days],
+                $days,
+                ['{range}' => $range, '{days}' => $this->formatNumber($days, $locale)],
             );
         }
         if ($endAt !== null) {
             $days = $this->roundedUpDaysBetween($now, $endAt);
-            return $this->text(
-                $days === 1 ? 'period.remaining.one' : 'period.remaining.other',
+            return $this->pluralText(
+                'period.remaining',
                 $locale,
-                ['{range}' => $range, '{days}' => (string) $days],
+                $days,
+                ['{range}' => $range, '{days}' => $this->formatNumber($days, $locale)],
             );
         }
 
@@ -224,11 +234,14 @@ final class UpdatePageEvaluator
 
         $sameYear = $start->format('Y') === $end->format('Y');
         $sameMonth = $sameYear && $start->format('n') === $end->format('n');
-        $language = strtolower(explode('-', $locale, 2)[0]);
+        $language = $this->localeResolver->language($locale);
 
         if ($language === 'ja') {
             $startText = $this->formatDate($start, $locale, !$sameYear);
             $endText = $sameMonth ? $end->format('j日') : $this->formatDate($end, $locale, !$sameYear);
+        } elseif (in_array($language, ['ar', 'he'], true)) {
+            $startText = $this->formatDate($start, $locale, !$sameYear);
+            $endText = $this->formatDate($end, $locale, !$sameYear);
         } else {
             $startText = $this->formatDate($start, $locale, !$sameYear);
             $endText = $sameMonth ? $end->format('j') : $this->formatDate($end, $locale, !$sameYear);
@@ -243,12 +256,88 @@ final class UpdatePageEvaluator
             return '';
         }
 
-        if (strtolower(explode('-', $locale, 2)[0]) === 'ja') {
+        $language = $this->localeResolver->language($locale);
+        if ($language === 'ja') {
             return ($includeYear ? $date->format('Y年') : '') . $date->format('n月j日');
+        }
+        if (in_array($language, ['ar', 'he'], true)) {
+            $pattern = match ($language) {
+                'ar' => $includeYear ? 'd MMMM y' : 'd MMMM',
+                'he' => $includeYear ? 'd בMMMM y' : 'd בMMMM',
+            };
+            $formatter = new \IntlDateFormatter(
+                $locale,
+                \IntlDateFormatter::NONE,
+                \IntlDateFormatter::NONE,
+                $this->intlTimeZone($date),
+                \IntlDateFormatter::GREGORIAN,
+                $pattern,
+            );
+            $formatted = $formatter->format($date);
+            if ($formatted !== false) {
+                return $formatted;
+            }
         }
 
         $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         $formatted = $months[(int) $date->format('n') - 1] . ' ' . $date->format('j');
         return $includeYear ? $formatted . ', ' . $date->format('Y') : $formatted;
+    }
+
+    /** @param array<string, string> $replacements */
+    private function pluralText(string $baseKey, string $locale, int $value, array $replacements): string
+    {
+        $texts = $this->uiTexts ?? self::DEFAULT_UI_TEXTS;
+        $key = $baseKey . '.' . $this->pluralCategory($value, $locale);
+        if (!array_key_exists($key, $texts)) {
+            $key = $baseKey . '.other';
+        }
+
+        return $this->text($key, $locale, $replacements);
+    }
+
+    private function pluralCategory(int $value, string $locale): string
+    {
+        $language = $this->localeResolver->language($locale);
+        if ($language === 'ar') {
+            if ($value === 1) {
+                return 'one';
+            }
+            if ($value === 2) {
+                return 'two';
+            }
+
+            $moduloHundred = $value % 100;
+            if ($moduloHundred >= 3 && $moduloHundred <= 10) {
+                return 'few';
+            }
+            if ($moduloHundred >= 11 && $moduloHundred <= 99) {
+                return 'many';
+            }
+        }
+        if ($language === 'he' && $value === 2) {
+            return 'two';
+        }
+
+        return $value === 1 ? 'one' : 'other';
+    }
+
+    private function formatNumber(int $value, string $locale): string
+    {
+        if (!in_array($this->localeResolver->language($locale), ['ar', 'he'], true)) {
+            return (string) $value;
+        }
+
+        $formatter = new \NumberFormatter($locale, \NumberFormatter::DECIMAL);
+        $formatted = $formatter->format($value);
+        return $formatted === false ? (string) $value : $formatted;
+    }
+
+    private function intlTimeZone(DateTimeImmutable $date): string
+    {
+        $timeZone = $date->getTimezone()->getName();
+        return preg_match('/^[+-]\d{2}:\d{2}$/D', $timeZone) === 1
+            ? 'GMT' . $timeZone
+            : $timeZone;
     }
 }

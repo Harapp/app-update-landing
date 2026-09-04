@@ -17,6 +17,7 @@ final readonly class UpdatePageViewModel
     public string $socialCardTitle;
     public string $socialCardDescription;
     public string $title;
+    public string $textDirection;
 
     /** @var array{primaryColor: string, accentColor: string, backgroundColor: string, textColor: string, logoUrl: ?string, maxContentWidth: int} */
     public const DEFAULT_THEME = [
@@ -56,6 +57,7 @@ final readonly class UpdatePageViewModel
         ?string $socialCardTitle = null,
         ?string $socialCardDescription = null,
         ?string $title = null,
+        ?string $textDirection = null,
     ) {
         $this->eventPeriod = $eventPeriod;
         $this->updateButtonLabel = $updateButtonLabel ?? 'Update and play the event';
@@ -68,6 +70,9 @@ final readonly class UpdatePageViewModel
         $this->socialCardTitle = $socialCardTitle ?? ($description !== '' ? $description : 'App update');
         $this->socialCardDescription = $socialCardDescription ?? $description;
         $this->title = $title ?? $description;
+        $this->textDirection = $textDirection ?? (
+            in_array(strtolower(explode('-', $locale, 2)[0]), ['ar', 'he'], true) ? 'rtl' : 'ltr'
+        );
     }
 
     public static function unavailable(

@@ -6,7 +6,7 @@ declare(strict_types=1);
 $escape = static fn (string $value): string => htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 $pageTitle = $viewModel->socialCardTitle;
 ?><!doctype html>
-<html lang="<?= $escape($viewModel->locale) ?>">
+<html lang="<?= $escape($viewModel->locale) ?>" dir="<?= $escape($viewModel->textDirection) ?>">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -45,44 +45,44 @@ $pageTitle = $viewModel->socialCardTitle;
 <body>
 <main>
     <?php if ($viewModel->theme['logoUrl'] !== null): ?>
-        <img class="logo" src="<?= $escape($viewModel->theme['logoUrl']) ?>" alt="App logo">
+        <img class="logo" src="<?= $escape($viewModel->theme['logoUrl']) ?>" alt="">
     <?php endif; ?>
     <?php if ($viewModel->imageUrl !== null): ?>
         <img class="banner" src="<?= $escape($viewModel->imageUrl) ?>" alt="<?= $escape($viewModel->imageAlt ?? '') ?>">
     <?php endif; ?>
     <div class="content">
         <?php if ($viewModel->title !== ''): ?>
-            <h1><?= $escape($viewModel->title) ?></h1>
+            <h1 dir="auto"><?= $escape($viewModel->title) ?></h1>
         <?php endif; ?>
         <?php if ($viewModel->description !== ''): ?>
-            <p class="description"><?= $escape($viewModel->description) ?></p>
+            <p class="description" dir="auto"><?= $escape($viewModel->description) ?></p>
         <?php endif; ?>
         <?php if (!in_array($viewModel->state, ['available', 'unreleased', 'ended'], true)): ?>
-            <p class="status"><?= $escape($viewModel->statusMessage) ?></p>
+            <p class="status" dir="auto"><?= $escape($viewModel->statusMessage) ?></p>
         <?php endif; ?>
         <?php if ($viewModel->eventPeriod !== null && $viewModel->eventPeriod !== ''): ?>
-            <p class="period"><?= $escape($viewModel->eventPeriod) ?></p>
+            <p class="period" dir="auto"><?= $escape($viewModel->eventPeriod) ?></p>
         <?php endif; ?>
         <?php if ($viewModel->osRequirementMessage !== null): ?>
-            <p class="os-version"><?= $escape($viewModel->osRequirementMessage) ?></p>
+            <p class="os-version" dir="auto"><?= $escape($viewModel->osRequirementMessage) ?></p>
         <?php endif; ?>
         <?php if ($viewModel->showUpdate && $viewModel->destinationUrl !== null && $viewModel->targetVersion !== null): ?>
             <div class="update-action">
                 <?php if ($viewModel->state === 'unreleased'): ?>
                     <button class="update-link update-link--disabled" type="button" disabled>
-                        <span>V<?= $escape($viewModel->targetVersion) ?></span>
-                        <small><?= $escape($viewModel->comingSoonButtonLabel) ?></small>
+                        <span><bdi dir="ltr">V<?= $escape($viewModel->targetVersion) ?></bdi></span>
+                        <small dir="auto"><?= $escape($viewModel->comingSoonButtonLabel) ?></small>
                     </button>
                 <?php else: ?>
                     <a class="update-link" href="<?= $escape($viewModel->destinationUrl) ?>" aria-label="<?= $escape($viewModel->updateButtonAriaLabel) ?>">
-                        <span>V<?= $escape($viewModel->targetVersion) ?></span>
-                        <small><?= $escape($viewModel->updateButtonLabel) ?></small>
+                        <span><bdi dir="ltr">V<?= $escape($viewModel->targetVersion) ?></bdi></span>
+                        <small dir="auto"><?= $escape($viewModel->updateButtonLabel) ?></small>
                     </a>
                 <?php endif; ?>
             </div>
         <?php endif; ?>
         <?php if ($viewModel->showStoreNotice): ?>
-            <p class="notice"><?= $escape($viewModel->storeNotice) ?></p>
+            <p class="notice" dir="auto"><?= $escape($viewModel->storeNotice) ?></p>
         <?php endif; ?>
     </div>
 </main>

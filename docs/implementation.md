@@ -241,6 +241,8 @@ JSON Schemaでは少なくとも次を検証します。
 
 すべての文言キーで`en`を必須とし、完全一致、言語部分、`en`の順で解決します。アクセシブルな名前などで使用する`{version}`等のplaceholderは、すべての翻訳に残す必要があります。
 
+Arabic（`ar`）とHebrew（`he`）はRTLとして`html`の文字方向を切り替え、バージョン番号はLTRの独立要素として表示します。日付と数字はPHP Intlでlocaleに合わせて整形します。カウント値は最低1日とし、Arabicの日数は`one`、`two`、`few`、`many`、`other`、Hebrewは`one`、`two`、`other`の複数形を使い分けます。
+
 標準のJSON Schemaだけでは表現しにくい次の整合性は、デプロイ前の追加検証で確認します。
 
 - 同じゲーム内で`targetVersion`が一意であること
