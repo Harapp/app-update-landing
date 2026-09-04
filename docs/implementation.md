@@ -90,7 +90,21 @@ en
 
 例として、`ja-JP`に完全一致する設定がなければ`ja`を確認し、さらに存在しなければ`en`を使用します。`en`は必須です。
 
-### 5. HTML生成
+### 5. 公開リリースAPI
+
+`/api/`は認証なしの読み取り専用JSON APIです。ページと同じ`update-pages.json`の`releaseTargetVersion`を正本とし、次の公開項目だけを固定レスポンスとして返します。
+
+- `schemaVersion`: APIレスポンス形式のバージョン
+- `releaseVersion`: 現在のリリース対象版
+- `enabled`: Updateページの有効状態
+- `eventPeriod.startAt`、`eventPeriod.endAt`: ISO 8601形式のイベント期間
+- `eventPeriod.phase`: `upcoming`、`active`、`ended`
+- `platforms.{ios|android|pc}.released`: platform別の配信状態
+- `platforms.{ios|android|pc}.targetUrl`: 設定済みの公開遷移先。未設定時は`null`
+
+APIはGETとHEADだけを許可し、WebGLなどからも参照できるよう`Access-Control-Allow-Origin: *`を返します。認証情報、内部ファイルパス、許可リストなどは出力しません。設定読込に失敗した場合はHTTP 503と固定エラーコードだけを返します。
+
+### 6. HTML生成
 
 判定済みのView Modelをテンプレートへ渡します。テンプレートは条件判定や設定取得を行わず、表示だけを担当します。
 

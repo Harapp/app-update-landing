@@ -29,7 +29,7 @@ composer assets:build
 
 リリース実行環境には`cwebp`が必要です。macOSではHomebrewの`webp` formulaなどで用意します。元画像がない場合や`banner.webp`を生成できない場合、デプロイは公開リンクを切り替える前に失敗します。
 
-転送後はまだ`current`を切り替えず、候補release上でComposerのplatform要件、PHP構文、JSON Schemaと固定ゲーム設定、iOS・Android・PCの更新先とHTML生成を検証します。すべて成功した場合だけ`current`と公開リンクを切り替え、その後に公開URLのHTTPS health checkを実行します。公開ルートとリリース対象版は`games/{game-key}/update-pages.json`を正とし、相対画像パスの解決、health check、完了時URL表示で共用します。
+転送後はまだ`current`を切り替えず、候補release上でComposerのplatform要件、PHP構文、JSON Schemaと固定ゲーム設定、iOS・Android・PCの更新先とHTML生成を検証します。すべて成功した場合だけ`current`と公開リンクを切り替え、その後に公開ページ・バナー・公開APIのHTTPS health checkを実行します。公開ルートとリリース対象版は`games/{game-key}/update-pages.json`を正とし、相対画像パスの解決、health check、完了時URL表示で共用します。
 
 Deployerのリリース領域は公開ディレクトリ外に置きます。
 
@@ -175,7 +175,7 @@ current symlinkを切り替え
   ↓
 HTTP health check
   ↓
-公開ページURLとバナーURLを表示
+公開ページURL、バナーURL、API URLを表示
 ```
 
 テスト、Schema検証、配布物作成に失敗した場合は、`current`を切り替えません。切り替え後のhealth checkに失敗した場合は、直前のreleaseへ戻せるようにします。

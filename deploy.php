@@ -216,7 +216,7 @@ task('deploy:public_link', function (): void {
     run("{{bin/symlink}} {{current_path}}/public $publicPath; rm -f $temporaryLink");
 });
 
-/** @return array{page: string, banner: string} */
+/** @return array{page: string, banner: string, api: string} */
 function publishedUrls(): array
 {
     $baseUrl = rtrim((string) get('public_base_url'), '/');
@@ -231,6 +231,7 @@ function publishedUrls(): array
     return [
         'page' => $baseUrl . '/?' . $query,
         'banner' => $baseUrl . '/assets/banner.webp',
+        'api' => $baseUrl . '/api/',
     ];
 }
 
@@ -243,6 +244,9 @@ task('deploy:health', function (): void {
         run("curl --fail --silent --show-error --location --max-time 15 "
             . quote($urls['page']) . ' '
             . "| grep -F '<main>'");
+        run("curl --fail --silent --show-error --location --max-time 15 "
+            . quote($urls['api']) . ' '
+            . '| grep -F ' . quote('"releaseVersion":"' . get('release_target_version') . '"'));
     } catch (\Throwable $exception) {
         warning('Health check failed; restoring the previous release.');
         invoke('rollback');
@@ -257,6 +261,7 @@ task('deploy:show_urls', function (): void {
     writeln('<info>Published URLs</info>');
     writeln('Page:   ' . $urls['page']);
     writeln('Banner: ' . $urls['banner']);
+    writeln('API:    ' . $urls['api']);
 });
 
 // The public mount is updated only after Deployer has switched current. Health

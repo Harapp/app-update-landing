@@ -65,6 +65,31 @@ platformはUser-Agentによる内部判定を優先します。iOSまたはAndro
 
 ゲームはドメインまたはデプロイ先で固定し、ゲーム識別子をquery parameterとして受け取りません。
 
+## 公開API
+
+固定URLの`/api/`で、現在のリリース情報を認証なしのJSONとして提供します。返す情報は`releaseTargetVersion`に対応する設定のうち、リリース版、`enabled`、開始・終了日時、イベント状態、iOS・Android・PC別の`released`と遷移先URLだけです。
+
+```json
+{
+  "schemaVersion": 1,
+  "releaseVersion": "2.9.0",
+  "enabled": true,
+  "eventPeriod": {
+    "startAt": "2026-09-05T00:00:00+09:00",
+    "endAt": "2026-10-04T23:59:59+09:00",
+    "phase": "upcoming"
+  },
+  "platforms": {
+    "ios": {
+      "released": true,
+      "targetUrl": "https://apps.apple.com/example"
+    }
+  }
+}
+```
+
+`eventPeriod.phase`は開始前を`upcoming`、期間中を`active`、終了後を`ended`とします。APIはGET・HEADだけを許可し、CORSは公開情報として全originを許可します。エラー時は内部情報を含めず、固定エラーコードを返します。
+
 ## 言語
 
 対応言語、ロケールキー、文字方向、AI向け翻訳依頼プロンプトは[翻訳ガイド](translations.md)を正とします。
