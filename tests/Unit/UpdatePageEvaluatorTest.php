@@ -246,10 +246,10 @@ final class UpdatePageEvaluatorTest extends TestCase
         $active = (new UpdatePageEvaluator($repository, new FixedClock('2026-09-20T00:00:00+09:00'), uiTexts: $texts))->evaluate($request);
         $ended = (new UpdatePageEvaluator($repository, new FixedClock('2026-10-01T00:00:00+09:00'), uiTexts: $texts))->evaluate($request);
 
-        self::assertSame('イベント期間：9月10日〜30日（7日後に開始）', $before->eventPeriod);
+        self::assertSame("イベント期間：\n9月10日〜30日（7日後に開始）", $before->eventPeriod);
         self::assertSame('近日開始', $before->comingSoonButtonLabel);
-        self::assertSame('イベント期間：9月10日〜30日（残り11日）', $active->eventPeriod);
-        self::assertSame('イベント期間：終了しました。', $ended->eventPeriod);
+        self::assertSame("イベント期間：\n9月10日〜30日（残り11日）", $active->eventPeriod);
+        self::assertSame("イベント期間：\n終了しました。", $ended->eventPeriod);
     }
 
     public function testArabicAndHebrewEventPeriodsUseLocalizedDatesAndPluralForms(): void
@@ -296,13 +296,13 @@ final class UpdatePageEvaluatorTest extends TestCase
 
         self::assertSame('rtl', $arabicTwo->textDirection);
         self::assertSame('عنوان الفعالية', $arabicTwo->title);
-        self::assertSame('فترة الفعالية: من 10 سبتمبر إلى 30 سبتمبر (يبدأ خلال يومين)', $arabicTwo->eventPeriod);
-        self::assertSame('فترة الفعالية: من 10 سبتمبر إلى 30 سبتمبر (يبدأ خلال 3 أيام)', $arabicFew->eventPeriod);
-        self::assertSame('فترة الفعالية: من 10 سبتمبر إلى 30 سبتمبر (يبدأ خلال 11 يومًا)', $arabicMany->eventPeriod);
-        self::assertSame('فترة الفعالية: من 10 سبتمبر إلى 30 سبتمبر (متبقية 3 أيام)', $arabicRemaining->eventPeriod);
+        self::assertSame("فترة الفعالية:\nمن 10 سبتمبر إلى 30 سبتمبر (يبدأ خلال يومين)", $arabicTwo->eventPeriod);
+        self::assertSame("فترة الفعالية:\nمن 10 سبتمبر إلى 30 سبتمبر (يبدأ خلال 3 أيام)", $arabicFew->eventPeriod);
+        self::assertSame("فترة الفعالية:\nمن 10 سبتمبر إلى 30 سبتمبر (يبدأ خلال 11 يومًا)", $arabicMany->eventPeriod);
+        self::assertSame("فترة الفعالية:\nمن 10 سبتمبر إلى 30 سبتمبر (متبقية 3 أيام)", $arabicRemaining->eventPeriod);
         self::assertSame('rtl', $hebrewTwo->textDirection);
         self::assertSame('כותרת האירוע', $hebrewTwo->title);
-        self::assertSame('תקופת האירוע: מ־10 בספטמבר עד 30 בספטמבר (מתחיל בעוד יומיים)', $hebrewTwo->eventPeriod);
+        self::assertSame("תקופת האירוע:\nמ־10 בספטמבר עד 30 בספטמבר (מתחיל בעוד יומיים)", $hebrewTwo->eventPeriod);
     }
 
     public function testUnsupportedOsAndMissingDestinationAreSafeStates(): void

@@ -252,8 +252,8 @@ JSON Schemaでは少なくとも次を検証します。
     "ja": "更新してイベントに備える"
   },
   "period.label": {
-    "en": "Event period: {period}",
-    "ja": "イベント期間：{period}"
+    "en": "Event period:\n{period}",
+    "ja": "イベント期間：\n{period}"
   },
   "notice.storeDelay": {
     "en": "Updates may take some time to appear...",

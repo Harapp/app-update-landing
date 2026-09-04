@@ -34,7 +34,7 @@ $pageTitle = $viewModel->socialCardTitle;
         h1 { margin: 0; font-size: 1.35rem; line-height: 1.45; overflow-wrap: anywhere; }
         .description { margin: .75rem 0 0; line-height: 1.75; overflow-wrap: anywhere; }
         .status { margin: 1rem 0 0; font-weight: 600; }
-        .period { margin: 1.25rem 0 0; color: #4b5563; font-weight: 600; text-align: center; }
+        .period { margin: 1.25rem 0 0; color: #4b5563; font-weight: 600; text-align: center; white-space: pre-line; }
         .os-version { margin: .5rem 0; color: #4b5563; }
         .update-action { display: flex; justify-content: center; margin-top: 1.25rem; }
         .update-link { box-sizing: border-box; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; min-width: 12rem; padding: .8rem 1.25rem; border: 0; border-radius: .6rem; background: <?= $escape($viewModel->theme['primaryColor']) ?>; color: #fff; font: inherit; font-weight: 700; line-height: 1.25; text-align: center; text-decoration: none; }

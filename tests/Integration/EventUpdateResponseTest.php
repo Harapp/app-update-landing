@@ -95,13 +95,13 @@ final class EventUpdateResponseTest extends TestCase
         ];
 
         return [
-            'available' => ['2026-09-03T12:00:00Z', $baseRequest, [], null, true, false, true, false, 'Event period: Sep 3–4 (1 day remaining)'],
-            'up-to-date' => ['2026-09-03T12:00:00Z', [...$baseRequest, 'appVersion' => '2.0.0'], [], "You're using the latest version.", false, false, false, true, 'Event period: Sep 3–4 (1 day remaining)'],
-            'disabled' => ['2026-09-03T12:00:00Z', $baseRequest, ['enabled' => false], 'This update is currently unavailable.', false, false, false, true, 'Event period: Sep 3–4 (1 day remaining)'],
-            'unreleased-before-event' => ['2026-09-03T12:00:00Z', $baseRequest, ['startAt' => '2026-09-03T13:00:00Z', 'released' => ['ios' => false, 'android' => true, 'pc' => true]], null, true, true, true, false, 'Event period: Sep 3–4 (starts in 1 day)'],
-            'ended' => ['2026-09-03T12:00:00Z', $baseRequest, ['endAt' => '2026-09-03T11:00:00Z'], null, false, false, false, false, 'Event period: Ended.'],
-            'unsupported-os' => ['2026-09-03T12:00:00Z', [...$baseRequest, 'osVersion' => '17.0'], [], 'This update requires a newer OS version.', false, false, false, true, 'Event period: Sep 3–4 (1 day remaining)'],
-            'missing-destination' => ['2026-09-03T12:00:00Z', [...$baseRequest, 'platform' => 'android', 'osVersion' => '14'], ['destinationUrls' => ['ios' => 'https://apps.apple.com/app/id1']], 'This update is temporarily unavailable.', false, false, false, true, 'Event period: Sep 3–4 (1 day remaining)'],
+            'available' => ['2026-09-03T12:00:00Z', $baseRequest, [], null, true, false, true, false, "Event period:\nSep 3–4 (1 day remaining)"],
+            'up-to-date' => ['2026-09-03T12:00:00Z', [...$baseRequest, 'appVersion' => '2.0.0'], [], "You're using the latest version.", false, false, false, true, "Event period:\nSep 3–4 (1 day remaining)"],
+            'disabled' => ['2026-09-03T12:00:00Z', $baseRequest, ['enabled' => false], 'This update is currently unavailable.', false, false, false, true, "Event period:\nSep 3–4 (1 day remaining)"],
+            'unreleased-before-event' => ['2026-09-03T12:00:00Z', $baseRequest, ['startAt' => '2026-09-03T13:00:00Z', 'released' => ['ios' => false, 'android' => true, 'pc' => true]], null, true, true, true, false, "Event period:\nSep 3–4 (starts in 1 day)"],
+            'ended' => ['2026-09-03T12:00:00Z', $baseRequest, ['endAt' => '2026-09-03T11:00:00Z'], null, false, false, false, false, "Event period:\nEnded."],
+            'unsupported-os' => ['2026-09-03T12:00:00Z', [...$baseRequest, 'osVersion' => '17.0'], [], 'This update requires a newer OS version.', false, false, false, true, "Event period:\nSep 3–4 (1 day remaining)"],
+            'missing-destination' => ['2026-09-03T12:00:00Z', [...$baseRequest, 'platform' => 'android', 'osVersion' => '14'], ['destinationUrls' => ['ios' => 'https://apps.apple.com/app/id1']], 'This update is temporarily unavailable.', false, false, false, true, "Event period:\nSep 3–4 (1 day remaining)"],
         ];
     }
 

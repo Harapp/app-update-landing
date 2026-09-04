@@ -25,7 +25,7 @@ final class UpdatePageEvaluator
         'button.prepareAriaLabel' => ['en' => 'Update to version {version} and get ready for the event'],
         'button.comingSoon' => ['en' => 'Coming Soon'],
         'notice.storeDelay' => ['en' => 'Updates may take some time to appear on the App Store or Google Play. If the update is not available yet, please try again later.'],
-        'period.label' => ['en' => 'Event period: {period}'],
+        'period.label' => ['en' => "Event period:\n{period}"],
         'period.range' => ['en' => '{start}–{end}'],
         'period.remaining.one' => ['en' => '{range} (1 day remaining)'],
         'period.remaining.two' => ['en' => '{range} (2 days remaining)'],
