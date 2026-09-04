@@ -46,12 +46,13 @@ Escaped HTML response
 | parameter | 内容 |
 | --- | --- |
 | `appVersion` | 任意。インストール済みアプリバージョン。未指定時は更新済み判定を省略 |
-| `locale` | 任意。端末のロケール。未指定時は`en` |
+| `locale` | 任意。端末のロケール。未指定時は`Accept-Language`、判定不能時は`en` |
 | `platform` | 任意。`ios`、`android`、`pc`。内部判定不能時のフォールバック |
 | `osVersion` | 任意。端末のOSバージョン。未指定時は最低OS判定を省略 |
 
 入力値は長さ、形式、許容値を検証します。端末ID、通知トークン、認証情報は受け取りません。
 User-AgentからiOSまたはAndroidを判定できた場合は内部判定を優先し、それ以外では有効な`platform`、未指定時は`pc`を使用します。
+言語は有効な`locale` parameterを最優先し、未指定時はHTTPの`Accept-Language`から品質値を含めて優先言語を解決します。ヘッダーがない、長すぎる、または判定不能な場合は`en`を使用します。
 
 ### 2. 設定取得
 

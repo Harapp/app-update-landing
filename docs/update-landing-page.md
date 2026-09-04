@@ -52,7 +52,7 @@ https://updates.example.com/update
 | parameter | 必須 | 内容 |
 | --- | --- | --- |
 | `appVersion` | 任意 | タップ時点でインストールされているアプリバージョン。未指定時は更新済み判定を省略 |
-| `locale` | 任意 | タップ時点の言語・ロケール。未指定時は`en` |
+| `locale` | 任意 | タップ時点の言語・ロケール。未指定時はブラウザ言語、判定不能時は`en` |
 | `platform` | 任意 | `ios`、`android`、または`pc`。端末判定不能時のフォールバック |
 | `osVersion` | 任意 | タップ時点のOSバージョン。未指定時は最低OS判定を省略 |
 
@@ -62,6 +62,8 @@ query parameterは表示判定の入力であり、認証・認可や秘密情�
 旧URLに`targetVersion`が残っていても値は使用せず、常にJSONの`releaseTargetVersion`を表示します。
 
 platformはUser-Agentによる内部判定を優先します。iOSまたはAndroidを判定できた場合はquery parameterより内部判定を使用し、判定できない場合だけ有効な`platform`を使用します。どちらもない場合は`pc`とします。
+
+言語は`locale` parameterを最優先します。未指定時はブラウザの`Accept-Language`から優先言語を取得し、取得できない場合は`en`へフォールバックします。
 
 ゲームはドメインまたはデプロイ先で固定し、ゲーム識別子をquery parameterとして受け取りません。
 
@@ -94,7 +96,7 @@ platformはUser-Agentによる内部判定を優先します。iOSまたはAndro
 
 対応言語、ロケールキー、文字方向、AI向け翻訳依頼プロンプトは[翻訳ガイド](translations.md)を正とします。
 
-- 既定言語は `en` 固定とする
+- 最終フォールバック言語は`en`固定とする
 - 初期リリースでは英語文言を必須とする
 - `en` は削除や別言語への変更を不可とする
 - `locale` に一致する翻訳が将来追加された場合は、その翻訳を優先する
@@ -383,7 +385,7 @@ Updates may take some time to appear on the App Store or Google Play. If the upd
 - `ar`と`he`でRTL表示、翻訳済み本文、ローカライズ済み日付、適切な複数形になることを確認する
 - iOS / Androidの配信済み・未配信状態で、ページ最下部にストア反映の注意書きが表示されることを確認する
 - 不正なquery parameter、`releaseTargetVersion`に対応する設定の欠落、無効な外部URLを安全に拒否する
-- query parameterを省略しても、既定言語、内部platform判定、`releaseTargetVersion`によりページを表示できることを確認する
+- query parameterを省略しても、ブラウザ言語または`en`、内部platform判定、`releaseTargetVersion`によりページを表示できることを確認する
 - 未指定のテンプレートが`event-update`へ解決され、未知のテンプレートが安全に拒否されることを確認する
 - Consoleから表示するテストリンクで、固定URLと現在の`releaseTargetVersion`のページを確認できる
 

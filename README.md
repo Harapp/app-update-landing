@@ -48,7 +48,7 @@ PHP
 利用者へUpdateランディングページを表示
 ```
 
-query parameterはすべて任意です。未指定の判定材料は安全に省略し、対象版は常にゲーム設定の`releaseTargetVersion`、言語は`en`、端末を判別できないplatformは`pc`を使用します。旧URLに`targetVersion`が含まれていても表示対象には使用しません。
+query parameterはすべて任意です。未指定の判定材料は安全に省略し、対象版は常にゲーム設定の`releaseTargetVersion`、言語はブラウザの`Accept-Language`から解決後に`en`へフォールバック、端末を判別できないplatformは`pc`を使用します。旧URLに`targetVersion`が含まれていても表示対象には使用しません。
 
 1つのデプロイ先は1つのゲームに固定します。ゲーム識別子をquery parameterとして受け取りません。
 

@@ -7,6 +7,7 @@ use App\Config\UiTextRepository;
 use App\Config\UpdatePageRepository;
 use App\Domain\LocaleResolver;
 use App\Domain\UpdatePageEvaluator;
+use App\Http\BrowserLocaleResolver;
 use App\Http\PlatformResolver;
 use App\Http\RequestValidator;
 use App\Presentation\HtmlRenderer;
@@ -27,6 +28,10 @@ $statusCode = 503;
 
 try {
     $query = $_GET;
+    $query['locale'] = (new BrowserLocaleResolver())->resolve(
+        $query['locale'] ?? null,
+        $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? null,
+    );
     $query['platform'] = (new PlatformResolver())->resolve(
         $query['platform'] ?? null,
         $_SERVER['HTTP_USER_AGENT'] ?? null,

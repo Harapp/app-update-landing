@@ -164,6 +164,24 @@ final class PublicIndexTest extends TestCase
             self::assertStringContainsString('<html lang="en" dir="ltr">', $bodyWithoutParameters);
             self::assertStringContainsString('<span><bdi dir="ltr">V2.9.0</bdi></span>', $bodyWithoutParameters);
             self::assertStringContainsString('href="https://www.harapeco.okinawa/info/app/neko_boku.html"', $bodyWithoutParameters);
+
+            $japaneseBrowserBody = file_get_contents(
+                "http://127.0.0.1:$port/?platform=pc",
+                false,
+                $this->headerContext(['Accept-Language: ja-JP,ja;q=0.9,en;q=0.8']),
+            );
+            self::assertIsString($japaneseBrowserBody);
+            self::assertStringContainsString('<html lang="ja-JP" dir="ltr">', $japaneseBrowserBody);
+            self::assertStringContainsString('<h1 dir="auto">すすきとだんごと月あかりの空が、お部屋にやってきます。</h1>', $japaneseBrowserBody);
+
+            $explicitEnglishBody = file_get_contents(
+                "http://127.0.0.1:$port/?locale=en&platform=pc",
+                false,
+                $this->headerContext(['Accept-Language: ja-JP,ja;q=0.9']),
+            );
+            self::assertIsString($explicitEnglishBody);
+            self::assertStringContainsString('<html lang="en" dir="ltr">', $explicitEnglishBody);
+            self::assertStringContainsString('<h1 dir="auto">Pampas grass, dumplings and a moonlit sky come to the room.</h1>', $explicitEnglishBody);
         } finally {
             proc_terminate($process);
             proc_close($process);
@@ -173,7 +191,13 @@ final class PublicIndexTest extends TestCase
     /** @return resource */
     private function userAgentContext(string $userAgent)
     {
-        return stream_context_create(['http' => ['header' => "User-Agent: $userAgent\r\n"]]);
+        return $this->headerContext(["User-Agent: $userAgent"]);
+    }
+
+    /** @param list<string> $headers @return resource */
+    private function headerContext(array $headers)
+    {
+        return stream_context_create(['http' => ['header' => implode("\r\n", $headers) . "\r\n"]]);
     }
 
     /** @param list<string> $headers */
