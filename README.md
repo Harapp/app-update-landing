@@ -18,19 +18,20 @@ Unityクライアントは、UPMパッケージ
 [`com.harapeco.app.update.landing`](app-update-landing-unity/Packages/com.harapeco.app.update.landing/README.md)として管理します。
 公開APIからイベント状態を取得し、Hostアプリの表示・詳細ダイアログ・ランディングページ遷移へ接続できます。
 
-Unity Package Managerの `Add package from git URL...` で導入できます。
+Unity Package Managerの`Install package from Git URL`で導入できます。
 
 ```text
-git@Harapp-GitHub:Harapp/app-update-landing.git?path=app-update-landing-unity/Packages/com.harapeco.app.update.landing/
+https://github.com/Harapp/app-update-landing.git?path=/app-update-landing-unity/Packages/com.harapeco.app.update.landing
 ```
 
 Unityパッケージのバージョン更新は、Unity Editorの
 `Window > App Update Landing > Release`から確認できます。Releaseは全EditMode Test成功後に
 `package.json`と`AppUpdateLandingVersion.Value`を同期更新しますが、commit・push・tag作成は行いません。
 
-API取得とイベント状態表示の確認には、開発用Unityプロジェクトの
-`Assets/Samples/AppUpdateLanding/AppUpdateLandingSample.unity`を使用します。
-Settingsの`Test State`から、イベント無し・イベント前・アップデート待ち・イベント中・イベント後を切り替えられます。
+インストール後は、Package Managerの`Samples`欄から`App Update Landing Sample`をImportできます。
+開発用Unityプロジェクトでは`Assets/Samples/AppUpdateLanding`をSampleの正本とし、
+`Window > App Update Landing > Export Sample`からPackageの`Samples~`へ同期します。
+Settingsの`Test State`では、イベント無し・イベント前・アップデート待ち・イベント中・イベント後を切り替えられます。
 
 ルートの`scripts/`はリポジトリ内のどこからでも実行でき、必要な処理を
 `app-update-landing-server/`を作業ディレクトリとして起動します。

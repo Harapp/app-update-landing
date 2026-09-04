@@ -7,6 +7,13 @@
   "dependencies": {
     "com.unity.modules.unitywebrequest": "1.0.0"
   },
+  "samples": [
+    {
+      "displayName": "App Update Landing Sample",
+      "description": "Scene for checking API status, Editor test states, and the App Update Landing page flow.",
+      "path": "Samples~/AppUpdateLanding"
+    }
+  ],
   "author": {
     "name": "HARAPECORPORATION Inc."
   }

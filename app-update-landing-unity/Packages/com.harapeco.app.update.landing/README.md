@@ -2,6 +2,23 @@
 
 App Update Landingの公開APIからイベント状態を取得し、Unity内の表示と詳細ページへの導線を提供するUnityパッケージです。
 
+## インストール
+
+1. Unity Editorで`Window > Package Management > Package Manager`を開く
+2. `Install`メニューから`Install package from Git URL`を選ぶ
+3. 次のURLを入力して`Install`を押す
+
+```text
+https://github.com/Harapp/app-update-landing.git?path=/app-update-landing-unity/Packages/com.harapeco.app.update.landing
+```
+
+インストール後、`Window > App Update Landing > Settings`を開き、公開API URLと再取得間隔を
+設定してください。Settings Windowを初めて開くと、次のアセットが作成されます。
+
+```text
+Assets/Resources/AppUpdateLandingSettings.asset
+```
+
 初期実装には次の機能が含まれます。
 
 - 公開API Schema v2の取得と検証
@@ -107,12 +124,6 @@ await service.Client.PresentDetailsAsync(dialogPresenter, CancellationToken.None
 テストや一時的な接続先では、常駐スケジューラを使わず従来どおり
 `new AppUpdateLandingClient("https://...")`でAPI URLを直接指定できます。
 
-Settings Windowを初めて開くと、次のアセットが作成されます。
-
-```text
-Assets/Resources/AppUpdateLandingSettings.asset
-```
-
 ## Test State
 
 Settingsの`Test State`はSample Scene専用ではありません。Settingsから生成された
@@ -126,7 +137,12 @@ Test StateはClient生成時に読み込まれるため、Play Modeへ入る前�
 API URLを直接指定する`new AppUpdateLandingClient("https://...")`はSettingsを使用しないため、
 Test Stateも適用されません。
 
-このリポジトリの開発用Unityプロジェクトでは、動作確認用Sceneを`Assets/Samples/AppUpdateLanding/AppUpdateLandingSample.unity`に用意しています。`イベント前`と`イベント中`では、APIから取得したWebページを開くボタンも表示します。
+## SampleのImport
+
+Package Managerで`App Update Landing`を選択し、`Samples`欄にある
+`App Update Landing Sample`の`Import`を押してください。Importされた
+`AppUpdateLandingSample.unity`を開くと、API取得と各Test Stateの表示を確認できます。
+`イベント前`と`イベント中`では、APIから取得したWebページを開くボタンも表示します。
 
 `IAppUpdateLandingDialogPresenter`はRuntimeパッケージ側でUIを固定しないための境界です。Hostアプリ側で既存のダイアログに接続してください。ダイアログが`OpenPage`を返すと、クライアントが詳細ページを開きます。
 

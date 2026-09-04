@@ -8,6 +8,8 @@ Icon?
 *.swp
 *.swo
 *~
+!app-update-landing-unity/Packages/com.harapeco.app.update.landing/Samples~/
+!app-update-landing-unity/Packages/com.harapeco.app.update.landing/Samples~/**
 
 # Environment and secrets
 .env
