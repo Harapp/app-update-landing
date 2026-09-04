@@ -75,25 +75,35 @@ namespace Harapeco.AppUpdateLanding
         {
             get
             {
-                if (!Enabled)
-                {
-                    return AppUpdateLandingEventState.Disabled;
-                }
-
-                if (Phase == AppUpdateLandingEventPhase.Ended)
-                {
-                    return AppUpdateLandingEventState.Ended;
-                }
-
-                if (Phase == AppUpdateLandingEventPhase.Upcoming)
-                {
-                    return AppUpdateLandingEventState.Upcoming;
-                }
-
-                return Released
-                    ? AppUpdateLandingEventState.Active
-                    : AppUpdateLandingEventState.WaitingForRelease;
+                return GetState(DateTimeOffset.UtcNow);
             }
+        }
+
+        public AppUpdateLandingEventState GetState(DateTimeOffset now)
+        {
+            if (!Enabled)
+            {
+                return AppUpdateLandingEventState.Disabled;
+            }
+
+            if (EndAt.HasValue && now > EndAt.Value)
+            {
+                return AppUpdateLandingEventState.Ended;
+            }
+
+            if (StartAt.HasValue && now < StartAt.Value)
+            {
+                return AppUpdateLandingEventState.Upcoming;
+            }
+
+            if (Phase == AppUpdateLandingEventPhase.Ended)
+            {
+                return AppUpdateLandingEventState.Ended;
+            }
+
+            return Released
+                ? AppUpdateLandingEventState.Active
+                : AppUpdateLandingEventState.WaitingForRelease;
         }
     }
 }

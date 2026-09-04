@@ -52,7 +52,8 @@ namespace Harapeco.AppUpdateLanding.Editor
                 {
                     EditorGUILayout.LabelField("App Update Landing Settings", EditorStyles.boldLabel);
                     EditorGUILayout.HelpBox(
-                        "Configure the public API URL used by AppUpdateLandingClient.",
+                        "Configure the public API URL and cache refresh backoff used by "
+                        + "AppUpdateLandingClient.",
                         MessageType.Info);
 
                     settingsEditor?.OnInspectorGUI();

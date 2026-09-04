@@ -14,3 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   apiUrl: https://neko.harapeco.okinawa/event-update/api/
   testState: 0
+  firstBackoffDays: 1
+  secondBackoffDays: 2
+  thirdBackoffDays: 3
+  maximumBackoffDays: 3
