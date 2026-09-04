@@ -79,7 +79,7 @@ namespace Harapeco.AppUpdateLanding
             switch (state)
             {
                 case AppUpdateLandingEventState.Disabled:
-                    return "[イベント停止中]";
+                    return "[イベントなし]";
                 case AppUpdateLandingEventState.Upcoming:
                     return "[イベント待ち]";
                 case AppUpdateLandingEventState.WaitingForRelease:
@@ -110,6 +110,11 @@ namespace Harapeco.AppUpdateLanding
 
         private static string TimingText(AppUpdateLandingStatus status, DateTimeOffset now)
         {
+            if (status.State == AppUpdateLandingEventState.Disabled)
+            {
+                return string.Empty;
+            }
+
             if (status.Phase == AppUpdateLandingEventPhase.Upcoming && status.StartAt.HasValue)
             {
                 return "あと" + RoundedUpDaysBetween(now, status.StartAt.Value) + "日後に開催";

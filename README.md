@@ -28,5 +28,9 @@ Unityパッケージのバージョン更新は、Unity Editorの
 `Window > App Update Landing > Release`から確認できます。Releaseは全EditMode Test成功後に
 `package.json`と`AppUpdateLandingVersion.Value`を同期更新しますが、commit・push・tag作成は行いません。
 
+API取得とイベント状態表示の確認には、開発用Unityプロジェクトの
+`Assets/Samples/AppUpdateLanding/AppUpdateLandingSample.unity`を使用します。
+Settingsの`Test State`から、イベント無し・イベント前・アップデート待ち・イベント中・イベント後を切り替えられます。
+
 ルートの`scripts/`はリポジトリ内のどこからでも実行でき、必要な処理を
 `app-update-landing-server/`を作業ディレクトリとして起動します。

@@ -39,6 +39,10 @@ Settings Windowを初めて開くと、次のアセットが作成されます�
 Assets/Resources/AppUpdateLandingSettings.asset
 ```
 
+Unity Editorでは、Settingsの`Test State`でAPI取得後の表示を`イベント無し`、`イベント前`、`アップデート待ち`、`イベント中`、`イベント後`へ差し替えられます。Player Buildではこの設定を無視し、常にAPIレスポンスを使用します。
+
+このリポジトリの開発用Unityプロジェクトでは、動作確認用Sceneを`Assets/Samples/AppUpdateLanding/AppUpdateLandingSample.unity`に用意しています。`イベント前`と`イベント中`では、APIから取得したWebページを開くボタンも表示します。
+
 テストや一時的な接続先では、従来どおり`new AppUpdateLandingClient("https://...")`でAPI URLを直接指定できます。
 
 `IAppUpdateLandingDialogPresenter`はRuntimeパッケージ側でUIを固定しないための境界です。Hostアプリ側で既存のダイアログに接続してください。ダイアログが`OpenPage`を返すと、クライアントが詳細ページを開きます。

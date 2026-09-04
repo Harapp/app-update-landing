@@ -19,9 +19,26 @@ namespace Harapeco.AppUpdateLanding
         [Tooltip("App Update Landingの公開API URL。通常はHTTPSの/api/を指定します。")]
         private string apiUrl = string.Empty;
 
+        [Header("Editor Testing")]
+        [SerializeField]
+        [Tooltip("Unity EditorでAPI取得後の表示状態を差し替えます。Player Buildでは常にAPI Responseを使用します。")]
+        private AppUpdateLandingTestState testState = AppUpdateLandingTestState.ApiResponse;
+
         private static AppUpdateLandingSettings instance;
 
         public string ApiUrl => NormalizeText(apiUrl);
+
+        public AppUpdateLandingTestState TestState
+        {
+            get
+            {
+#if UNITY_EDITOR
+                return testState;
+#else
+                return AppUpdateLandingTestState.ApiResponse;
+#endif
+            }
+        }
 
         public static AppUpdateLandingSettings Current
         {
@@ -85,9 +102,12 @@ namespace Harapeco.AppUpdateLanding
             return AppUpdateLandingSettingsValidationResult.Success();
         }
 
-        internal void ConfigureForTesting(string value)
+        internal void ConfigureForTesting(
+            string value,
+            AppUpdateLandingTestState state = AppUpdateLandingTestState.ApiResponse)
         {
             apiUrl = value;
+            testState = state;
         }
 
         private static AppUpdateLandingSettings Create()
@@ -114,6 +134,27 @@ namespace Harapeco.AppUpdateLanding
         {
             return value == null ? string.Empty : value.Trim();
         }
+    }
+
+    public enum AppUpdateLandingTestState
+    {
+        [InspectorName("API Response")]
+        ApiResponse = 0,
+
+        [InspectorName("イベント無し")]
+        NoEvent,
+
+        [InspectorName("イベント前")]
+        Upcoming,
+
+        [InspectorName("アップデート待ち")]
+        WaitingForRelease,
+
+        [InspectorName("イベント中")]
+        Active,
+
+        [InspectorName("イベント後")]
+        Ended
     }
 
     public enum AppUpdateLandingSettingsValidationCode

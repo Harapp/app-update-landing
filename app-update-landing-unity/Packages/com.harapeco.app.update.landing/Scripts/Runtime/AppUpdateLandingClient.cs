@@ -25,6 +25,7 @@ namespace Harapeco.AppUpdateLanding
         private readonly AppUpdateLandingEnvironment environment;
         private readonly IAppUpdateLandingUrlOpener urlOpener;
         private readonly int timeoutSeconds;
+        private readonly AppUpdateLandingTestState testState;
 
         public AppUpdateLandingClient()
             : this(AppUpdateLandingSettings.LoadFromResources())
@@ -36,7 +37,12 @@ namespace Harapeco.AppUpdateLanding
             AppUpdateLandingEnvironment environment = null,
             IAppUpdateLandingUrlOpener urlOpener = null,
             int timeoutSeconds = 15)
-            : this(RequireApiUrl(settings), environment, urlOpener, timeoutSeconds)
+            : this(
+                RequireApiUrl(settings),
+                environment,
+                urlOpener,
+                timeoutSeconds,
+                settings.TestState)
         {
         }
 
@@ -45,6 +51,21 @@ namespace Harapeco.AppUpdateLanding
             AppUpdateLandingEnvironment environment = null,
             IAppUpdateLandingUrlOpener urlOpener = null,
             int timeoutSeconds = 15)
+            : this(
+                apiUrl,
+                environment,
+                urlOpener,
+                timeoutSeconds,
+                AppUpdateLandingTestState.ApiResponse)
+        {
+        }
+
+        private AppUpdateLandingClient(
+            string apiUrl,
+            AppUpdateLandingEnvironment environment,
+            IAppUpdateLandingUrlOpener urlOpener,
+            int timeoutSeconds,
+            AppUpdateLandingTestState testState)
         {
             if (!AppUpdateLandingUrlBuilder.TryCreateAllowedWebUri(apiUrl, out var uri))
             {
@@ -62,6 +83,7 @@ namespace Harapeco.AppUpdateLanding
             this.environment = environment ?? AppUpdateLandingEnvironment.FromUnity();
             this.urlOpener = urlOpener ?? new AppUpdateLandingUnityUrlOpener();
             this.timeoutSeconds = timeoutSeconds;
+            this.testState = testState;
         }
 
         public event Action<AppUpdateLandingStatus> StatusUpdated;
@@ -73,10 +95,14 @@ namespace Harapeco.AppUpdateLanding
         {
             cancellationToken.ThrowIfCancellationRequested();
             var json = await GetJsonAsync(cancellationToken);
+            var fetchedAt = DateTimeOffset.UtcNow;
             var status = AppUpdateLandingResponseParser.Parse(
                 json,
                 environment.Platform,
-                DateTimeOffset.UtcNow);
+                fetchedAt);
+#if UNITY_EDITOR
+            status = AppUpdateLandingTestStatus.Apply(status, testState, fetchedAt);
+#endif
             CurrentStatus = status;
             StatusUpdated?.Invoke(status);
             return status;

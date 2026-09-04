@@ -12,4 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e784397816c03404eba6635880723a32, type: 3}
   m_Name: AppUpdateLandingSettings
   m_EditorClassIdentifier:
-  apiUrl:
+  apiUrl: https://neko.harapeco.okinawa/event-update/api/
+  testState: 0

@@ -62,6 +62,15 @@ namespace Harapeco.AppUpdateLanding.Editor
                     {
                         EditorGUILayout.HelpBox(validation.Message, MessageType.Warning);
                     }
+
+                    if (settings != null
+                        && settings.TestState != AppUpdateLandingTestState.ApiResponse)
+                    {
+                        EditorGUILayout.HelpBox(
+                            "Test State overrides the API event state in Unity Editor only. "
+                            + "The API request still runs, and Player Builds always use the API response.",
+                            MessageType.Warning);
+                    }
                 }
 
                 EditorGUILayout.EndScrollView();
