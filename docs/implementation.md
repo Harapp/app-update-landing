@@ -97,12 +97,13 @@ en
 
 - `schemaVersion`: APIレスポンス形式のバージョン
 - `releaseVersion`: 現在のリリース対象版
-- `eventUrl`: 現在のイベントUpdateページURL
+- `pageUrl`: 現在のUpdateページURL
 - `enabled`: Updateページの有効状態
 - `eventPeriod.startAt`、`eventPeriod.endAt`: ISO 8601形式のイベント期間
 - `eventPeriod.phase`: `upcoming`、`active`、`ended`
 - `platforms.{ios|android|pc}.released`: platform別の配信状態
-- `platforms.{ios|android|pc}.targetUrl`: 設定済みの公開遷移先。未設定時は`null`
+
+現在の`schemaVersion`は`2`です。platform別の遷移先は公開せず、ページへの導線にはトップレベルの`pageUrl`を使用します。
 
 APIはGETとHEADだけを許可し、WebGLなどからも参照できるよう`Access-Control-Allow-Origin: *`を返します。認証情報、内部ファイルパス、許可リストなどは出力しません。設定読込に失敗した場合はHTTP 503と固定エラーコードだけを返します。
 

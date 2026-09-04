@@ -35,16 +35,14 @@ final class PublicApiTest extends TestCase
             $endAt = new DateTimeImmutable($payload['eventPeriod']['endAt']);
             $expectedEventPhase = $now < $startAt ? 'upcoming' : ($now > $endAt ? 'ended' : 'active');
 
-            self::assertSame(1, $payload['schemaVersion']);
+            self::assertSame(2, $payload['schemaVersion']);
             self::assertSame('2.9.0', $payload['releaseVersion']);
-            self::assertSame('https://neko.harapeco.okinawa/event-update/', $payload['eventUrl']);
+            self::assertSame('https://neko.harapeco.okinawa/event-update/', $payload['pageUrl']);
             self::assertTrue($payload['enabled']);
             self::assertSame($expectedEventPhase, $payload['eventPeriod']['phase']);
-            self::assertTrue($payload['platforms']['ios']['released']);
-            self::assertSame(
-                'https://itunes.apple.com/jp/app/id1269423920',
-                $payload['platforms']['ios']['targetUrl'],
-            );
+            self::assertSame(['released' => true], $payload['platforms']['ios']);
+            self::assertSame(['released' => true], $payload['platforms']['android']);
+            self::assertSame(['released' => true], $payload['platforms']['pc']);
             self::assertContainsHeader('Content-Type: application/json; charset=UTF-8', $http_response_header ?? []);
             self::assertContainsHeader('Access-Control-Allow-Origin: *', $http_response_header ?? []);
             self::assertContainsHeader('X-Robots-Tag: noindex, nofollow, noarchive', $http_response_header ?? []);

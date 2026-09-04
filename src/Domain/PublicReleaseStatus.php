@@ -31,14 +31,13 @@ final readonly class PublicReleaseStatus
         foreach (['ios', 'android', 'pc'] as $platform) {
             $platforms[$platform] = [
                 'released' => $page['released'][$platform],
-                'targetUrl' => $page['destinationUrls'][$platform] ?? null,
             ];
         }
 
         return [
-            'schemaVersion' => 1,
+            'schemaVersion' => 2,
             'releaseVersion' => $page['targetVersion'],
-            'eventUrl' => rtrim($release['publicBaseUrl'], '/') . '/',
+            'pageUrl' => rtrim($release['publicBaseUrl'], '/') . '/',
             'enabled' => $page['enabled'],
             'eventPeriod' => [
                 'startAt' => $this->formatDate($page['startAt']),

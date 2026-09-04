@@ -69,13 +69,13 @@ platformはUser-Agentによる内部判定を優先します。iOSまたはAndro
 
 ## 公開API
 
-固定URLの`/api/`で、現在のリリース情報を認証なしのJSONとして提供します。返す情報は`releaseTargetVersion`に対応する設定のうち、リリース版、イベントURL、`enabled`、開始・終了日時、イベント状態、iOS・Android・PC別の`released`と遷移先URLだけです。
+固定URLの`/api/`で、現在のリリース情報を認証なしのJSONとして提供します。返す情報は`releaseTargetVersion`に対応する設定のうち、リリース版、UpdateページURL、`enabled`、開始・終了日時、イベント状態、iOS・Android・PC別の`released`だけです。
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "releaseVersion": "2.9.0",
-  "eventUrl": "https://game-a.update.example.com/event-update/",
+  "pageUrl": "https://game-a.update.example.com/event-update/",
   "enabled": true,
   "eventPeriod": {
     "startAt": "2026-09-05T00:00:00+09:00",
@@ -84,8 +84,7 @@ platformはUser-Agentによる内部判定を優先します。iOSまたはAndro
   },
   "platforms": {
     "ios": {
-      "released": true,
-      "targetUrl": "https://apps.apple.com/example"
+      "released": true
     }
   }
 }

@@ -34,10 +34,10 @@ final class PublicReleaseStatusTest extends TestCase
 
         $status = (new PublicReleaseStatus($repository, $clock))->get();
 
-        self::assertSame(['schemaVersion', 'releaseVersion', 'eventUrl', 'enabled', 'eventPeriod', 'platforms'], array_keys($status));
-        self::assertSame(1, $status['schemaVersion']);
+        self::assertSame(['schemaVersion', 'releaseVersion', 'pageUrl', 'enabled', 'eventPeriod', 'platforms'], array_keys($status));
+        self::assertSame(2, $status['schemaVersion']);
         self::assertSame('2.9.0', $status['releaseVersion']);
-        self::assertSame('https://neko.harapeco.okinawa/event-update/', $status['eventUrl']);
+        self::assertSame('https://neko.harapeco.okinawa/event-update/', $status['pageUrl']);
         self::assertTrue($status['enabled']);
         self::assertSame([
             'startAt' => '2026-09-05T00:00:00+09:00',
@@ -46,15 +46,12 @@ final class PublicReleaseStatusTest extends TestCase
         ], $status['eventPeriod']);
         self::assertSame([
             'released' => true,
-            'targetUrl' => 'https://itunes.apple.com/jp/app/id1269423920',
         ], $status['platforms']['ios']);
         self::assertSame([
             'released' => true,
-            'targetUrl' => 'https://play.google.com/store/apps/details?id=okinawa.harapeco.catRestaurant',
         ], $status['platforms']['android']);
         self::assertSame([
             'released' => true,
-            'targetUrl' => 'https://www.harapeco.okinawa/info/app/neko_boku.html',
         ], $status['platforms']['pc']);
     }
 
