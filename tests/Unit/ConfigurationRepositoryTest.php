@@ -394,12 +394,20 @@ final class ConfigurationRepositoryTest extends TestCase
         self::assertSame('https://itunes.apple.com/jp/app/id1269423920', $page['destinationUrls']['ios']);
         self::assertSame('https://play.google.com/store/apps/details?id=okinawa.harapeco.catRestaurant', $page['destinationUrls']['android']);
         self::assertSame('https://www.harapeco.okinawa/info/app/neko_boku.html', $page['destinationUrls']['pc']);
-        self::assertSame('Pampas grass, dumplings and a moonlit sky come to the room.', $page['title']['en']);
+        $expectedLocales = [
+            'en', 'ar', 'it', 'id', 'uk', 'nl', 'ca', 'el', 'sv', 'es', 'sk', 'sl', 'th', 'cs', 'da', 'de',
+            'tr', 'no', 'hu', 'hi', 'fi', 'fr', 'vi', 'he', 'pl', 'pt', 'ro', 'ru', 'ko', 'zh-Hans', 'zh-Hant', 'ja',
+        ];
+        self::assertSame($expectedLocales, array_keys($page['title']));
+        self::assertSame($expectedLocales, array_keys($page['descriptions']));
+        self::assertSame('Moonlit Night', $page['title']['en']);
         self::assertArrayHasKey('ar', $page['title']);
         self::assertArrayHasKey('he', $page['title']);
-        self::assertSame('すすきとだんごと月あかりの空が、お部屋にやってきます。', $page['title']['ja']);
-        self::assertSame('Pampas grass, dumplings and a moonlit sky come to the room.', $page['socialCard']['title']['en']);
-        self::assertSame('すすきとだんごと月あかりの空が、お部屋にやってきます。', $page['socialCard']['title']['ja']);
+        self::assertSame('おつきみ日和', $page['title']['ja']);
+        self::assertSame('A quiet veranda in the moonlight. A cat in rabbit ears comes to visit. Watch the sky with the cats and little ghosts.', $page['descriptions']['en']);
+        self::assertSame('月あかりのさす、しずかな縁側。うさぎの耳をつけたねこが遊びにきます。だんごをお供えして、猫とゆうれいたちとぼんやり空を見ませんか。', $page['descriptions']['ja']);
+        self::assertSame($page['title'], $page['socialCard']['title']);
+        self::assertSame($page['descriptions'], $page['socialCard']['description']);
         self::assertSame('#0E7490', $theme['primaryColor']);
         self::assertSame('#155E75', $theme['accentColor']);
         self::assertSame('#ECFEFF', $theme['backgroundColor']);

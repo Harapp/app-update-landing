@@ -45,10 +45,10 @@ final class PublicIndexTest extends TestCase
                 self::assertStringNotContainsString('alt="App logo"', $body);
                 self::assertStringContainsString('PurrfectSpirits event update', $body);
                 self::assertStringContainsString('<html lang="en-US" dir="ltr">', $body);
-                self::assertStringContainsString('<h1 dir="auto">Pampas grass, dumplings and a moonlit sky come to the room.</h1>', $body);
-                self::assertStringContainsString('<p class="description" dir="auto">While the event runs, your room becomes a veranda', $body);
-                self::assertStringContainsString('<meta property="og:title" content="Pampas grass, dumplings and a moonlit sky come to the room.">', $body);
-                self::assertStringContainsString('<meta property="og:description" content="Update to V2.9.0 and play the event from Sep 5–Oct 4.">', $body);
+                self::assertStringContainsString('<h1 dir="auto">Moonlit Night</h1>', $body);
+                self::assertStringContainsString('<p class="description" dir="auto">A quiet veranda in the moonlight.', $body);
+                self::assertStringContainsString('<meta property="og:title" content="Moonlit Night">', $body);
+                self::assertStringContainsString('<meta property="og:description" content="A quiet veranda in the moonlight.', $body);
                 self::assertStringContainsString('<p class="period" dir="auto">', $body);
                 if (str_contains($body, '<a class="update-link"')) {
                     self::assertStringContainsString(
@@ -65,10 +65,10 @@ final class PublicIndexTest extends TestCase
             );
             self::assertIsString($japaneseBody);
             self::assertStringContainsString('<html lang="ja-JP" dir="ltr">', $japaneseBody);
-            self::assertStringContainsString('<h1 dir="auto">すすきとだんごと月あかりの空が、お部屋にやってきます。</h1>', $japaneseBody);
-            self::assertStringContainsString('<p class="description" dir="auto">イベント期間中、お部屋は月あかりの縁側になります。', $japaneseBody);
-            self::assertStringContainsString('<meta property="og:title" content="すすきとだんごと月あかりの空が、お部屋にやってきます。">', $japaneseBody);
-            self::assertStringContainsString('<meta property="og:description" content="V2.9.0へ更新して、9月5日〜10月4日のイベントを遊ぼう。">', $japaneseBody);
+            self::assertStringContainsString('<h1 dir="auto">おつきみ日和</h1>', $japaneseBody);
+            self::assertStringContainsString('<p class="description" dir="auto">月あかりのさす、しずかな縁側。', $japaneseBody);
+            self::assertStringContainsString('<meta property="og:title" content="おつきみ日和">', $japaneseBody);
+            self::assertStringContainsString('<meta property="og:description" content="月あかりのさす、しずかな縁側。', $japaneseBody);
             self::assertStringContainsString('<p class="period" dir="auto">', $japaneseBody);
             if (str_contains($japaneseBody, '<a class="update-link"')) {
                 $expectedButtonText = $isBeforeEvent ? '更新してイベントに備える' : '更新してイベントを遊ぶ';
@@ -87,8 +87,8 @@ final class PublicIndexTest extends TestCase
             );
             self::assertIsString($arabicBody);
             self::assertStringContainsString('<html lang="ar-SA" dir="rtl">', $arabicBody);
-            self::assertStringContainsString('<h1 dir="auto">يأتي عشب البامباس وحلوى الدانغو وسماء يضيئها القمر إلى الغرفة.</h1>', $arabicBody);
-            self::assertStringContainsString('<meta property="og:description" content="حدّث إلى V2.9.0 والعب الفعالية من 5 سبتمبر إلى 4 أكتوبر.">', $arabicBody);
+            self::assertStringContainsString('<h1 dir="auto">ليلة القمر</h1>', $arabicBody);
+            self::assertStringContainsString('<meta property="og:description" content="شرفة هادئة في ضوء القمر.', $arabicBody);
             if (str_contains($arabicBody, '<a class="update-link"')) {
                 self::assertStringContainsString('<span><bdi dir="ltr">V2.9.0</bdi></span>', $arabicBody);
                 self::assertStringContainsString(
@@ -102,8 +102,8 @@ final class PublicIndexTest extends TestCase
             );
             self::assertIsString($hebrewBody);
             self::assertStringContainsString('<html lang="he-IL" dir="rtl">', $hebrewBody);
-            self::assertStringContainsString('<h1 dir="auto">עשב פמפס, דנגו ושמיים באור ירח מגיעים אל החדר.</h1>', $hebrewBody);
-            self::assertStringContainsString('<meta property="og:description" content="עדכנו לגרסה V2.9.0 ושחקו באירוע מ־5 בספטמבר עד 4 באוקטובר.">', $hebrewBody);
+            self::assertStringContainsString('<h1 dir="auto">ליל ירח</h1>', $hebrewBody);
+            self::assertStringContainsString('<meta property="og:description" content="מרפסת שקטה לאור הירח.', $hebrewBody);
             if (str_contains($hebrewBody, '<a class="update-link"')) {
                 self::assertStringContainsString(
                     '<small dir="auto">' . ($isBeforeEvent ? 'עדכנו והתכוננו לאירוע' : 'עדכנו ושחקו באירוע') . '</small>',
@@ -112,10 +112,10 @@ final class PublicIndexTest extends TestCase
             }
 
             $fallbackBody = file_get_contents(
-                "http://127.0.0.1:$port/?appVersion=0.0.0&targetVersion=2.9.0&locale=fr-FR&platform=ios&osVersion=1"
+                "http://127.0.0.1:$port/?appVersion=0.0.0&targetVersion=2.9.0&locale=ga-IE&platform=ios&osVersion=1"
             );
             self::assertIsString($fallbackBody);
-            self::assertStringContainsString('<meta property="og:title" content="Pampas grass, dumplings and a moonlit sky come to the room.">', $fallbackBody);
+            self::assertStringContainsString('<meta property="og:title" content="Moonlit Night">', $fallbackBody);
             self::assertStringContainsString('<p class="period" dir="auto">', $fallbackBody);
             if (str_contains($fallbackBody, '<a class="update-link"')) {
                 self::assertStringContainsString(
@@ -172,7 +172,7 @@ final class PublicIndexTest extends TestCase
             );
             self::assertIsString($japaneseBrowserBody);
             self::assertStringContainsString('<html lang="ja-JP" dir="ltr">', $japaneseBrowserBody);
-            self::assertStringContainsString('<h1 dir="auto">すすきとだんごと月あかりの空が、お部屋にやってきます。</h1>', $japaneseBrowserBody);
+            self::assertStringContainsString('<h1 dir="auto">おつきみ日和</h1>', $japaneseBrowserBody);
 
             $explicitEnglishBody = file_get_contents(
                 "http://127.0.0.1:$port/?locale=en&platform=pc",
@@ -181,7 +181,7 @@ final class PublicIndexTest extends TestCase
             );
             self::assertIsString($explicitEnglishBody);
             self::assertStringContainsString('<html lang="en" dir="ltr">', $explicitEnglishBody);
-            self::assertStringContainsString('<h1 dir="auto">Pampas grass, dumplings and a moonlit sky come to the room.</h1>', $explicitEnglishBody);
+            self::assertStringContainsString('<h1 dir="auto">Moonlit Night</h1>', $explicitEnglishBody);
         } finally {
             proc_terminate($process);
             proc_close($process);

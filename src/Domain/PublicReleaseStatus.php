@@ -38,6 +38,7 @@ final readonly class PublicReleaseStatus
         return [
             'schemaVersion' => 1,
             'releaseVersion' => $page['targetVersion'],
+            'eventUrl' => rtrim($release['publicBaseUrl'], '/') . '/',
             'enabled' => $page['enabled'],
             'eventPeriod' => [
                 'startAt' => $this->formatDate($page['startAt']),

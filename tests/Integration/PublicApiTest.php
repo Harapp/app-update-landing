@@ -37,6 +37,7 @@ final class PublicApiTest extends TestCase
 
             self::assertSame(1, $payload['schemaVersion']);
             self::assertSame('2.9.0', $payload['releaseVersion']);
+            self::assertSame('https://neko.harapeco.okinawa/event-update/', $payload['eventUrl']);
             self::assertTrue($payload['enabled']);
             self::assertSame($expectedEventPhase, $payload['eventPeriod']['phase']);
             self::assertTrue($payload['platforms']['ios']['released']);

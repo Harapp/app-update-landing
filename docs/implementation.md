@@ -97,6 +97,7 @@ en
 
 - `schemaVersion`: APIレスポンス形式のバージョン
 - `releaseVersion`: 現在のリリース対象版
+- `eventUrl`: 現在のイベントUpdateページURL
 - `enabled`: Updateページの有効状態
 - `eventPeriod.startAt`、`eventPeriod.endAt`: ISO 8601形式のイベント期間
 - `eventPeriod.phase`: `upcoming`、`active`、`ended`

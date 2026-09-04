@@ -34,9 +34,10 @@ final class PublicReleaseStatusTest extends TestCase
 
         $status = (new PublicReleaseStatus($repository, $clock))->get();
 
-        self::assertSame(['schemaVersion', 'releaseVersion', 'enabled', 'eventPeriod', 'platforms'], array_keys($status));
+        self::assertSame(['schemaVersion', 'releaseVersion', 'eventUrl', 'enabled', 'eventPeriod', 'platforms'], array_keys($status));
         self::assertSame(1, $status['schemaVersion']);
         self::assertSame('2.9.0', $status['releaseVersion']);
+        self::assertSame('https://neko.harapeco.okinawa/event-update/', $status['eventUrl']);
         self::assertTrue($status['enabled']);
         self::assertSame([
             'startAt' => '2026-09-05T00:00:00+09:00',
