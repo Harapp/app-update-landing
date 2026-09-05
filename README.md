@@ -6,7 +6,7 @@ UnityクライアントとUpdateランディングページ用サーバーを同
 app-update-landing/
 ├── app-update-landing-unity/   # Unityプロジェクト
 ├── app-update-landing-server/  # PHPサーバー
-└── scripts/                    # サーバーのpreview・deploy・releaseコマンド
+└── scripts/                    # preview・deploy・releaseコマンド
 ```
 
 サーバーの仕様、開発方法、ローカルプレビューについては
@@ -27,6 +27,15 @@ https://github.com/Harapp/app-update-landing.git?path=/app-update-landing-unity/
 Unityパッケージのバージョン更新は、Unity Editorの
 `Window > App Update Landing > Release`から確認できます。Releaseは全EditMode Test成功後に
 `package.json`と`AppUpdateLandingVersion.Value`を同期更新しますが、commit・push・tag作成は行いません。
+
+更新後は、リポジトリルートで次を実行します。
+
+```sh
+scripts/release-unity-tag [<version>]
+```
+
+このコマンドはversionファイルを検証してrelease commitと`unity-vX.Y.Z`タグを作成し、
+`main`とタグをoriginへatomic pushします。変更内容だけを確認する場合は`--dry-run`を指定します。
 
 インストール後は、Package Managerの`Samples`欄から`App Update Landing Sample`をImportできます。
 開発用Unityプロジェクトでは`Assets/Samples/AppUpdateLanding`をSampleの正本とし、

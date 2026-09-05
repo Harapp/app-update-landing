@@ -1,0 +1,168 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'USAGE'
+Usage: scripts/release-unity-tag [--dry-run] [<version>]
+
+Validate the App Update Landing Unity package version files, create the release
+commit and monorepo unity-vX.Y.Z tag, then atomically push main and the tag.
+USAGE
+}
+
+die() {
+  echo "error: $*" >&2
+  exit 1
+}
+
+read_single_match() {
+  local path="$1"
+  local pattern="$2"
+  local label="$3"
+  local matches=()
+
+  while IFS= read -r match; do
+    matches+=("$match")
+  done < <(sed -nE "$pattern" "$path")
+  if [[ ${#matches[@]} -ne 1 ]]; then
+    die "expected exactly one $label in $path, found ${#matches[@]}"
+  fi
+
+  printf '%s\n' "${matches[0]}"
+}
+
+head_changed_unity_version_files() {
+  if ! git rev-parse -q --verify HEAD^ >/dev/null; then
+    return 1
+  fi
+
+  ! git diff --quiet HEAD^ HEAD -- "$package_json" "$version_source"
+}
+
+dry_run=false
+version=""
+
+while (($#)); do
+  case "$1" in
+    --dry-run)
+      dry_run=true
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    -*)
+      die "unknown option: $1"
+      ;;
+    *)
+      if [[ -n "$version" ]]; then
+        die "multiple versions were provided"
+      fi
+      version="$1"
+      shift
+      ;;
+  esac
+done
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+package_json="app-update-landing-unity/Packages/com.harapeco.app.update.landing/package.json"
+version_source="app-update-landing-unity/Packages/com.harapeco.app.update.landing/Scripts/Runtime/AppUpdateLandingVersion.cs"
+
+[[ -f "$package_json" ]] || die "package.json does not exist: $repo_root/$package_json"
+[[ -f "$version_source" ]] || die "AppUpdateLandingVersion.cs does not exist: $repo_root/$version_source"
+
+current_branch="$(git branch --show-current)"
+[[ "$current_branch" == "main" ]] || die "release tags must be created from main, current branch: ${current_branch:-detached HEAD}"
+
+package_version="$(read_single_match "$package_json" 's/^[[:space:]]*"version"[[:space:]]*:[[:space:]]*"([^"]+)".*$/\1/p' "package version")"
+runtime_version="$(read_single_match "$version_source" 's/^.*public[[:space:]]+const[[:space:]]+string[[:space:]]+Value[[:space:]]*=[[:space:]]*"([^"]+)"[[:space:]]*;.*$/\1/p' "AppUpdateLandingVersion.Value")"
+
+if [[ -z "$version" ]]; then
+  version="$package_version"
+fi
+
+if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  die "invalid version: $version (expected X.Y.Z; pre-release versions are not supported)"
+fi
+
+if [[ "$package_version" != "$runtime_version" ]]; then
+  die "package.json version ($package_version) does not match AppUpdateLandingVersion.Value ($runtime_version)"
+fi
+
+if [[ "$package_version" != "$version" ]]; then
+  die "package.json version is $package_version, expected $version"
+fi
+
+if [[ "$runtime_version" != "$version" ]]; then
+  die "AppUpdateLandingVersion.Value is $runtime_version, expected $version"
+fi
+
+unity_tag="unity-v$version"
+export GIT_SSH_COMMAND="${GIT_SSH_COMMAND:-ssh -o BatchMode=yes -o ConnectTimeout=10}"
+
+if git rev-parse -q --verify "refs/tags/$unity_tag" >/dev/null; then
+  die "local tag already exists: $unity_tag"
+fi
+
+set +e
+remote_tag_output="$(git ls-remote --exit-code --tags origin "refs/tags/$unity_tag" 2>&1)"
+remote_tag_status=$?
+set -e
+
+if [[ $remote_tag_status -eq 0 ]]; then
+  die "origin tag already exists: $unity_tag"
+elif [[ $remote_tag_status -ne 2 ]]; then
+  echo "warning: could not check origin tag $unity_tag; continuing because origin may be unreachable from this machine" >&2
+  echo "$remote_tag_output" >&2
+fi
+
+commit_message="release: unity package v$version"
+tag_message="$commit_message"
+version_files_changed=false
+if ! git diff --quiet HEAD -- "$package_json" "$version_source"; then
+  version_files_changed=true
+fi
+
+if [[ "$dry_run" == true ]]; then
+  echo "Dry run: Unity package version is $version"
+  if [[ "$version_files_changed" == true ]]; then
+    echo "Dry run: would stage $package_json"
+    echo "Dry run: would stage $version_source"
+    echo "Dry run: would commit with message: $commit_message"
+    echo "Dry run: would create tag: $unity_tag"
+    echo "Dry run: tag message: $tag_message"
+  elif head_changed_unity_version_files; then
+    echo "Dry run: no Unity version changes relative to HEAD"
+    echo "Dry run: would create tag on HEAD: $unity_tag"
+    echo "Dry run: tag message: $tag_message"
+  else
+    die "no Unity version changes found in the working tree or HEAD; run Window > App Update Landing > Release with a new version before tagging"
+  fi
+
+  echo "Dry run: would atomically push main and $unity_tag to origin"
+  exit 0
+fi
+
+if [[ "$version_files_changed" == true ]]; then
+  git add "$package_json" "$version_source"
+  if git diff --cached --quiet -- "$package_json" "$version_source"; then
+    die "Unity version files changed relative to HEAD, but no staged changes were found"
+  fi
+  git commit -m "$commit_message" -- "$package_json" "$version_source"
+  git tag --no-sign -m "$tag_message" "$unity_tag"
+  echo "Created release commit and tag: $unity_tag"
+elif head_changed_unity_version_files; then
+  git tag --no-sign -m "$tag_message" "$unity_tag"
+  echo "Created tag on existing release commit: $unity_tag"
+else
+  die "no Unity version changes found in the working tree or HEAD; run Window > App Update Landing > Release with a new version before tagging"
+fi
+
+if ! git push --atomic origin main "$unity_tag"; then
+  die "atomic push failed; the release commit and local tag remain. Resolve the cause, then push main and $unity_tag together"
+fi
+
+echo "Pushed main and $unity_tag to origin"
